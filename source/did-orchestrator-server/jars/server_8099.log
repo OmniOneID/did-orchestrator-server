@@ -1,0 +1,27 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.4)
+
+2025-02-18T16:22:25.574+09:00  INFO 50452 --- [demo] [           main] org.omnione.did.DemoApplication          : Starting DemoApplication v1.0.0 using Java 17.0.13 with PID 50452 (/Users/sjkim/project/did-orchestrator-server/jars/Demo/did-demo-server-1.0.0.jar started by sjkim in /Users/sjkim/project/did-orchestrator-server/jars)
+2025-02-18T16:22:25.576+09:00 DEBUG 50452 --- [demo] [           main] org.omnione.did.DemoApplication          : Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-02-18T16:22:25.577+09:00  INFO 50452 --- [demo] [           main] org.omnione.did.DemoApplication          : No active profile set, falling back to 4 default profiles: "dev", "logging", "spring-docs", "demo"
+2025-02-18T16:22:26.397+09:00  INFO 50452 --- [demo] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=8e18f07d-1156-31ce-adf4-bb14a420446a
+2025-02-18T16:22:26.433+09:00  WARN 50452 --- [demo] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.ws.config.annotation.DelegatingWsConfiguration' of type [org.springframework.ws.config.annotation.DelegatingWsConfiguration$$SpringCGLIB$$0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [annotationActionEndpointMapping] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2025-02-18T16:22:26.453+09:00  INFO 50452 --- [demo] [           main] .w.s.a.s.AnnotationActionEndpointMapping : Supporting [WS-Addressing August 2004, WS-Addressing 1.0]
+2025-02-18T16:22:26.776+09:00  INFO 50452 --- [demo] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8099 (http)
+2025-02-18T16:22:26.784+09:00  INFO 50452 --- [demo] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-02-18T16:22:26.784+09:00  INFO 50452 --- [demo] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-02-18T16:22:26.805+09:00  INFO 50452 --- [demo] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-02-18T16:22:26.806+09:00  INFO 50452 --- [demo] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1168 ms
+2025-02-18T16:22:27.094+09:00  INFO 50452 --- [demo] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-02-18T16:22:27.364+09:00  INFO 50452 --- [demo] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2025-02-18T16:22:27.829+09:00  INFO 50452 --- [demo] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8099 (http) with context path ''
+2025-02-18T16:22:27.842+09:00  INFO 50452 --- [demo] [           main] org.omnione.did.DemoApplication          : Started DemoApplication in 2.59 seconds (process running for 2.948)
+2025-02-18T16:22:27.888+09:00  INFO 50452 --- [demo] [nio-8099-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-02-18T16:22:27.888+09:00  INFO 50452 --- [demo] [nio-8099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-02-18T16:22:27.889+09:00  INFO 50452 --- [demo] [nio-8099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

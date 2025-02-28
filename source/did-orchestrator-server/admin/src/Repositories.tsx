@@ -1,0 +1,285 @@
+/*
+ * Copyright 2025 OmniOne.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from "react";
+import ProgressIcon from "./icons/ProgressIcon";
+import LogIcon from "./icons/LogIcon";
+
+interface Repository {
+  id: string;
+  name: string;
+  status: string;
+}
+
+interface RepositoriesProps {}
+
+const defaultRepos: Repository[] = [
+  { id: "fabric", name: "Hyperledger Fabric", status: "⚪" },
+  { id: "postgre", name: "PostgreSQL", status: "⚪" },
+];
+
+const Repositories = forwardRef((props: RepositoriesProps, ref) => {
+  const [repositories, setRepositories] = useState<Repository[]>(() => {
+    const stored = localStorage.getItem("repositories");
+    if (stored) {
+      try {
+        return JSON.parse(stored) as Repository[];
+      } catch (e) {
+        console.error("Error parsing repositories from localStorage", e);
+        return defaultRepos;
+      }
+    }
+    return defaultRepos;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("repositories", JSON.stringify(repositories));
+  }, [repositories]);
+
+  const healthCheck = async (repoId: string, fromUser: boolean = false) => {
+    const currentRepo = repositories.find((repo) => repo.id === repoId);
+    if (fromUser && currentRepo && currentRepo.status === "PROGRESS") {
+      alert("The operation is currently in progress. Please try again later.");
+      return;
+    }
+
+    /*
+    setRepositories((prevRepos) =>
+      prevRepos.map((repo) =>
+        repo.id === repoId ? { ...repo, status: "PROGRESS" } : repo
+      )
+    );
+    */
+
+    try {
+      const response = await fetch(`/healthcheck/${repoId}`, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch health status for ${repoId}`);
+      }
+      const data = await response.json();
+      setRepositories((prevRepos) =>
+        prevRepos.map((repo) =>
+          repo.id === repoId
+            ? { ...repo, status: data.status === "UP" ? "🟢" : "🔴" }
+            : repo
+        )
+      );
+    } catch (error) {
+      console.error("Error checking repository status:", error);
+      setRepositories((prevRepos) =>
+        prevRepos.map((repo) =>
+          repo.id === repoId ? { ...repo, status: "🔴" } : repo
+        )
+      );
+    }
+  };
+
+  const startRepository = async (repoId: string, fromUser: boolean = false) => {
+    const currentRepo = repositories.find((repo) => repo.id === repoId);
+    if (fromUser && currentRepo && currentRepo.status === "PROGRESS") {
+      alert("The operation is currently in progress. Please try again later.");
+      return;
+    }
+
+    setRepositories((prevRepos) =>
+      prevRepos.map((repo) =>
+        repo.id === repoId ? { ...repo, status: "PROGRESS" } : repo
+      )
+    );
+
+    try {
+      const response = await fetch(`/startup/${repoId}`, {
+        method: "GET",
+      });
+      if (response.ok) {
+        console.log(`Repository ${repoId} started successfully`);
+      } else {
+        console.error(`Failed to start repository ${repoId}`);
+      }
+    } catch (error) {
+      console.error("Error starting repository:", error);
+    }
+
+    await healthCheck(repoId, false);
+  };
+
+  const stopRepository = async (repoId: string, fromUser: boolean = false) => {
+    const currentRepo = repositories.find((repo) => repo.id === repoId);
+    if (fromUser && currentRepo && currentRepo.status === "PROGRESS") {
+      alert("The operation is currently in progress. Please try again later.");
+      return;
+    }
+
+    setRepositories((prevRepos) =>
+      prevRepos.map((repo) =>
+        repo.id === repoId ? { ...repo, status: "PROGRESS" } : repo
+      )
+    );
+
+    try {
+      const response = await fetch(`/shutdown/${repoId}`, {
+        method: "GET",
+      });
+      if (response.ok) {
+        console.log(`Repository ${repoId} stopped successfully`);
+      } else {
+        console.error(`Failed to stop repository ${repoId}`);
+      }
+    } catch (error) {
+      console.error("Error stopping repository:", error);
+    }
+
+    await healthCheck(repoId, false);
+  };
+
+  const getOverallStatus = async (): Promise<string> => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const statuses = repositories.map((repo) => repo.status);
+    const allGreen = statuses.every((status) => status === "🟢");
+    const allRed = statuses.every((status) => status === "🔴");
+
+    if (allGreen) {
+      return "SUCCESS";
+    } else if (allRed) {
+      return "FAIL";
+    } else if (statuses.some((status) => status === "🟢")) {
+      return "PARTIAL";
+    }
+    return "FAIL";
+  };
+  const resetRepository = async (repoId: string, fromUser: boolean = false) => {
+    const currentRepo = repositories.find((repo) => repo.id === repoId);
+    if (fromUser && currentRepo && currentRepo.status === "PROGRESS") {
+      alert("The operation is currently in progress. Please try again later.");
+      return;
+    }
+
+    setRepositories((prevRepos) =>
+      prevRepos.map((repo) =>
+        repo.id === repoId ? { ...repo, status: "PROGRESS" } : repo
+      )
+    );
+
+    try {
+      const response = await fetch(`/reset/${repoId}`, {
+        method: "GET",
+      });
+      if (response.ok) {
+        console.log(`Repository ${repoId} reset successfully`);
+      } else {
+        console.error(`Failed to reset repository ${repoId}`);
+      }
+    } catch (error) {
+      console.error("Error reset repository:", error);
+    }
+    await healthCheck(repoId, false);
+  };
+
+  const statusAll = async (): Promise<string> => {
+    for (const repo of repositories) {
+      await healthCheck(repo.id);
+    }
+
+    await Promise.all(repositories.map((repo) => healthCheck(repo.id)));
+    return getOverallStatus();
+  };
+
+  const startAll = async () => {
+    for (const repo of repositories) {
+      await startRepository(repo.id);
+    }
+  };
+
+  const stopAll = async () => {
+    for (let i = repositories.length - 1; i >= 0; i--) {
+      const repo = repositories[i];
+      await stopRepository(repo.id);
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    getOverallStatus,
+    startAll,
+    stopAll,
+    statusAll,
+  }));
+
+  return (
+    <section className="bg-white p-6 rounded shadow mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Repositories</h2>
+      </div>
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="p-2 w-20">Status</th>
+            <th className="p-2 w-56">Name</th>
+            <th className="p-2 w-96">Actions</th>
+            <th className="p-2 w-56">Info</th>
+          </tr>
+        </thead>
+        <tbody className="server-table">
+          {repositories.map((repo) => (
+            <tr key={repo.id} className="border-b">
+              <td className="p-2 pl-6">
+                {repo.status === "PROGRESS" ? <ProgressIcon /> : repo.status}
+              </td>
+              <td className="p-2 font-bold">
+                {repo.name} <button onClick={() => window.open(`/logs/${repo.id}.log`)}><LogIcon width="0.8em" height="0.8em"/></button>
+              </td>
+              <td className="p-2">
+                <div className="flex space-x-1">
+                  <button
+                    className="bg-green-600 text-white px-3 py-1 rounded"
+                    onClick={() => startRepository(repo.id, true)}
+                  >
+                    Start
+                  </button>
+                  <button
+                    className="bg-red-600 text-white px-3 py-1 rounded"
+                    onClick={() => stopRepository(repo.id, true)}
+                  >
+                    Stop
+                  </button>
+                  <button
+                    className="bg-gray-600 text-white px-3 py-1 rounded"
+                    onClick={() => healthCheck(repo.id, true)}
+                  >
+                    Status
+                  </button>
+                  {repo.name === "Hyperledger Fabric" && (
+                  <button
+                    className="bg-blue-600 text-white px-3 py-1 rounded"
+                    onClick={() => resetRepository(repo.id, true)}
+                  >
+                    Reset
+                  </button>
+                  )}
+                </div>
+              </td>
+              <td className="p-2"></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+});
+
+export default Repositories;

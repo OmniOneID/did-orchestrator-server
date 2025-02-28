@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: orchestrator
+  profiles:
+    default: dev
+  jackson:
+    default-property-inclusion: non_null
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, shutdown, refresh
+  endpoint:
+    shutdown:
+      enabled: true
+    startup:
+      enabled: true
+server:
+  port: 9001
+blockchain:
+  channel: mychannel
+  chaincodeName: opendid
+database:
+  port: 5430
+  user: omn
+  password: omn
+  db: omn
+services:
+  cliToolPath: /tool
+  jarPath: /jars
+  walletPath: /wallet
+  didDocPath: /DIDDoc
+  logPath: /logs
+  server:
+    tas:
+      name: TAS
+      port: 8090
+      file: did-ta-server-1.0.0.jar
+    issuer:
+      name: Issuer
+      port: 8091
+      file: did-issuer-server-1.0.0.jar
+    verifier:
+      name: Verifier
+      port: 8092
+      file: did-verifier-server-1.0.0.jar
+    api:
+      name: API
+      port: 8093
+      file: did-api-server-1.0.0.jar
+    cas:
+      name: CAS
+      port: 8094
+      file: did-cas-server-1.0.0.jar
+    wallet:
+      name: WalletService
+      port: 8095
+      file: did-wallet-server-1.0.0.jar
+    demo:
+      name: Demo
+      port: 8099
+      file: did-demo-server-1.0.0.jar
+logging:
+  level:
+    org.omnione: debug
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    groups-order: ASC
+    operations-sorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

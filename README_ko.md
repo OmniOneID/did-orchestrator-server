@@ -4,6 +4,19 @@ DID Orchestrator Server
 DID Orchestrator 서버 Repository에 오신 것을 환영합니다. <br>
 이 Repository는 DID Orchestrator 서버의 소스 코드, 문서, 관련 리소스를 포함하고 있습니다.
 
+## DID Orchestrator 개요
+DID Orchestrator는 OpenDID 시스템 내 다양한 서버 및 저장소 등의 상태를 모니터링하고 제어할 수 있는 통합 관리 도구입니다. 특히 쉬운 설치 및 구동을 촉진하여 사용자들이 손쉽게 OpenDID에 온보딩할 수 있도록 도와주는 역할을 합니다.
+
+![화면 구성](./docs/manual/orchestrator.png)
+
+DID Orchestrator는 크게 아래와 같은 메뉴 및 기능으로 구성되어 있습니다.
+- Dashboard : 서버 오케스트레이션 및 현황 모니터링 기능 제공 
+  - Quick Start : 모든 엔티티들에 대한 빠른 실행/중단
+  - Repositories : 블록체인 및 DB에 대한 실행/중단
+  - Servers : 서버 엔티티들에 대한 실행/중단
+  - Demo : 데모 서비스 대한 실행/중단
+- Configuration : 자체 설정 정보 수정 기능 제공
+
 ## 폴더 구조
 프로젝트 디렉터리 내 주요 폴더와 문서에 대한 개요:
 
@@ -61,7 +74,6 @@ did-orchestrator-server
 | &nbsp;&nbsp;&nbsp;┖ src          | 주요 소스 코드 디렉터리                  |
 | &nbsp;&nbsp;&nbsp;┖ build.gradle | Gradle 빌드 설정 파일                    |
 | &nbsp;&nbsp;&nbsp;┖ README.md    | 소스 코드 개요 및 지침                   |
-
 <br/>
 
 ## 라이브러리

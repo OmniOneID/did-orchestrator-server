@@ -146,7 +146,15 @@ sudo systemctl enable docker
 
 ---
 
-## 7. Running All Entities
+## 7. Installing Go for Running Hyperledger Fabric
+Since the Chaincode in Hyperledger Fabric is written in Go, Go must be installed.<br>
+Please refer to the Go installation section in the [Fabric Installation Guide](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html) to install Go.<br>
+
+Once you have completed this step, all the prerequisites for using the Orchestrator will be ready!
+
+---
+
+## 8. Running All Entities
 
 1. Access Orchestrator via a browser and click the **All Entities** button to start all entities.  
 2. When each service and entity is running, they will be indicated with a green light.
@@ -155,7 +163,7 @@ sudo systemctl enable docker
 
 ---
 
-## 8. Generating Wallets and DID Documents
+## 9. Generating Wallets and DID Documents
 You can generate wallets and DID documents for all entities or for individual entities.
 
 ### Generating for All Entities
@@ -169,7 +177,7 @@ To manually generate a wallet or DID document for a specific entity, go to the *
 
 ---
 
-## 9. Configuring TAS and Issuing Registration Certificates
+## 10. Configuring TAS and Issuing Registration Certificates
 Click the **Settings** button for TAS in the **Servers** tab to navigate to the TAS settings page.
 Follow the installation guide to configure TAS, register entities, and issue registration certificates.
 

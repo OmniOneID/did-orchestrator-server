@@ -30,7 +30,7 @@ Since OpenDID Orchestrator manages and operates individual server entities, you 
 Run the following command in the terminal to execute `download.sh` and download the individual server entities:
 
 ```bash
-cd did-orchestrator-server/source/
+cd did-orchestrator-server/source/did-orchestrator-server/
 sh download.sh
 ```
 

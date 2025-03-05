@@ -31,7 +31,7 @@ OpenDID Orchestrator는 개별 서버 엔티티들을 구동 및 관리하는 �
 아래 명령어를 터미널에 입력하여 download.sh을 실행하여 개별 서버 엔티티들을 다운로드하세요.
 
 ```bash
-cd did-orchestrator-server/source/
+cd did-orchestrator-server/source/did-orchestrator-server/
 sh download.sh
 ```
 

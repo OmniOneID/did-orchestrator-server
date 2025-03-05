@@ -48,7 +48,7 @@ JAR_PATHS=(
     "${PWD}/../../jars/Issuer"
     "${PWD}/../../jars/Verifier"
     "${PWD}/../../jars/CAS"
-    "${PWD}/../../jars/WalletService"
+    "${PWD}/../../jars/Wallet"
     "${PWD}/../../jars/API"
 )
 

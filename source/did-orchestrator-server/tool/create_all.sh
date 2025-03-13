@@ -52,4 +52,4 @@ echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$TAS_PATH/tas.wallet"
 echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$CAS_PATH/cas.wallet" -f "$CAS_PATH/cas.did" -id did:omn:cas -ci did:omn:tas -mi assert -ai auth -ki keyagree -p
 echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$ISSUER_PATH/issuer.wallet" -f "$ISSUER_PATH/issuer.did" -id did:omn:issuer -ci did:omn:tas -mi assert -ai auth -ki keyagree -p
 echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$VERIFIER_PATH/verifier.wallet" -f "$VERIFIER_PATH/verifier.did" -id did:omn:verifier -ci did:omn:tas -mi assert -ai auth -ki keyagree -p
-echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$WALLET_PATH/wallet.wallet" -f "$WALLET_PATH/wallet.did" -id did:omn:tas -ci did:omn:wallet -mi assert -ai auth -ki keyagree -p
+echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$WALLET_PATH/wallet.wallet" -f "$WALLET_PATH/wallet.did" -id did:omn:wallet -ci did:omn:tas -mi assert -ai auth -ki keyagree -p

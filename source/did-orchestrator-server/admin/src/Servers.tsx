@@ -117,32 +117,63 @@ const Servers = forwardRef((props: ServerProps, ref) => {
     }
   };
 
-  const startServer = async (serverId: string, serverPort: number, fromUser: boolean = false) => {
+  const startServer = async (serverId: string, serverPort: number, fromUser = false) => {
     const currentServer = servers.find((server) => server.id === serverId);
     if (fromUser && currentServer && currentServer.status === "PROGRESS") {
-      alert("The operation is currently in progress. Please try again later.");
-      return;
+        alert("The operation is currently in progress. Please try again later.");
+        return;
     }
 
     setServers((prevServers) =>
-      prevServers.map((server) =>
-        server.id === serverId ? { ...server, status: "PROGRESS" } : server
-      )
+        prevServers.map((server) =>
+            server.id === serverId ? { ...server, status: "PROGRESS" } : server
+        )
     );
 
     try {
-      const response = await fetch(`/startup/${serverPort}`, { method: "GET" });
-      if (response.ok) {
-        console.log(`Server ${serverId} started successfully`);
-      } else {
-        console.error(`Failed to start server ${serverId}`);
-      }
+        const response = await fetch(`/startup/${serverPort}`, { method: "GET" });
+        if (response.ok) {
+            console.log(`Server ${serverId} started successfully`);
+            await waitForServerHealth(serverId, serverPort); 
+        } else {
+            console.error(`Failed to start server ${serverId}`);
+        }
     } catch (error) {
-      console.error("Error starting server:", error);
+        console.error("Error starting server:", error);
+    }
+};
+
+
+  const waitForServerHealth = async (serverId: string, serverPort: number, maxRetries = 10, interval = 2000) => {
+    for (let i = 0; i < maxRetries; i++) {
+        await new Promise((resolve) => setTimeout(resolve, interval)); 
+        try {
+            const response = await fetch(`/actuator/health`, { method: "GET" });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === "UP") {
+                    setServers((prevServers) =>
+                        prevServers.map((server) =>
+                            server.id === serverId ? { ...server, status: "🟢" } : server
+                        )
+                    );
+                    console.log(`Server ${serverId} is now UP`);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error("Error checking health status:", error);
+        }
     }
 
-    await healthCheck(serverId, serverPort, false);
-  };
+    console.log(`Server ${serverId} is still DOWN after retries`);
+    setServers((prevServers) =>
+        prevServers.map((server) =>
+            server.id === serverId ? { ...server, status: "🔴" } : server
+        )
+    );
+};
+
 
   const stopServer = async (serverId: string, serverPort: number, fromUser: boolean = false) => {
     const currentServer = servers.find((server) => server.id === serverId);

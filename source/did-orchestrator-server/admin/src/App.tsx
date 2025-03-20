@@ -22,6 +22,15 @@ import HelpIcon from './icons/HelpIcon';
 import showToolTip from "./Tooltip";
 import ProgressIcon from './icons/ProgressIcon';
 import ProgressOverlay from './ProgressOverlay';
+import StatusIcon from './StatusIcon';
+
+interface Config {
+  generator: {
+    easySettingModeEnabled: boolean;
+    [key: string]: boolean;
+  };
+  [key: string]: any;
+}
 
 const generateRandomDid = (): string => {
   const randomHex = [...Array(25)]
@@ -35,22 +44,45 @@ const App: React.FC = () => {
   const [popupDid, setPopupDid] = useState<string | null>(null);
   const [popupWallet, setPopupWallet] = useState<string | null>(null);
   const [popupGenAll, setPopupGenAll] = useState(false);
+  const [config, setConfig] = useState<Config | null>(null);
+  const [isEasySettingEnabled, setIsEasySettingEnabled] = useState(false);
 
   const [status, setStatus] = useState<string>(() => {
     const stored = localStorage.getItem("allStatus");
-    return stored ? stored : "⚪";
+    return stored ? stored : "GRAY";
   });
 
   useEffect(() => {
     localStorage.setItem("allStatus", status);
   }, [status]);
 
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch('/configs');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const configData = await response.json();
+        setConfig(configData);
+        
+        if (configData.generator && configData.generator.easySettingModeEnabled !== undefined) {
+          setIsEasySettingEnabled(configData.generator.easySettingModeEnabled);
+        }
+      } catch (error) {
+        console.error('Error fetching config:', error);
+      }
+    };
+  
+    fetchConfig();
+  }, []);
+
   const hasMountedRef = useRef(false);
 
   const sectionRef = (node: HTMLElement | null) => {
     if (node && !hasMountedRef.current) {
       hasMountedRef.current = true;
-      if(status != "⚪") statusAll();
+      if(status != "GRAY") statusAll();
     }
   };
 
@@ -58,9 +90,59 @@ const App: React.FC = () => {
   const closePopupDid = () => setPopupDid(null);
   const openPopupWallet = (id: string) => setPopupWallet(id);
   const closePopupWallet = () => setPopupWallet(null);
-  const openGenerateAll = () => setPopupGenAll(true);
+  
+  const openGenerateAll = async () => {
+    if (isEasySettingEnabled) {
+      const genAll = localStorage.getItem("genAll");
+      if(genAll == "DONE") {
+        if(!confirm("You have already performed this task. If you do it again, all server configurations may get messed up. Is that okay with you?")) {
+          return;
+        }
+      }
+      var confirmResult = confirm("Do you want to automatically generate Wallet and DID Document in bulk?");
+      
+      if(confirmResult) {
+        setIsSaving(true);
+        try {
+          const autoPassword = 'omnioneopendid12!@';
+          
+          const serversData = localStorage.getItem("servers");
+          if (!serversData) {
+            alert(`Generation All creation failed - No servers data found in localStorage.`);
+            return;
+          }
+          
+          const apiResponse = await fetch("/create/all", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify({ password: autoPassword }),
+          });
+
+          if (!apiResponse.ok) {
+            const errorData = await apiResponse.json();
+            alert(`Generation All creation failed: ${errorData.message || "Unknown error."}`);
+            return;
+          }
+          
+          alert(`Generation All created successfully!`);
+          localStorage.setItem("genAll", "DONE");
+        } catch (error) {
+          console.error("Error creating all:", error);
+          alert("An error occurred while creating all documents.");
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    } else {
+      setPopupGenAll(true);
+    }
+  };
+
   const closeGenerateAll = () => setPopupGenAll(false);
 
+  const genAllFormRef = useRef<HTMLFormElement>(null);
   const genAllSubmitGenAllPasswordRef = useRef<HTMLInputElement>(null);
   const genAllSubmitGenAllConfirmPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -261,6 +343,7 @@ const App: React.FC = () => {
     }
   };
 
+  const didFormRef = useRef<HTMLFormElement>(null);
   const didSubmitDidRef = useRef<HTMLInputElement>(null);
   const didSubmitDidRefWalletRef = useRef<HTMLInputElement>(null);
   const didSubmitDidRefPasswordRef = useRef<HTMLInputElement>(null);
@@ -428,11 +511,11 @@ const App: React.FC = () => {
     console.log("serverStatus : " + serverStatus);
 
     if (repoStatus === "SUCCESS" && serverStatus === "SUCCESS") {
-      setStatus("🟢");
+      setStatus("GREEN");
     } else if (repoStatus === "FAIL" && serverStatus === "FAIL") {
-      setStatus("🔴");
+      setStatus("RED");
     } else {
-      setStatus("🟡");
+      setStatus("YELLOW");
     }
 
     if (demoRef.current) {
@@ -444,13 +527,14 @@ const App: React.FC = () => {
     <div className="bg-gray-100">
       <div className="flex h-screen">
         {/* Sidebar */}
-        <aside className="w-64 bg-gray-900 text-white flex flex-col border-r border-gray-300 h-[1250px]">
-          <div className="p-6 text-lg font-bold">OmniOne OpenDID Orchestrator</div>
+        <aside className="w-64 bg-[#202B45] text-white flex flex-col border-r border-gray-300 h-[1250px]">
+          <div className="p-6 text-l font-bold"><img src='omniOneLogo.png' /> Orchestrator</div>
           <nav className="flex-1">
-            <a href="/" className="block py-3 px-6 bg-orange-500">
+            <div className="border-b border-gray-500 h-1 ml-2 mr-2 mb-6"></div>
+            <a href="/" className="block text-l py-3 px-6 bg-[#4E546B] ml-2 mr-2 rounded-lg">
               Dashboard
             </a>
-            <a href="/conf" className="block py-3 px-6 bg-gray-800">
+            <a href="/conf" className="block text-l py-3 px-6 bg-[#202B45] ml-2 mr-2 hover:bg-[#1A2331] rounded-lg">
               Configuration
             </a>
           </nav>
@@ -474,8 +558,9 @@ const App: React.FC = () => {
             </div>
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-200">
-                  <th className="p-2 w-20">Status</th>
+                <tr className="bg-gray-100">
+                  <th className="p-2 w-20">Status
+                  </th>
                   <th className="p-2 w-56">Name</th>
                   <th className="p-2 w-56">
                     Actions
@@ -494,6 +579,7 @@ const App: React.FC = () => {
                   <th className="p-2 w-48">Info</th>
                   <th className="p-2 w-48">
                     Generators
+                    {!isEasySettingEnabled && (
                     <button
                       onClick={(e) =>
                         showToolTip(
@@ -505,31 +591,45 @@ const App: React.FC = () => {
                     >
                       <HelpIcon width="1em" height="1em" />
                     </button>
+                    )}
+                    {isEasySettingEnabled && (
+                    <button
+                    onClick={(e) =>
+                      showToolTip(
+                        "Automatically generate Wallet and DID Document in bulk.",
+                        e
+                      )
+                    }
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <HelpIcon width="1em" height="1em" />
+                  </button>
+                    )}
                   </th>
                 </tr>
               </thead>
               <tbody className="server-table">
                 <tr className="border-b">
                   <td className="p-2 pl-6 all">
-                    {status === "PROGRESS" ? <ProgressIcon /> : status}
+                    {StatusIcon(status)}
                   </td>
                   <td className="p-2 font-bold">All Entities</td>
                   <td className="p-2">
                     <div className="flex space-x-1">
                       <button
-                        className="bg-green-600 text-white px-3 py-1 rounded"
+                        className="bg-green-600 text-white px-2 py-1 rounded"
                         onClick={startAll}
                       >
                         Start All
                       </button>
                       <button
-                        className="bg-red-600 text-white px-3 py-1 rounded"
+                        className="bg-[#ED207B] text-white px-2 py-1 rounded"
                         onClick={stopAll}
                       >
                         Stop All
                       </button>
                       <button
-                        className="bg-gray-600 text-white px-3 py-1 rounded"
+                        className="bg-gray-600 text-white px-2 py-1 rounded"
                         onClick={statusAll}
                       >
                         Status All
@@ -539,7 +639,7 @@ const App: React.FC = () => {
                   <td className="p-2"></td>
                   <td className="p-2">
                     <button
-                      className="bg-orange-500 text-white px-3 py-1 rounded"
+                      className="bg-orange-500 text-white px-2 py-1 rounded"
                       onClick={openGenerateAll}
                     >
                       Generate All
@@ -567,22 +667,29 @@ const App: React.FC = () => {
       {/* Gen All Popup */}
       {popupGenAll && (
         <div id="popup-overlay-genall" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white w-96 p-6 rounded-lg shadow-lg">
+          <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+            <button
+            type="button"
+            onClick={closeGenerateAll}
+            className="absolute top-5 right-5 text-gray-500 hover:text-gray-700 px-1 py-1 text-xl"
+            >
+            X
+            </button>
             <h2 className="text-lg font-bold border-b pb-2 mb-4">Wallet & Document All Generator</h2>
-            <form onSubmit={handleGenAllSubmit}>
+            <form ref={genAllFormRef} onSubmit={handleGenAllSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Password</label>
-                <input type="password" name="genAllPassword" ref={genAllSubmitGenAllPasswordRef} className="w-full border p-2 rounded" maxLength={10} autoFocus />
+                <input type="password" name="genAllPassword" ref={genAllSubmitGenAllPasswordRef} className="w-full border p-2 rounded" maxLength={20} placeholder="Enter your password." autoFocus />
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Confirm Password</label>
-                <input type="password" name="genAllConfirmPassword" ref={genAllSubmitGenAllConfirmPasswordRef} className="w-full border p-2 rounded" maxLength={10} />
+                <input type="password" name="genAllConfirmPassword" ref={genAllSubmitGenAllConfirmPasswordRef} className="w-full border p-2 rounded" maxLength={20} placeholder="Enter your password again." />
               </div>
               <div className="flex justify-end space-x-2">
-                <button type="button" onClick={closeGenerateAll} className="px-4 py-2 border rounded text-gray-700">
+                <button type="button" onClick={closeGenerateAll} className="w-1/2 px-4 py-2 border rounded text-orange-500 border-orange-500">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded">
+                <button type="submit" className="w-1/2 px-4 py-2 bg-orange-500 text-white rounded">
                   Generate
                 </button>
               </div>
@@ -594,30 +701,37 @@ const App: React.FC = () => {
       {/* DID Document Generator Popup */}
       {popupDid && (
         <div id="popup-overlay-did" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white w-96 p-6 rounded-lg shadow-lg">
+          <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+            <button
+            type="button"
+            onClick={closePopupDid}
+            className="absolute top-5 right-5 text-gray-500 hover:text-gray-700 px-1 py-1 text-xl"
+            >
+            X
+            </button>
             <h2 className="text-lg font-bold border-b pb-2 mb-4">DID Document Generator</h2>
-            <form onSubmit={handleDidSubmit}>
+            <form ref={didFormRef} onSubmit={handleDidSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">DID</label>
-                <input type="text" name="did" ref={didSubmitDidRef} className="w-full border p-2 rounded" defaultValue={generateRandomDid()} maxLength={35} />
+                <input type="text" name="did" ref={didSubmitDidRef} className="w-full border p-2 rounded" defaultValue={generateRandomDid()} maxLength={35} placeholder="Enter your DID." />
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Wallet Name</label>
-                <input type="text" name="walletName" ref={didSubmitDidRefWalletRef} className="w-full border p-2 rounded" defaultValue={popupDid} maxLength={10} />
+                <input type="text" name="walletName" ref={didSubmitDidRefWalletRef} className="w-full border p-2 rounded" defaultValue={popupDid} maxLength={10} placeholder="Enter your wallet name." />
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Password</label>
-                <input type="password" name="didPassword" ref={didSubmitDidRefPasswordRef} className="w-full border p-2 rounded" maxLength={10} autoFocus />
+                <input type="password" name="didPassword" ref={didSubmitDidRefPasswordRef} className="w-full border p-2 rounded" maxLength={20} placeholder="Enter your password." autoFocus />
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Confirm Password</label>
-                <input type="password" name="didConfirmPassword" ref={didSubmitDidRefConfirmPasswordRef} className="w-full border p-2 rounded" maxLength={10} />
+                <input type="password" name="didConfirmPassword" ref={didSubmitDidRefConfirmPasswordRef} className="w-full border p-2 rounded" maxLength={20} placeholder="Enter your password again." />
               </div>
               <div className="flex justify-end space-x-2">
-                <button type="button" onClick={closePopupDid} className="px-4 py-2 border rounded text-gray-700">
+                <button type="button" onClick={closePopupDid} className="w-1/2 px-4 py-2 border rounded text-orange-500 border-orange-500">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded">
+                <button type="submit" className="w-1/2 px-4 py-2 bg-orange-500 text-white rounded">
                   Generate
                 </button>
               </div>
@@ -629,26 +743,33 @@ const App: React.FC = () => {
       {/* Wallet Generator Popup */}
       {popupWallet && (
         <div id="popup-overlay-wallet" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white w-96 p-6 rounded-lg shadow-lg">
+          <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+            <button
+            type="button"
+            onClick={closePopupWallet}
+            className="absolute top-5 right-5 text-gray-500 hover:text-gray-700 px-1 py-1 text-xl"
+            >
+            X
+            </button>
             <h2 className="text-lg font-bold border-b pb-2 mb-4">Wallet Generator</h2>
             <form onSubmit={handleWalletSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Wallet Name</label>
-                <input type="text" name="walletName" ref={walletSubmitDidRefWalletRef} className="w-full border p-2 rounded" defaultValue={popupWallet} />
+                <input type="text" name="walletName" ref={walletSubmitDidRefWalletRef} className="w-full border p-2 rounded" defaultValue={popupWallet} placeholder="Enter your wallet name." />
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Password</label>
-                <input type="password" name="walletPassword" ref={walletSubmitDidRefPasswordRef} className="w-full border p-2 rounded" autoFocus />
+                <input type="password" name="walletPassword" ref={walletSubmitDidRefPasswordRef} className="w-full border p-2 rounded" maxLength={20} placeholder="Enter your password." autoFocus />
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-700">Confirm Password</label>
-                <input type="password" name="walletConfirmPassword" ref={walletSubmitDidRefConfirmPasswordRef} className="w-full border p-2 rounded" />
+                <input type="password" name="walletConfirmPassword" ref={walletSubmitDidRefConfirmPasswordRef} className="w-full border p-2 rounded" maxLength={20} placeholder="Enter your password again." />
               </div>
               <div className="flex justify-end space-x-2">
-                <button type="button" onClick={closePopupWallet} className="px-4 py-2 border rounded text-gray-700">
+                <button type="button" onClick={closePopupWallet} className="w-1/2 px-4 py-2 border rounded text-orange-500 border-orange-500">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded">
+                <button type="submit" className="w-1/2 px-4 py-2 bg-orange-500 text-white rounded">
                   Generate
                 </button>
               </div>

@@ -2,7 +2,7 @@ GITHUB_REPO="DevOmniOneID/did-orchestrator-server"
 TAG="V1.0.0"
 
 JAR_NAMES=("did-api-server-1.0.0.jar" "did-demo-server-1.0.0.jar" "did-issuer-server-1.0.0.jar" "did-ta-server-1.0.0.jar" "did-ca-server-1.0.0.jar" "did-verifier-server-1.0.0.jar" "did-wallet-server-1.0.0.jar")
-JAR_PATHS=("jars/API" "jars/Demo" "jars/Issuer" "jars/TAS" "jars/CAS" "jars/Verifier" "jars/Wallet")
+JAR_PATHS=("jars/API" "jars/Demo" "jars/Issuer" "jars/TA" "jars/CA" "jars/Verifier" "jars/Wallet")
 
 fail_flag=0
 

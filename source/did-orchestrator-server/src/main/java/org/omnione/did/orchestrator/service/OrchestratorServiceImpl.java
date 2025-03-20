@@ -822,14 +822,11 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     private String startServer(String port) throws IOException, InterruptedException {
         Map<String, String> server_jars = SERVER_JARS;
         server_jars = initializeServerJars();
-
         String jarFolder = SERVER_JARS_FOLDER.get(port); // 해당 포트에 대한 JAR 폴더명 가져오기
         String jarFilePath = JARS_DIR + "/" + jarFolder + "/" + server_jars.get(port);
         String configFilePath = JARS_DIR + "/" + jarFolder + "/application.yml";
-
         File jarFile = new File(jarFilePath);
         File scriptFile = new File(JARS_DIR + "/start.sh");
-
         if (!new File(configFilePath).exists()) {
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -844,10 +841,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         log.info("Executing command: " + String.join(" ", command));
 
         ProcessBuilder builder = new ProcessBuilder(command);
+
         builder.directory(new File(JARS_DIR));
         builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-
         Process process = builder.start();
         log.debug("Server on port " + port + " started with nohup! Waiting for health check...");
 
@@ -860,10 +857,8 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             }
         }
         log.error("Server on port " + port + " failed to start.");
-        return "UP";
+        return "DOWN";
     }
-
-
 
     private String stopServer(String port) throws InterruptedException {
 

@@ -44,10 +44,10 @@ EOF
 
 #apply to application.yml
 JAR_PATHS=(
-    "${PWD}/../../jars/TAS"
+    "${PWD}/../../jars/TA"
     "${PWD}/../../jars/Issuer"
     "${PWD}/../../jars/Verifier"
-    "${PWD}/../../jars/CAS"
+    "${PWD}/../../jars/CA"
     "${PWD}/../../jars/Wallet"
     "${PWD}/../../jars/API"
 )

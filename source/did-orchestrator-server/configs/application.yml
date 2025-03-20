@@ -21,9 +21,9 @@ blockchain:
   channel: mychannel
   chaincodeName: opendid
 database:
-  port: 5430
+  port: '5430'
   user: omn
-  password: omn
+  password: omn2
   db: omn
 services:
   cliToolPath: /tool
@@ -51,7 +51,7 @@ services:
     cas:
       name: CAS
       port: 8094
-      file: did-cas-server-1.0.0.jar
+      file: did-ca-server-1.0.0.jar
     wallet:
       name: Wallet
       port: 8095
@@ -60,6 +60,8 @@ services:
       name: Demo
       port: 8099
       file: did-demo-server-1.0.0.jar
+generator:
+  easySettingModeEnabled: true
 logging:
   level:
     org.omnione: debug

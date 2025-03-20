@@ -75,6 +75,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         this.DID_DOC_DIR = System.getProperty("user.dir") + servicesProperties.getDidDocPath();
         this.CLI_TOOL_DIR = System.getProperty("user.dir") + servicesProperties.getCliToolPath();
         this.LOGS_PATH = System.getProperty("user.dir") + servicesProperties.getLogPath();
+        Constant.WALLET_DIR = System.getProperty("user.dir") + servicesProperties.getWalletPath();
+        Constant.DID_DOC_DIR = System.getProperty("user.dir") + servicesProperties.getDidDocPath();
+        Constant.CLI_TOOL_DIR = System.getProperty("user.dir") + servicesProperties.getCliToolPath();
+        Constant.LOGS_PATH = System.getProperty("user.dir") + servicesProperties.getLogPath();
     }
 
     private Map<String, String> initializeServerJars() {
@@ -286,6 +290,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                         log.debug(line);
 
                         if (line.contains(Constant.FABRIC_SUCCESS_CHAINCODE_MESSAGE) || line.contains(Constant.FABRIC_START_MESSAGE)) {
+                            logFile.delete();
                             callback.onStartupComplete();
                             return;
                         }
@@ -822,7 +827,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     private String startServer(String port) throws IOException, InterruptedException {
         Map<String, String> server_jars = SERVER_JARS;
         server_jars = initializeServerJars();
-        String jarFolder = SERVER_JARS_FOLDER.get(port); // 해당 포트에 대한 JAR 폴더명 가져오기
+        String jarFolder = SERVER_JARS_FOLDER.get(port);
         String jarFilePath = JARS_DIR + "/" + jarFolder + "/" + server_jars.get(port);
         String configFilePath = JARS_DIR + "/" + jarFolder + "/application.yml";
         File jarFile = new File(jarFilePath);

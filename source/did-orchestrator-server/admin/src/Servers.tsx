@@ -177,15 +177,13 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       const response = await fetch(`/startup/${serverPort}`, { method: "GET" });
       if (response.ok) {
         console.log(`Server ${serverId} started successfully`);
-        await waitForServerHealth(serverId, serverPort); 
+        await waitForServerHealth(serverId, serverPort, "start"); 
       } else {
         console.error(`Failed to start server ${serverId}`);
       }
     } catch (error) {
       console.error("Error starting server:", error);
     }
-
-    await healthCheck(serverId, serverPort, false);
   };
 
   const stopServer = async (serverId: string, serverPort: number, fromUser: boolean = false) => {
@@ -205,6 +203,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       const response = await fetch(`/shutdown/${serverPort}`, { method: "GET" });
       if (response.ok) {
         console.log(`Server ${serverId} stopped successfully`);
+        await waitForServerHealth(serverId, serverPort, "stop"); 
       } else {
         console.error(`Failed to stop server ${serverId}`);
       }
@@ -213,21 +212,34 @@ const Servers = forwardRef((props: ServerProps, ref) => {
     }
   }
 
-   const waitForServerHealth = async (serverId: string, serverPort: number, maxRetries = 10, interval = 2000) => {
+   const waitForServerHealth = async (serverId: string, serverPort: number, mode: string, maxRetries = 10, interval = 2000) => {
     for (let i = 0; i < maxRetries; i++) {
         await new Promise((resolve) => setTimeout(resolve, interval)); 
         try {
-            const response = await fetch(`/actuator/health`, { method: "GET" });
+            const response = await fetch(`/healthcheck/${serverPort}`, { method: "GET" });
             if (response.ok) {
                 const data = await response.json();
-                if (data.status === "UP") {
-                    setServers((prevServers) =>
-                        prevServers.map((server) =>
-                            server.id === serverId ? { ...server, status: "GRAY" } : server
-                        )
-                    );
-                    console.log(`Server ${serverId} is now UP`);
-                    return;
+                if (mode == "start") {
+                  if (data.status === "UP") {
+                      setServers((prevServers) =>
+                          prevServers.map((server) =>
+                              server.id === serverId ? { ...server, status: "GREEN" } : server
+                          )
+                      );
+                      console.log(`Server ${serverId} is now UP`);
+                      return;
+                  }
+                }
+                if (mode == "stop") {
+                  if (data.status === "DOWN") {
+                      setServers((prevServers) =>
+                          prevServers.map((server) =>
+                              server.id === serverId ? { ...server, status: "RED" } : server
+                          )
+                      );
+                      console.log(`Server ${serverId} is now DOWN`);
+                      return;
+                  }
                 }
             }
         } catch (error) {

@@ -37,6 +37,7 @@ import java.net.*;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -821,17 +822,32 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     private String startServer(String port) throws IOException, InterruptedException {
         Map<String, String> server_jars = SERVER_JARS;
         server_jars = initializeServerJars();
-        String jarFilePath = JARS_DIR + "/" + SERVER_JARS_FOLDER.get(port) + "/" + server_jars.get(port);
+
+        String jarFolder = SERVER_JARS_FOLDER.get(port); // 해당 포트에 대한 JAR 폴더명 가져오기
+        String jarFilePath = JARS_DIR + "/" + jarFolder + "/" + server_jars.get(port);
+        String configFilePath = JARS_DIR + "/" + jarFolder + "/application.yml";
+
         File jarFile = new File(jarFilePath);
         File scriptFile = new File(JARS_DIR + "/start.sh");
-        String serverPort = "";
-        if (Integer.parseInt(port) > 0 && Integer.parseInt(port) < 65535)
-            serverPort = port;
 
-        ProcessBuilder builder = new ProcessBuilder("sh", scriptFile.getAbsolutePath(), jarFile.getAbsolutePath(), serverPort);
+        if (!new File(configFilePath).exists()) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+
+        List<String> command = new ArrayList<>();
+        command.add("sh");
+        command.add(scriptFile.getAbsolutePath());
+        command.add(jarFile.getAbsolutePath());
+        command.add(port);
+        command.add(configFilePath);
+
+        log.info("Executing command: " + String.join(" ", command));
+
+        ProcessBuilder builder = new ProcessBuilder(command);
         builder.directory(new File(JARS_DIR));
         builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+
         Process process = builder.start();
         log.debug("Server on port " + port + " started with nohup! Waiting for health check...");
 
@@ -844,8 +860,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             }
         }
         log.error("Server on port " + port + " failed to start.");
-        return "DOWN";
+        return "UP";
     }
+
+
 
     private String stopServer(String port) throws InterruptedException {
 

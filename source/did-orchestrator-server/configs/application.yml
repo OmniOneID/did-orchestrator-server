@@ -53,7 +53,7 @@ services:
       port: 8094
       file: did-cas-server-1.0.0.jar
     wallet:
-      name: WalletService
+      name: Wallet
       port: 8095
       file: did-wallet-server-1.0.0.jar
     demo:

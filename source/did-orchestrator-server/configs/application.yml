@@ -33,7 +33,7 @@ services:
   logPath: /logs
   server:
     tas:
-      name: TAS
+      name: TA
       port: 8090
       file: did-ta-server-1.0.0.jar
     issuer:
@@ -49,7 +49,7 @@ services:
       port: 8093
       file: did-api-server-1.0.0.jar
     cas:
-      name: CAS
+      name: CA
       port: 8094
       file: did-ca-server-1.0.0.jar
     wallet:
@@ -61,7 +61,7 @@ services:
       port: 8099
       file: did-demo-server-1.0.0.jar
 generator:
-  easySettingModeEnabled: true
+  easySettingModeEnabled: false
 logging:
   level:
     org.omnione: debug

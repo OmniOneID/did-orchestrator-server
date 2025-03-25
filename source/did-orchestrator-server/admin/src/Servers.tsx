@@ -369,12 +369,14 @@ const Servers = forwardRef((props: ServerProps, ref) => {
               </td>
               <td className="p-2">
                 <div className="flex space-x-1">
+              {server.id !== "api" && (
                   <button 
                   className="bg-gray-600 text-white px-2 py-1 rounded"
                   onClick={() => window.open(`http://localhost:${server.port}`)}
                   >
                     Settings
                   </button>
+              )}
                   <button 
                   className="bg-gray-600 text-white px-2 py-1 rounded"
                   onClick={() => window.open(`http://localhost:${server.port}/swagger-ui/index.html`)}

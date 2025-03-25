@@ -73,4 +73,8 @@ This document provides a detailed overview of the licenses associated with the t
     - [postgresql-42.6.2.jar/META-INF/licenses/com.ongres.scram/client-2.1/LICENSE](postgresql-42.6.2.jar/META-INF/licenses/com.ongres.scram/client-2.1/LICENSE)  
     - [postgresql-42.6.2.jar/META-INF/licenses/com.ongres.scram/common-2.1/LICENSE](postgresql-42.6.2.jar/META-INF/licenses/com.ongres.scram/common-2.1/LICENSE)  
     - [postgresql-42.6.2.jar/META-INF/licenses/com.ongres.stringprep/saslprep-1.1/LICENSE](postgresql-42.6.2.jar/META-INF/licenses/com.ongres.stringprep/saslprep-1.1/LICENSE)  
-    - [postgresql-42.6.2.jar/META-INF/licenses/com.ongres.stringprep/stringprep-1.1/LICENSE](postgresql-42.6.2.jar/META-INF/licenses/com.ongres.stringprep/stringprep-1.1/LICENSE)  
+    - [postgresql-42.6.2.jar/META-INF/licenses/com.ongres.stringprep/stringprep-1.1/LICENSE](postgresql-42.6.2.jar/META-INF/licenses/com.ongres.stringprep/stringprep-1.1/LICENSE)
+
+## The SIL Open Font License
+**SUIT**:(https://noonnu.cc/en/font_page/845)
+> - **SUIT-Regular** : SUIT is open source. You can use, modify, and redistribute it freely under the SIL Open Font License. The Korean glyphs are based on **Bongodik**.

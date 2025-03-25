@@ -27,4 +27,9 @@ public class Constant {
     public static final String POSTGRE_STOP_MESSAGE = "stop";
     public static final String POSTGRE_HEALTH_MESSAGE = "All databases are successfully created";
 
+    public static String WALLET_DIR;
+    public static String DID_DOC_DIR;
+    public static String CLI_TOOL_DIR;
+    public static String LOGS_PATH;
+
 }

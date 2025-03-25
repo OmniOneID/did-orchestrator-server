@@ -37,6 +37,7 @@ import java.net.*;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +75,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         this.DID_DOC_DIR = System.getProperty("user.dir") + servicesProperties.getDidDocPath();
         this.CLI_TOOL_DIR = System.getProperty("user.dir") + servicesProperties.getCliToolPath();
         this.LOGS_PATH = System.getProperty("user.dir") + servicesProperties.getLogPath();
+        Constant.WALLET_DIR = System.getProperty("user.dir") + servicesProperties.getWalletPath();
+        Constant.DID_DOC_DIR = System.getProperty("user.dir") + servicesProperties.getDidDocPath();
+        Constant.CLI_TOOL_DIR = System.getProperty("user.dir") + servicesProperties.getCliToolPath();
+        Constant.LOGS_PATH = System.getProperty("user.dir") + servicesProperties.getLogPath();
     }
 
     private Map<String, String> initializeServerJars() {
@@ -285,6 +290,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                         log.debug(line);
 
                         if (line.contains(Constant.FABRIC_SUCCESS_CHAINCODE_MESSAGE) || line.contains(Constant.FABRIC_START_MESSAGE)) {
+                            logFile.delete();
                             callback.onStartupComplete();
                             return;
                         }
@@ -821,14 +827,26 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     private String startServer(String port) throws IOException, InterruptedException {
         Map<String, String> server_jars = SERVER_JARS;
         server_jars = initializeServerJars();
-        String jarFilePath = JARS_DIR + "/" + SERVER_JARS_FOLDER.get(port) + "/" + server_jars.get(port);
+        String jarFolder = SERVER_JARS_FOLDER.get(port);
+        String jarFilePath = JARS_DIR + "/" + jarFolder + "/" + server_jars.get(port);
+        String configFilePath = JARS_DIR + "/" + jarFolder + "/application.yml";
         File jarFile = new File(jarFilePath);
         File scriptFile = new File(JARS_DIR + "/start.sh");
-        String serverPort = "";
-        if (Integer.parseInt(port) > 0 && Integer.parseInt(port) < 65535)
-            serverPort = port;
+        if (!new File(configFilePath).exists()) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
 
-        ProcessBuilder builder = new ProcessBuilder("sh", scriptFile.getAbsolutePath(), jarFile.getAbsolutePath(), serverPort);
+        List<String> command = new ArrayList<>();
+        command.add("sh");
+        command.add(scriptFile.getAbsolutePath());
+        command.add(jarFile.getAbsolutePath());
+        command.add(port);
+        command.add(configFilePath);
+
+        log.info("Executing command: " + String.join(" ", command));
+
+        ProcessBuilder builder = new ProcessBuilder(command);
+
         builder.directory(new File(JARS_DIR));
         builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         builder.redirectError(ProcessBuilder.Redirect.INHERIT);

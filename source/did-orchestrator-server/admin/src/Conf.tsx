@@ -32,6 +32,7 @@ interface Config {
     };
     [key: string]: any;
   };
+  generator: { [key: string]: boolean };
 }
 
 const Conf: React.FC = () => {
@@ -56,17 +57,34 @@ const Conf: React.FC = () => {
   }, []);
 
   const handleConfigChange = (
-    section: 'blockchain' | 'database',
+    section: 'blockchain' | 'database' | 'generator',
     key: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (!config) return;
+    
+    if (section === 'generator') {
+      return;
+    }
+    
     setConfig({
       ...config,
       [section]: {
         ...config[section],
         [key]: e.target.value,
       },
+    });
+  };
+
+  const handleGeneratorToggle = (key: string) => {
+    if (!config) return;
+    
+    setConfig({
+      ...config,
+      generator: {
+        ...config.generator,
+        [key]: !config.generator[key]
+      }
     });
   };
 
@@ -157,13 +175,14 @@ const Conf: React.FC = () => {
       <div className="bg-gray-100 min-h-screen">
         <div className="flex">
           {/* Sidebar */}
-          <aside className="w-64 bg-gray-900 text-white flex flex-col border-r border-gray-300 min-h-screen">
-            <div className="p-6 text-lg font-bold">OmniOne OpenDID Orchestrator</div>
+          <aside className="w-64 bg-[#202B45] text-white flex flex-col border-r border-gray-300 min-h-screen">
+          <div className="p-6 text-l font-bold"><img src='omniOneLogo.png'/> Orchestrator</div>
             <nav className="flex-1">
-              <a href="/" className="block py-3 px-6 bg-gray-800">
+              <div className="border-b border-gray-500 h-1 ml-2 mr-2 mb-6"></div>
+              <a href="/" className="block text-l py-3 px-6 bg-[#202B45] ml-2 mr-2 hover:bg-[#1A2331] rounded-lg">
                 Dashboard
               </a>
-              <a href="/conf" className="block py-3 px-6 bg-orange-500">
+              <a href="/conf" className="block text-l py-3 px-6 bg-[#4E546B] ml-2 mr-2 rounded-lg">
                 Configuration
               </a>
             </nav>
@@ -196,7 +215,7 @@ const Conf: React.FC = () => {
                 </h3>
                 <table className="min-w-full">
                   <thead>
-                    <tr className="bg-gray-200">
+                    <tr className="bg-gray-100">
                       <th className="p-2 text-left w-48">Key</th>
                       <th className="p-2 text-left w-96">Value</th>
                     </tr>
@@ -237,7 +256,7 @@ const Conf: React.FC = () => {
                 </h3>
                 <table className="min-w-full">
                   <thead>
-                    <tr className="bg-gray-200">
+                    <tr className="bg-gray-100">
                       <th className="p-2 text-left w-48">Key</th>
                       <th className="p-2 text-left w-96">Value</th>
                     </tr>
@@ -282,7 +301,7 @@ const Conf: React.FC = () => {
                 </h3>
                 <table className="min-w-full">
                   <thead>
-                    <tr className="bg-gray-200">
+                    <tr className="bg-gray-100">
                       <th className="p-2 text-left w-48">Service</th>
                       <th className="p-2 text-left w-48">Name</th>
                       <th className="p-2 text-left w-48">Port</th>
@@ -343,7 +362,7 @@ const Conf: React.FC = () => {
                 </h3>
                 <table className="min-w-full">
                   <thead>
-                    <tr className="bg-gray-200">
+                    <tr className="bg-gray-100">
                       <th className="p-2 text-left w-48">Key</th>
                       <th className="p-2 text-left w-96">Value</th>
                     </tr>
@@ -360,6 +379,57 @@ const Conf: React.FC = () => {
                             onChange={(e) => handleServicesPathChange(key, e)}
                             maxLength={30}
                           />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section className="bg-white p-6 rounded shadow mb-6">
+              {/* Generators Section */}
+              <div>
+                <h3 className="text-lg font-bold mb-2">
+                  Generator
+                  <button
+                    onClick={(e) =>
+                      showToolTip(
+                        "The following settings are for whether to activate Easy Setting Mode. <br>When this setting is turned on, all Wallets and DID Documents will be automatically generated with a default password. <br>If you want to create them manually, you can turn off this setting.",
+                        e
+                      )
+                    }
+                    className="text-gray-500 hover:text-gray-700 ml-1"
+                  >
+                    <HelpIcon width="0.9em" height="0.9em" />
+                  </button>
+                </h3>
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 text-left w-48">Key</th>
+                      <th className="p-2 text-left w-96">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(config.generator).map(([key, value]) => (
+                      <tr key={key} className="border-b">
+                        <td className="p-2 font-bold capitalize">{key}</td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="mr-2 text-sm">{String(value)}</span>
+                            <button
+                              onClick={() => handleGeneratorToggle(key)}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full ${
+                                value ? "bg-orange-500" : "bg-gray-300"
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                                  value ? "translate-x-6" : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

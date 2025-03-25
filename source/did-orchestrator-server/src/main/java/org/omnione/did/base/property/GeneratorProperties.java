@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import React from 'react';
+package org.omnione.did.base.property;
 
-const ProgressOverlay: React.FC = () => {
-  return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-      <img src="progressIcon.gif" alt="Loading..." className="w-16 h-16" />
-    </div>
-  );
-};
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-export default ProgressOverlay;
+@Getter
+@Setter
+@ConfigurationProperties(prefix = "generator")
+public class GeneratorProperties {
+    public boolean easySettingModeEnabled;
+}

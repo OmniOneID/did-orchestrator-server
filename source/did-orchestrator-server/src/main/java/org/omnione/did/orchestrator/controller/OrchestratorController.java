@@ -271,7 +271,8 @@ public class OrchestratorController {
         OrchestratorConfigDto response = new OrchestratorConfigDto(
                 configProperties.getBlockchain(),
                 configProperties.getDatabase(),
-                configProperties.getServices()
+                configProperties.getServices(),
+                configProperties.getGenerator()
         );
         return ResponseEntity.ok(response);
     }

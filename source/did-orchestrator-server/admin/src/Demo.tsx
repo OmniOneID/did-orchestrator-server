@@ -20,6 +20,7 @@ import showToolTip from "./Tooltip";
 import ProgressIcon from "./icons/ProgressIcon";
 import LogIcon from './icons/LogIcon';
 import { CSSTransition } from "react-transition-group";
+import StatusIcon from './StatusIcon';
 
 interface Demo {
   id: string;
@@ -32,7 +33,7 @@ const defaultDemo: Demo = {
   id: "demo",
   name: "DEMO",
   port: 8099,
-  status: "⚪",
+  status: "GRAY",
 };
 
 const Demo = forwardRef((props, ref) => {
@@ -60,7 +61,7 @@ const Demo = forwardRef((props, ref) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     var allStatus = localStorage.getItem("allStatus")
-    setShowDemoActionsAndInfo(allStatus === "🟢");
+    setShowDemoActionsAndInfo(allStatus === "GREEN");
   };
 
   useImperativeHandle(ref, () => ({
@@ -86,11 +87,11 @@ const Demo = forwardRef((props, ref) => {
       const data = await response.json();
       setDemo((prev) => ({
         ...prev,
-        status: data.status === "UP" ? "🟢" : "🔴",
+        status: data.status === "UP" ? "GREEN" : "RED",
       }));
     } catch (error) {
       console.error("Error checking demo status:", error);
-      setDemo((prev) => ({ ...prev, status: "🔴" }));
+      setDemo((prev) => ({ ...prev, status: "RED" }));
     }
   };
 
@@ -152,7 +153,7 @@ const Demo = forwardRef((props, ref) => {
       </div>
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-gray-100">
             <th className="p-2 w-20">Status</th>
             <th className="p-2 w-56">Name</th>
             <th className="p-2 w-56">Actions</th>
@@ -170,7 +171,7 @@ const Demo = forwardRef((props, ref) => {
                 unmountOnExit
             >
               <div>
-                {demo.status === "PROGRESS" ? <ProgressIcon/> : demo.status}
+                {StatusIcon(demo.status)}
               </div>
             </CSSTransition>
           </td>
@@ -182,7 +183,7 @@ const Demo = forwardRef((props, ref) => {
                 unmountOnExit
             >
               <div>
-                {demo.name} ({demo.port}) <button onClick={() => window.open(`/logs/server_${demo.port}.log`)}><LogIcon width="0.8em" height="0.8em"/></button>
+                {demo.name} ({demo.port}) <button onClick={() => window.open(`/logs/server_${demo.port}.log`)} className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded" title='By clicking this icon, you can view the logs.'>log</button> 
               </div>
             </CSSTransition>
           </td>
@@ -194,24 +195,24 @@ const Demo = forwardRef((props, ref) => {
                 unmountOnExit
             >
               <div className="flex space-x-1">
-                <button
-                    className="bg-green-600 text-white px-3 py-1 rounded"
+              <button
+                    className="bg-green-600 text-white px-2 py-1 rounded"
                     onClick={() => startDemo(true)}
-                >
-                  Start
-                </button>
-                <button
-                    className="bg-red-600 text-white px-3 py-1 rounded"
+                  >
+                    Start
+                  </button>
+                  <button
+                    className="bg-[#ED207B] text-white px-2 py-1 rounded"
                     onClick={() => stopDemo(true)}
-                >
-                  Stop
-                </button>
-                <button
-                    className="bg-gray-600 text-white px-3 py-1 rounded"
+                  >
+                    Stop
+                  </button>
+                  <button 
+                    className="bg-gray-600 text-white px-2 py-1 rounded"
                     onClick={() => healthCheckDemo(true)}
-                >
-                  Status
-                </button>
+                  >
+                    Status
+                  </button>
               </div>
             </CSSTransition>
           </td>

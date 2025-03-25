@@ -149,7 +149,15 @@ sudo systemctl enable docker
 
 ---
 
-## 7. 전체 entities 구동
+## 7. Hyperledger Fabric 구동을 위한 Go 설치
+Hyperledger Fabric의 Chaincode가 Go 언어로 구성되어 있어 Go 설치가 필요합니다.<br>
+[Fabric 설치 가이드](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html)의 Go 설치 부분을 참조하여 Go를 설치해주세요.<br>
+
+위 절차까지 수행되면 Orchestrator를 사용하기 위한 모든 사전 준비가 완료되었습니다!
+
+---
+
+## 8. 전체 Entities 구동
 
 1. 브라우저에서 Orchestrator에 접속한 후, **All Entities** 버튼을 클릭하여 전체 entities를 구동합니다.  
 
@@ -159,7 +167,7 @@ sudo systemctl enable docker
 
 ---
 
-## 8. Wallet 및 DID Document 생성
+## 9. Wallet 및 DID Document 생성
 전체 엔티티에 대한 월렛 및 DID Document 생성 또는 개별 엔티티별 월렛 및 DID Document 생성이 가능합니다.
 
 ### 전체 엔티티에 대한 일괄 생성
@@ -176,7 +184,7 @@ sudo systemctl enable docker
 
 ---
 
-## 9. TAS 개별 설정 및 가입증명서 발급
+## 10. TAS 개별 설정 및 가입증명서 발급
 Servers탭의 TAS의 Settings 버튼을 클릭하여 TAS 설정페이지로 이동합니다.
 설치 가이드를 참고하여 TAS의 개별 설정을 진행하고, 엔티티 등록 및 가입증명서 발급 절차를 수행합니다.
 

@@ -71,7 +71,6 @@ IntelliJ IDEA is a widely used IDE for Java development. Since OpenDID Orchestra
 You can run the OpenDID server using console commands. The following steps involve building the project with Gradle and running the server using the generated JAR file.
 
 ### 4.2.1. Build with Gradle
-
 - Use Gradle Wrapper to build the source.
   ```shell
     # Navigate to the cloned repository's source folder
@@ -91,7 +90,6 @@ You can run the OpenDID server using console commands. The following steps invol
     ```
 - This command will generate the file `did-orchestrator-server-1.0.0.jar`.
 
-<br/>
 
 ### 4.2.2. Running the Server
 Run the built JAR file:
@@ -101,6 +99,8 @@ cp did-orchestrator-server-1.0.0.jar ../../
 cd ../../
 java -jar did-orchestrator-server-1.0.0.jar
 ```
+
+---
 
 ## 5. Accessing Orchestrator via Browser
 
@@ -126,7 +126,7 @@ To run these services, Docker Desktop or Colima must be running.
 2. Start Docker Desktop after installation.
 
 ### macOS
-1. Install either [Docker Desktop](https://www.docker.com/products/docker-desktop) or [Colima](https://github.com/abiosoft/colima).  
+1. Install either [Colima](https://github.com/abiosoft/colima) or [Docker Desktop](https://www.docker.com/products/docker-desktop).
 2. If using Colima, run the following command:
 ```bash
 colima start
@@ -154,41 +154,39 @@ Once you have completed this step, all the prerequisites for using the Orchestra
 
 ---
 
-## 8. Running All Entities
-
-1. Access Orchestrator via a browser and click the **All Entities** button to start all entities.  
-2. When each service and entity is running, they will be indicated with a green light.
-
-*Each service and entity can be started/stopped individually or all at once.*
-
----
-
-## 9. Generating Wallets and DID Documents
-You can generate wallets and DID documents for all entities or for individual entities.
-
-### Generating for All Entities
-Click the **Generate All** button and enter a password to generate wallets and DID documents.
-Wallets and DID documents will be automatically created based on each entity's name.
+## 8. Generating Wallets and DID Documents
+You can automatically generate Wallets and DID Documents for entities in bulk.<br>
+Click the **Generate All** button in the upper right corner.<br>
+Wallets and DID Documents will be automatically created using each entity's default name and a shared default password.<br>
 
 ### Generating for Individual Entities
-To manually generate a wallet or DID document for a specific entity, go to the **Servers** tab and click the respective **Wallet** or **DID Document** button.
-
-*Generated wallets need to be configured in the entity settings page with a path and password. DID documents are used for entity registration.*
+To manually generate a wallet or DID document for a specific entity, go to the **Configuration** tab and switch **easySettingModeEnabled** to **false** and save.<br>
+This will activate the individual create buttons for each entry, allowing you to manually enter the name and password to create them.
+However, if you use this method, generated wallets need to be configured in the entity settings page with a path and password.
 
 ---
 
-## 10. Configuring TAS and Issuing Registration Certificates
-Click the **Settings** button for TAS in the **Servers** tab to navigate to the TAS settings page.
-Follow the installation guide to configure TAS, register entities, and issue registration certificates.
+## 9. Starting All Entities
+
+Access Orchestrator via a browser and click the **Start All** button to run all entities.<br>
+When each service and entity is started, they will be indicated with a green light.<br>
+
+*Each service and entity can be fully started/stopped or started/stopped individually.*
+
+---
+
+## 10. Setting up individual entities.
+
+The role of the Orchestrator is now complete.<br>
+Refer to the manuals of the individual entities, click **Settings** to navigate, and then proceed with the individual configurations.
 
 ---
 
 ## Additional Notes
 
-- If any service or entity fails to start, check the logs for troubleshooting.
+- If any service or entity fails to start, check the logs for troubleshooting. Click the log icon on the right side of the entity name.<br>
 
 ---
 
 Now, OpenDID Orchestrator is successfully running.  
-For further inquiries, please use the project's [issue tracker](https://github.com/OmnioneId/did-orchestrator/issues).
-
+For further inquiries, please use the project's [issue tracker](https://github.com/OmniOneID/did-orchestrator-server/issues).

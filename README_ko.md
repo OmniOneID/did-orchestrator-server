@@ -7,7 +7,7 @@ DID Orchestrator 서버 Repository에 오신 것을 환영합니다. <br>
 ## DID Orchestrator 개요
 DID Orchestrator는 OpenDID 시스템 내 다양한 서버 및 저장소 등의 상태를 모니터링하고 제어할 수 있는 통합 관리 도구입니다. 특히 쉬운 설치 및 구동을 촉진하여 사용자들이 손쉽게 OpenDID에 온보딩할 수 있도록 도와주는 역할을 합니다.
 
-![화면 구성](./docs/manual/orchestrator.png)
+![화면 구성](./docs/manual/image/dashboard.png)
 
 DID Orchestrator는 크게 아래와 같은 메뉴 및 기능으로 구성되어 있습니다.
 - Dashboard : 서버 오케스트레이션 및 현황 모니터링 기능 제공 

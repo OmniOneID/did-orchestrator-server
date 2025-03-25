@@ -82,13 +82,13 @@ Orchestrator의 화면은 다음과 같은 주요 섹션으로 구성됩니다.
 - **Wallet 생성**:
   - Wallet의 이름과 비밀번호를 입력하여 해당 엔티티의 Wallet을 생성합니다.
 
-![Wallet 생성 화면](./image/wallet.png)
+  ![Wallet 생성 화면](./image/wallet.png)
 
 
 - **DID Document 생성**:
   - 생성한 Wallet과 동일한 이름, DID, 비밀번호를 입력하여 해당 엔티티의 DID Document를 생성합니다.
 
-![DID Document 생성 화면](./image/diddoc.png)
+  ![DID Document 생성 화면](./image/diddoc.png)
 
 
 ### 3.2 Configuration

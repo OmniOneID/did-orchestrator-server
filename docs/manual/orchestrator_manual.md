@@ -82,12 +82,12 @@ Provides functionality to manage individual servers.
 - **Wallet Generation**:
   - Enter the Wallet name and password to generate the Wallet for the entity.
 
-![Wallet Generation Screen](./image/wallet.png)
+  ![Wallet Generation Screen](./image/wallet.png)
 
 - **DID Document Generation**:
   - Enter the same name, DID, and password used for the Wallet to generate the DID Document for the entity.
 
-![DID Document Generation Screen](./image/diddoc.png)
+  ![DID Document Generation Screen](./image/diddoc.png)
 
 ### 3.2 Configuration
 

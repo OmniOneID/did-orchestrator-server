@@ -31,10 +31,12 @@ public class ConfigProperties {
     private final BlockchainProperties blockchain;
     private final DatabaseProperties database;
     private final ServicesProperties services;
+    private final GeneratorProperties generator;
 
-    public ConfigProperties(BlockchainProperties blockchain, DatabaseProperties database, ServicesProperties services) {
+    public ConfigProperties(BlockchainProperties blockchain, DatabaseProperties database, ServicesProperties services, GeneratorProperties generator) {
         this.blockchain = blockchain;
         this.database = database;
         this.services = services;
+        this.generator = generator;
     }
 }

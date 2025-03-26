@@ -19,12 +19,22 @@ import HelpIcon from './icons/HelpIcon';
 import LogIcon from './icons/LogIcon';
 import showToolTip from "./Tooltip";
 import ProgressIcon from "./icons/ProgressIcon";
+import StatusIcon from './StatusIcon';
+import { CSSTransition } from "react-transition-group";
 
 interface Server {
   id: string;
   name: string;
   port: number;
   status: string;
+}
+
+interface Config {
+  generator: {
+    easySettingModeEnabled: boolean;
+    [key: string]: boolean;
+  };
+  [key: string]: any;
 }
 
 interface ServerProps {
@@ -34,6 +44,21 @@ interface ServerProps {
 
 const Servers = forwardRef((props: ServerProps, ref) => {
   const { openPopupWallet, openPopupDid } = props;
+  const [config, setConfig] = useState<Config | null>(null);
+  const [isEasySettingEnabled, setIsEasySettingEnabled] = useState(true);
+
+  const fetchConfigs = async (): Promise<Config | null> => {
+    try {
+      const response = await fetch('/configs');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching config:', error);
+      return null;
+    }
+  };
 
   const fetchServers = (): Server[] => {
     try {
@@ -46,6 +71,10 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       }
 
       const data = JSON.parse(xhr.responseText);
+      
+      if (data.generator && data.generator.easySettingModeEnabled !== undefined) {
+        setIsEasySettingEnabled(data.generator.easySettingModeEnabled);
+      }
 
       return Object.entries(data.services.server)
       .filter(([key, _]) => key !== "demo")
@@ -53,7 +82,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
         id: key,
         name: value.name,
         port: value.port,
-        status: "⚪"
+        status: "GRAY"
       }))
       .sort((a, b) => (a.id === "api" ? 1 : b.id === "api" ? -1 : 0));
     } catch (error) {
@@ -74,6 +103,20 @@ const Servers = forwardRef((props: ServerProps, ref) => {
     }
     return fetchServers();
   });
+
+  useEffect(() => {
+    const getConfigs = async () => {
+      const configData = await fetchConfigs();
+      if (configData) {
+        setConfig(configData);
+        if (configData.generator && configData.generator.easySettingModeEnabled !== undefined) {
+          setIsEasySettingEnabled(configData.generator.easySettingModeEnabled);
+        }
+      }
+    };
+    
+    getConfigs();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("servers", JSON.stringify(servers));
@@ -103,7 +146,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       setServers((prevServers) =>
         prevServers.map((server) =>
           server.id === serverId
-            ? { ...server, status: data.status === "UP" ? "🟢" : "🔴" }
+            ? { ...server, status: data.status === "UP" ? "GREEN" : "RED" }
             : server
         )
       );
@@ -111,7 +154,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       console.error("Error checking server status:", error);
       setServers((prevServers) =>
         prevServers.map((server) =>
-          server.id === serverId ? { ...server, status: "🔴" } : server
+          server.id === serverId ? { ...server, status: "RED" } : server
         )
       );
     }
@@ -134,14 +177,13 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       const response = await fetch(`/startup/${serverPort}`, { method: "GET" });
       if (response.ok) {
         console.log(`Server ${serverId} started successfully`);
+        await waitForServerHealth(serverId, serverPort, "start"); 
       } else {
         console.error(`Failed to start server ${serverId}`);
       }
     } catch (error) {
       console.error("Error starting server:", error);
     }
-
-    await healthCheck(serverId, serverPort, false);
   };
 
   const stopServer = async (serverId: string, serverPort: number, fromUser: boolean = false) => {
@@ -161,28 +203,70 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       const response = await fetch(`/shutdown/${serverPort}`, { method: "GET" });
       if (response.ok) {
         console.log(`Server ${serverId} stopped successfully`);
+        await waitForServerHealth(serverId, serverPort, "stop"); 
       } else {
         console.error(`Failed to stop server ${serverId}`);
       }
     } catch (error) {
       console.error("Error stopping server:", error);
     }
+  }
 
-    await healthCheck(serverId, serverPort, false);
+   const waitForServerHealth = async (serverId: string, serverPort: number, mode: string, maxRetries = 10, interval = 2000) => {
+    for (let i = 0; i < maxRetries; i++) {
+        await new Promise((resolve) => setTimeout(resolve, interval)); 
+        try {
+            const response = await fetch(`/healthcheck/${serverPort}`, { method: "GET" });
+            if (response.ok) {
+                const data = await response.json();
+                if (mode == "start") {
+                  if (data.status === "UP") {
+                      setServers((prevServers) =>
+                          prevServers.map((server) =>
+                              server.id === serverId ? { ...server, status: "GREEN" } : server
+                          )
+                      );
+                      console.log(`Server ${serverId} is now UP`);
+                      return;
+                  }
+                }
+                if (mode == "stop") {
+                  if (data.status === "DOWN") {
+                      setServers((prevServers) =>
+                          prevServers.map((server) =>
+                              server.id === serverId ? { ...server, status: "RED" } : server
+                          )
+                      );
+                      console.log(`Server ${serverId} is now DOWN`);
+                      return;
+                  }
+                }
+            }
+        } catch (error) {
+            console.error("Error checking health status:", error);
+        }
+    }
+
+    console.log(`Server ${serverId} is still DOWN after retries`);
+    setServers((prevServers) =>
+        prevServers.map((server) =>
+            server.id === serverId ? { ...server, status: "RED" } : server
+        )
+    );
   };
 
   const getOverallStatus = async (): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     const statuses = servers.map((server) => server.status);
-    const allGreen = statuses.every((status) => status === "🟢");
-    const allRed = statuses.every((status) => status === "🔴");
+    const allGreen = statuses.every((status) => status === "GREEN");
+    const allRed = statuses.every((status) => status === "RED");
 
     if (allGreen) {
       return "SUCCESS";
     } else if (allRed) {
       return "FAIL";
-    } else if (statuses.some((status) => status === "🟢")) {
+    } else if (statuses.some((status) => status === "GREEN")) {
       return "PARTIAL";
     }
     return "FAIL";
@@ -222,24 +306,33 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       <h2 className="text-xl font-bold mb-4">Servers</h2>
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-gray-100">
             <th className="p-2 w-20">Status</th>
             <th className="p-2 w-56">Name</th>
             <th className="p-2 w-56">Actions</th>
             <th className="p-2 w-48">Info</th>
             <th className="p-2 w-48">
-                    Generators
-                    <button
-                      onClick={(e) =>
-                        showToolTip(
-                          "generate Wallet and DID Document individually.<br>Notice:<br>- For each entity, you need to create the Wallet first and then the DID Document.<br>- Please create the Wallet and DID Document for TAS first, and then proceed with the processes for the remaining entities.",
-                          e
-                        )
-                      }
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <HelpIcon width="1em" height="1em" />
-                    </button>
+              Generators
+              <CSSTransition
+                      in={!isEasySettingEnabled}
+                      timeout={300}
+                      classNames="fade"
+                      unmountOnExit
+              >
+                <span>
+                <button
+                  onClick={(e) =>
+                    showToolTip(
+                      "generate Wallet and DID Document individually.<br>Notice:<br>- For each entity, you need to create the Wallet first and then the DID Document.<br>- Please create the Wallet and DID Document for TAS first, and then proceed with the processes for the remaining entities.",
+                      e
+                    )
+                  }
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                <HelpIcon width="1em" height="1em" />
+                </button>
+                </span>
+              </CSSTransition>
             </th>
           </tr>
         </thead>
@@ -247,27 +340,27 @@ const Servers = forwardRef((props: ServerProps, ref) => {
           {servers.map((server) => (
             <tr key={server.id} className="border-b">
               <td className="p-2 pl-6 all">
-                {server.status === "PROGRESS" ? <ProgressIcon /> : server.status}
+                {StatusIcon(server.status)}
               </td>
               <td className="p-2 font-bold">
-                {server.name} ({server.port}) <button onClick={()  => window.open(`/logs/server_${server.port}.log`)}><LogIcon width="0.8em" height="0.8em" /></button>
+                {server.name} ({server.port}) <button onClick={() => window.open(`/logs/server_${server.port}.log`)} className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded" title='By clicking this icon, you can view the logs.'>log</button>
               </td>
               <td className="p-2">
                 <div className="flex space-x-1">
                   <button
-                    className="bg-green-600 text-white px-3 py-1 rounded"
+                    className="bg-green-600 text-white px-2 py-1 rounded"
                     onClick={() => startServer(server.id, server.port, true)}
                   >
                     Start
                   </button>
                   <button
-                    className="bg-red-600 text-white px-3 py-1 rounded"
+                    className="bg-[#ED207B] text-white px-2 py-1 rounded"
                     onClick={() => stopServer(server.id, server.port, true)}
                   >
                     Stop
                   </button>
                   <button 
-                    className="bg-gray-600 text-white px-3 py-1 rounded"
+                    className="bg-gray-600 text-white px-2 py-1 rounded"
                     onClick={() => healthCheck(server.id, server.port, true)}
                   >
                     Status
@@ -276,38 +369,48 @@ const Servers = forwardRef((props: ServerProps, ref) => {
               </td>
               <td className="p-2">
                 <div className="flex space-x-1">
+              {server.id !== "api" && (
                   <button 
-                  className="bg-gray-600 text-white px-3 py-1 rounded"
+                  className="bg-gray-600 text-white px-2 py-1 rounded"
                   onClick={() => window.open(`http://localhost:${server.port}`)}
                   >
                     Settings
                   </button>
+              )}
                   <button 
-                  className="bg-gray-600 text-white px-3 py-1 rounded"
+                  className="bg-gray-600 text-white px-2 py-1 rounded"
                   onClick={() => window.open(`http://localhost:${server.port}/swagger-ui/index.html`)}
                   >
                     Swagger
                   </button>
                 </div>
               </td>
-              <td className="p-2">
-              {server.id === "api" ? "" : (
-                <div className="flex space-x-1">
-                  <button
-                    className="bg-orange-500 text-white px-3 py-1 rounded"
-                    onClick={() => openPopupWallet(server.id)}
-                  >
-                    Wallet
-                  </button>
-                  <button
-                    className="bg-orange-500 text-white px-3 py-1 rounded"
-                    onClick={() => openPopupDid(server.id)}
-                  >
-                    DID Document
-                  </button>
-                </div>
+              {server.id !== "api" && (
+                <td className="p-2">
+                    <CSSTransition
+                      in={!isEasySettingEnabled}
+                      timeout={300}
+                      classNames="fade"
+                      unmountOnExit
+                    >
+                  <div className="flex space-x-1">
+                    <button
+                      className="bg-orange-500 text-white px-2 py-1 rounded"
+                      onClick={() => openPopupWallet(server.id)}
+                    >
+                      Wallet
+                    </button>
+                    <button
+                      className="bg-orange-500 text-white px-2 py-1 rounded"
+                      onClick={() => openPopupDid(server.id)}
+                    >
+                      DID Document
+                    </button>
+                  </div>
+                  </CSSTransition>
+                </td>
               )}
-            </td>
+              {server.id === "api" && <td></td>}
             </tr>
           ))}
         </tbody>

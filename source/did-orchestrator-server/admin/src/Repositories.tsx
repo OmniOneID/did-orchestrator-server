@@ -17,6 +17,7 @@
 import React, { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import ProgressIcon from "./icons/ProgressIcon";
 import LogIcon from "./icons/LogIcon";
+import StatusIcon from './StatusIcon';
 
 interface Repository {
   id: string;
@@ -27,8 +28,8 @@ interface Repository {
 interface RepositoriesProps {}
 
 const defaultRepos: Repository[] = [
-  { id: "fabric", name: "Hyperledger Fabric", status: "⚪" },
-  { id: "postgre", name: "PostgreSQL", status: "⚪" },
+  { id: "fabric", name: "Hyperledger Fabric", status: "GRAY" },
+  { id: "postgre", name: "PostgreSQL", status: "GRAY" },
 ];
 
 const Repositories = forwardRef((props: RepositoriesProps, ref) => {
@@ -75,7 +76,7 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
       setRepositories((prevRepos) =>
         prevRepos.map((repo) =>
           repo.id === repoId
-            ? { ...repo, status: data.status === "UP" ? "🟢" : "🔴" }
+            ? { ...repo, status: data.status === "UP" ? "GREEN" : "RED" }
             : repo
         )
       );
@@ -83,7 +84,7 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
       console.error("Error checking repository status:", error);
       setRepositories((prevRepos) =>
         prevRepos.map((repo) =>
-          repo.id === repoId ? { ...repo, status: "🔴" } : repo
+          repo.id === repoId ? { ...repo, status: "RED" } : repo
         )
       );
     }
@@ -151,14 +152,14 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     const statuses = repositories.map((repo) => repo.status);
-    const allGreen = statuses.every((status) => status === "🟢");
-    const allRed = statuses.every((status) => status === "🔴");
+    const allGreen = statuses.every((status) => status === "GREEN");
+    const allRed = statuses.every((status) => status === "RED");
 
     if (allGreen) {
       return "SUCCESS";
     } else if (allRed) {
       return "FAIL";
-    } else if (statuses.some((status) => status === "🟢")) {
+    } else if (statuses.some((status) => status === "GREEN")) {
       return "PARTIAL";
     }
     return "FAIL";
@@ -227,7 +228,7 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
       </div>
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-gray-100">
             <th className="p-2 w-20">Status</th>
             <th className="p-2 w-56">Name</th>
             <th className="p-2 w-96">Actions</th>
@@ -238,34 +239,34 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
           {repositories.map((repo) => (
             <tr key={repo.id} className="border-b">
               <td className="p-2 pl-6">
-                {repo.status === "PROGRESS" ? <ProgressIcon /> : repo.status}
+                {StatusIcon(repo.status)}
               </td>
               <td className="p-2 font-bold">
-                {repo.name} <button onClick={() => window.open(`/logs/${repo.id}.log`)}><LogIcon width="0.8em" height="0.8em"/></button>
+                {repo.name} <button onClick={() => window.open(`/logs/${repo.id}.log`)} className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded" title='By clicking this icon, you can view the logs.'>log</button>                
               </td>
               <td className="p-2">
                 <div className="flex space-x-1">
                   <button
-                    className="bg-green-600 text-white px-3 py-1 rounded"
+                    className="bg-green-600 text-white px-2 py-1 rounded"
                     onClick={() => startRepository(repo.id, true)}
                   >
                     Start
                   </button>
                   <button
-                    className="bg-red-600 text-white px-3 py-1 rounded"
+                    className="bg-[#ED207B] text-white px-2 py-1 rounded"
                     onClick={() => stopRepository(repo.id, true)}
                   >
                     Stop
                   </button>
                   <button
-                    className="bg-gray-600 text-white px-3 py-1 rounded"
+                    className="bg-gray-600 text-white px-2 py-1 rounded"
                     onClick={() => healthCheck(repo.id, true)}
                   >
                     Status
                   </button>
                   {repo.name === "Hyperledger Fabric" && (
                   <button
-                    className="bg-blue-600 text-white px-3 py-1 rounded"
+                    className="bg-[#0E76BD] text-white px-2 py-1 rounded"
                     onClick={() => resetRepository(repo.id, true)}
                   >
                     Reset

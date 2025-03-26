@@ -50,6 +50,7 @@ JAR_PATHS=(
     "${PWD}/../../jars/CA"
     "${PWD}/../../jars/Wallet"
     "${PWD}/../../jars/API"
+    "${PWD}/../../jars/Demo"
 )
 
 MY_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -n 1)

@@ -44,8 +44,10 @@ did-orchestrator-server
     └── did-orchestrator-server
         ├── gradle
         ├── libs
-        └── src
-        └── build.gradle
+        ├── src
+        ├── admin
+        ├── shells
+        ├── build.gradle
         └── README.md
 ```
 
@@ -72,15 +74,19 @@ did-orchestrator-server
 | &nbsp;&nbsp;&nbsp;┖ gradle       | Gradle 빌드 설정 및 스크립트             |
 | &nbsp;&nbsp;&nbsp;┖ libs         | 외부 라이브러리 및 종속성                |
 | &nbsp;&nbsp;&nbsp;┖ src          | 주요 소스 코드 디렉터리                  |
+| &nbsp;&nbsp;&nbsp;┖ admin        | Front-end 영역 디렉토리 |
+| &nbsp;&nbsp;&nbsp;┖ shells       | Blockchain, RDBMS 등 기타 모듈 영역       |
 | &nbsp;&nbsp;&nbsp;┖ build.gradle | Gradle 빌드 설정 파일                    |
 | &nbsp;&nbsp;&nbsp;┖ README.md    | 소스 코드 개요 및 지침                   |
-<br/>
 
 ## 라이브러리
 
 이 프로젝트에서 사용되는 라이브러리는 아래와 같이 구성됩니다:
 
-1. **서드 파티 라이브러리**: 이 라이브러리들은 오픈 소스 종속성으로, [build.gradle](source/did-orchestrator-server/build.gradle) 파일을 통해 관리됩니다. 서드 파티 라이브러리와 해당 라이선스의 자세한 목록은 [dependencies-license.md](dependencies-license.md) 파일을 참고하십시오.
+- **백엔드 서드 파티 라이브러리**: 이 라이브러리들은 오픈 소스 종속성으로, [build.gradle](source/did-orchestrator-server/build.gradle) 파일을 통해 관리됩니다. 서드 파티 라이브러리와 해당 라이선스의 자세한 목록은 [dependencies-license.md](dependencies-license.md) 파일을 참고하십시오.
+- **프론트엔드 서드 파티 라이브러리**: DID Orchestrator의 UI/UX를 제공하는 영역으로서, 자세한 사항은 source 영역 내 [README.md](source/did-orchestrator-server/README.md) 파일을 참고하십시오.
+- **기타 라이브러리**: 블록체인, RDBMS 등과 같이 소스 영역에는 속하지 않는 모듈들로서, 보다 더 자세한 사항은 source 영역 내 [README.md](source/did-orchestrator-server/README.md) 파일을 참고하십시요.
+
 
 ## 설치 및 운영 가이드
 

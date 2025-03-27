@@ -44,7 +44,9 @@ did-orchestrator-server
     └── did-orchestrator-server
         ├── gradle
         ├── libs
-        └── src
+        ├── src
+        ├── admin
+        ├── shells
         └── build.gradle
         └── README.md
 ```
@@ -72,15 +74,19 @@ Below is a description of each folder and file in the directory:
 | &nbsp;&nbsp;&nbsp;┖ gradle       | Gradle build settings and scripts              |
 | &nbsp;&nbsp;&nbsp;┖ libs         | External libraries and dependencies            |
 | &nbsp;&nbsp;&nbsp;┖ src          | Main source code directory                     |
+| &nbsp;&nbsp;&nbsp;┖ admin        | Front-end code Directory |
+| &nbsp;&nbsp;&nbsp;┖ shells       | Blockchain, RDBMS, and other Modules Directory  |
 | &nbsp;&nbsp;&nbsp;┖ build.gradle | Gradle build configuration file                |
 | &nbsp;&nbsp;&nbsp;┖ README.md    | Overview and instructions for the source code  |
-<br/>
 
 ## Libraries
 
 The libraries used in this project are as follows:
 
-1. **Third-party libraries**: These are open-source dependencies managed via the [build.gradle](source/did-orchestrator-server/build.gradle) file. A detailed list of third-party libraries and their licenses can be found in the [dependencies-license.md](dependencies-license.md) file.
+- **Back-end Third-party Libraries**: These are open-source dependencies managed via the [build.gradle](source/did-orchestrator-server/build.gradle) file. A detailed list of third-party libraries and their licenses can be found in the [dependencies-license.md](dependencies-license.md) file.
+- **Front-end Third-party Libraries**: These are modules that provide the UI/UX for the DID Orchestrator. For more details, please refer to the [README.md](source/did-orchestrator-server/README.md) file within the source area.
+- **Other Libraries**: These are modules that do not belong to the source area, such as Blockchain and RDBMS. For more details, please refer to the [README.md](source/did-orchestrator-server/README.md) file within the source area.
+
 
 ## Installation and Operation Guide
 

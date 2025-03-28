@@ -8,7 +8,7 @@ if [ -z "$PASSWORD" ]; then
     exit 1
 fi
 
-for mode in CAS Issuer TAS Verifier Wallet; do
+for mode in CA Issuer TA Verifier Wallet; do
     MODE_DIR="$BASE_DIR/$mode"
     if [ ! -d "$MODE_DIR" ]; then
         echo "Creating directory: $MODE_DIR"
@@ -17,9 +17,9 @@ for mode in CAS Issuer TAS Verifier Wallet; do
 done
 
 JAR_PATH="did-cli-tool-server-1.0.0.jar"
-CAS_PATH="$BASE_DIR/CAS"
+CAS_PATH="$BASE_DIR/CA"
 ISSUER_PATH="$BASE_DIR/Issuer"
-TAS_PATH="$BASE_DIR/TAS"
+TAS_PATH="$BASE_DIR/TA"
 VERIFIER_PATH="$BASE_DIR/Verifier"
 WALLET_PATH="$BASE_DIR/Wallet"
 
@@ -52,4 +52,4 @@ echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$TAS_PATH/tas.wallet"
 echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$CAS_PATH/cas.wallet" -f "$CAS_PATH/cas.did" -id did:omn:cas -ci did:omn:tas -mi assert -ai auth -ki keyagree -p
 echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$ISSUER_PATH/issuer.wallet" -f "$ISSUER_PATH/issuer.did" -id did:omn:issuer -ci did:omn:tas -mi assert -ai auth -ki keyagree -p
 echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$VERIFIER_PATH/verifier.wallet" -f "$VERIFIER_PATH/verifier.did" -id did:omn:verifier -ci did:omn:tas -mi assert -ai auth -ki keyagree -p
-echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$WALLET_PATH/wallet.wallet" -f "$WALLET_PATH/wallet.did" -id did:omn:tas -ci did:omn:wallet -mi assert -ai auth -ki keyagree -p
+echo "$PASSWORD" | java -jar "$JAR_PATH" did createDid -m "$WALLET_PATH/wallet.wallet" -f "$WALLET_PATH/wallet.did" -id did:omn:wallet -ci did:omn:tas -mi assert -ai auth -ki keyagree -p

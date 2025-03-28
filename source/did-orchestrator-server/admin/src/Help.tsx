@@ -27,9 +27,37 @@ const HelpMarkdown: React.FC = () => {
       .catch((err) => console.error("Error fetching markdown:", err));
   }, []);
 
+  const contextPath =  "https://raw.githubusercontent.com/OmniOneID/did-orchestrator-server/refs/heads/main/docs/manual/";
+
   return (
     <div className="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl" style={{ fontSize: "80%" }}>
-      <ReactMarkdown>{markdownContent}</ReactMarkdown>
+        <ReactMarkdown
+            children={markdownContent}
+            components={{
+                img: ({ node, ...props }) => {
+                    const src = props.src || "";
+                    const resolvedSrc =
+                        src.startsWith("http") || src.startsWith("/")
+                            ? src
+                            : `${contextPath}${src}`;
+                    return (
+                        <img
+                            {...props}
+                            src={resolvedSrc}
+                            alt={props.alt}
+                            style={{
+                                display: "inline",
+                                verticalAlign: "middle",
+                                maxWidth: "100%",
+                                height: "auto",
+                                margin: 0,
+                                padding: 0,
+                            }}
+                        />
+                    );
+                },
+            }}
+        />
     </div>
   );
 };

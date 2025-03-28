@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.omnione.did.base.property.BlockchainProperties;
+import org.omnione.did.base.property.GeneratorProperties;
 import org.omnione.did.base.property.DatabaseProperties;
 import org.omnione.did.base.property.ServicesProperties;
 
@@ -32,4 +33,5 @@ public class OrchestratorConfigDto {
     private BlockchainProperties blockchain;
     private DatabaseProperties database;
     private ServicesProperties services;
+    private GeneratorProperties generator;
 }

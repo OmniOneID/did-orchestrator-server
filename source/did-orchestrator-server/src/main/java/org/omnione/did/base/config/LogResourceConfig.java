@@ -16,6 +16,7 @@
 
 package org.omnione.did.base.config;
 
+import org.omnione.did.base.constant.Constant;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -26,7 +27,7 @@ public class LogResourceConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // server log file path
         registry.addResourceHandler("/logs/**")
-                .addResourceLocations("file:./logs/");
+                .addResourceLocations("file:" + Constant.LOGS_PATH + "/");
     }
 
 }

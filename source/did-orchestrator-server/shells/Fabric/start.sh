@@ -55,7 +55,7 @@ JAR_PATHS=(
 
 MY_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -n 1)
 BLOCKCHAIN_PATH="${PWD}/blockchain.properties"
-SETUP_PATH="${PWD}/../../jars/"
+SETUP_PATH="${PWD}/../../jars"
 
 for JAR_PATH in "${JAR_PATHS[@]}"; do
     APP_YML="${JAR_PATH}/application.yml"

@@ -35,31 +35,31 @@ services:
     tas:
       name: TA
       port: 8090
-      file: did-ta-server-1.0.0.jar
+      file: did-ta-server-1.0.1.jar
     issuer:
       name: Issuer
       port: 8091
-      file: did-issuer-server-1.0.0.jar
+      file: did-issuer-server-1.0.1.jar
     verifier:
       name: Verifier
       port: 8092
-      file: did-verifier-server-1.0.0.jar
+      file: did-verifier-server-1.0.1.jar
     api:
       name: API
       port: 8093
-      file: did-api-server-1.0.0.jar
+      file: did-api-server-1.0.1.jar
     cas:
       name: CA
       port: 8094
-      file: did-ca-server-1.0.0.jar
+      file: did-ca-server-1.0.1.jar
     wallet:
       name: Wallet
       port: 8095
-      file: did-wallet-server-1.0.0.jar
+      file: did-wallet-server-1.0.1.jar
     demo:
       name: Demo
       port: 8099
-      file: did-demo-server-1.0.0.jar
+      file: did-demo-server-1.0.1.jar
 generator:
   easySettingModeEnabled: true
 logging:

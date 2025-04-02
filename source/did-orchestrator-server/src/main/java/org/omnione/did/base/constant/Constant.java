@@ -17,7 +17,7 @@
 package org.omnione.did.base.constant;
 
 public class Constant {
-    public static final String FABRIC_SUCCESS_CHAINCODE_MESSAGE = "Chaincode initialization is not required!";
+    public static final String FABRIC_SUCCESS_CHAINCODE_MESSAGE = "Chaincode initialization is not required";
     public static final String FABRIC_START_MESSAGE = "starting checked";
     public static final String FABRIC_FAIL_CHAINCODE_MESSAGE = "Deploying chaincode failed";
     public static final String FABRIC_FAIL_DOCKER_MESSAGE = "Cannot connect to the Docker daemon";

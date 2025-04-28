@@ -17,7 +17,7 @@ DID Orchestrator Server는 현재 `org.omnione.did.orchestrator.service.Orchestr
 
 ## 3. 기능별 인터페이스 설명
 
-### 2.1. Hyperledger Fabric 제어
+### 3.1 Hyperledger Fabric 제어
 
 | 메서드 | 설명 | 파라미터 | 반환 값 |
 |:------|:----|:---------|:--------|
@@ -42,7 +42,7 @@ public interface OrchestratorService {
 ..
 ```
 
-### 2.2. PostgreSQL 제어
+### 3.2 PostgreSQL 제어
 
 | 메서드 | 설명 | 파라미터 | 반환 값 |
 |:------|:----|:---------|:--------|
@@ -67,7 +67,7 @@ public interface OrchestratorService {
 ..
 ```
 
-### 2.3. 엔티티 제어 (포트 기반 제어)
+### 3.3 엔티티 제어 (포트 기반 제어)
 
 | 메서드 | 설명 | 파라미터 | 반환 값 | 예외 발생 여부 |
 |:------|:----|:---------|:--------|:---------------|
@@ -98,7 +98,7 @@ public interface OrchestratorService {
 ..
 ```
 
-### 2.4. CLI Tool 기반 DID 리소스 생성
+### 3.4 CLI Tool 기반 DID 리소스 생성
 
 | 메서드 | 설명 | 파라미터 | 반환 값 |
 |:------|:----|:---------|:--------|
@@ -125,7 +125,7 @@ public interface OrchestratorService {
 ..
 ```
 
-### 2.5. 기타
+### 3.5 기타
 
 | 메서드 | 설명 | 파라미터 | 반환 값 |
 |:------|:----|:---------|:--------|

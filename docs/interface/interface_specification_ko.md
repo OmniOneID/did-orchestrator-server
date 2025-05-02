@@ -37,7 +37,7 @@ OrchestratorController → (Interface) OrchestratorService → (Implements) Orch
 * OpenDID에서 공통적으로 사용하는 Ledger에 해당하는 `Hyperledger Fabric`을 제어하는 기능을 수행합니다.
 * 향후 `Hyperledger Besu`, `RDBMS 기반 Repository 서버` 등을 확장 지원할 예정입니다.
 
-#### 4.1.2. 소스 코드 예시
+#### 소스 코드 예시
 ```java
 package org.omnione.did.orchestrator.service;
 

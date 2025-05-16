@@ -25,25 +25,64 @@ interface Repository {
   status: string;
 }
 
-interface RepositoriesProps {}
+interface RepositoriesProps {
+  openPopupLedger: (id: string) => void;
+  onConfirmReset: (repoId: string) => void;
+}
 
 const defaultRepos: Repository[] = [
   { id: "fabric", name: "Hyperledger Fabric", status: "GRAY" },
+  { id: "besu", name: "Hyperledger Besu", status: "GRAY" },
+  { id: "repository", name: "Trust Repository", status: "GRAY" },
   { id: "postgre", name: "PostgreSQL", status: "GRAY" },
 ];
 
 const Repositories = forwardRef((props: RepositoriesProps, ref) => {
+  const { openPopupLedger } = props;
+
   const [repositories, setRepositories] = useState<Repository[]>(() => {
+
+  let selectedIds: string[] = [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
+    if (Array.isArray(parsed)) {
+      selectedIds = parsed;
+    }
+  } catch (e) {
+    console.error("Error parsing selectedRepositories:", e);
+  }
+
+  const alwaysInclude = ["postgre"];
+  const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
+
+  const filteredRepos = defaultRepos.filter(repo =>
+    finalSelected.includes(repo.id)
+  );
+
+  localStorage.setItem("repositories", JSON.stringify(filteredRepos));
+
+  try {
     const stored = localStorage.getItem("repositories");
     if (stored) {
-      try {
-        return JSON.parse(stored) as Repository[];
-      } catch (e) {
-        console.error("Error parsing repositories from localStorage", e);
-        return defaultRepos;
-      }
+      const parsed = JSON.parse(stored) as Repository[];
+      const merged = parsed.filter(repo => finalSelected.includes(repo.id));
+      return merged.length > 0 ? merged : filteredRepos;
     }
-    return defaultRepos;
+  } catch (e) {
+    console.error("Error parsing repositories from localStorage", e);
+  }
+
+  return filteredRepos;
+
+    // if (stored) {
+    //   try {
+    //     return JSON.parse(stored) as Repository[];
+    //   } catch (e) {
+    //     console.error("Error parsing repositories from localStorage", e);
+    //     return defaultRepos;
+    //   }
+    // }
+    // return defaultRepos;
   });
 
   useEffect(() => {
@@ -183,6 +222,15 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
       });
       if (response.ok) {
         console.log(`Repository ${repoId} reset successfully`);
+
+        const postgreOnly = [
+          { id: "postgre", name: "PostgreSQL", status: "GRAY" }
+        ];
+
+        localStorage.setItem("repositories", JSON.stringify(postgreOnly));
+        localStorage.removeItem("selectedRepositories");
+
+        setRepositories(postgreOnly);
       } else {
         console.error(`Failed to reset repository ${repoId}`);
       }
@@ -219,6 +267,7 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
     startAll,
     stopAll,
     statusAll,
+    resetRepository,
   }));
 
   return (
@@ -264,10 +313,28 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
                   >
                     Status
                   </button>
-                  {repo.name === "Hyperledger Fabric" && (
+                  {/* {repo.name === "Hyperledger Fabric" && (
                   <button
                     className="bg-[#0E76BD] text-white px-2 py-1 rounded"
                     onClick={() => resetRepository(repo.id, true)}
+                  >
+                    Reset
+                  </button>
+                  )} */}
+                  {repo.name === "Hyperledger Besu" && (
+                  <button
+                    className="bg-[#0E76BD] text-white px-2 py-1 rounded"
+                    onClick={() => props.onConfirmReset(repo.id)}
+                    // onClick={() => resetRepository(repo.id, true)}
+                  >
+                    Reset
+                  </button>
+                  )}
+                  {repo.name === "Trust Repository" && (
+                  <button
+                    className="bg-[#0E76BD] text-white px-2 py-1 rounded"
+                    onClick={() => props.onConfirmReset(repo.id)}
+                    // onClick={() => resetRepository(repo.id, true)}
                   >
                     Reset
                   </button>
@@ -280,6 +347,8 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
         </tbody>
       </table>
     </section>
+
+    
   );
 });
 

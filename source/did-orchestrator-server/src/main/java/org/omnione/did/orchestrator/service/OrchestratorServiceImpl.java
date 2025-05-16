@@ -389,6 +389,69 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         return response;
     }
 
+    @Override
+    public OrchestratorResponseDto requestStartupBesu() {
+        log.info("requestStartupBesu");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+
+    @Override
+    public OrchestratorResponseDto requestShutdownBesu() {
+        log.info("requestShutdownBesu");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+
+    @Override
+    public OrchestratorResponseDto requestHealthCheckBesu() {
+        log.info("requestHealthCheckBesu");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+    @Override
+    public OrchestratorResponseDto requestResetBesu() {
+        log.info("requestResetBesu");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+
+
+    @Override
+    public OrchestratorResponseDto requestStartupRepoServer() {
+        log.info("requestStartupRepoServer");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+
+    @Override
+    public OrchestratorResponseDto requestShutdownRepoServer() {
+        log.info("requestShutdownRepoServer");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+
+    @Override
+    public OrchestratorResponseDto requestHealthCheckRepoServer() {
+        log.info("requestHealthCheckRepoServer");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+    @Override
+    public OrchestratorResponseDto requestResetRepoServer() {
+        log.info("requestResetRepoServer");
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        response.setStatus("ERROR");
+        return response;
+    }
+
     /**
      * Starts PostgreSQL by executing the `start.sh` script.
      * This method starts the PostgreSQL service and checks if it started successfully.

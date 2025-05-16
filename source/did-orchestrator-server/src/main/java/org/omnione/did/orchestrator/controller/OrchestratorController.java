@@ -177,6 +177,101 @@ public class OrchestratorController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/startup/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuStartup() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestStartupBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/shutdown/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuShutdown() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestShutdownBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/healthcheck/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuHealthCheck() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestHealthCheckBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reset/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuReset() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestResetBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+    //trust repository test
+    @GetMapping("/startup/repository")
+    public ResponseEntity<OrchestratorResponseDto> repoServerStartup() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestStartupRepoServer();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/shutdown/repository")
+    public ResponseEntity<OrchestratorResponseDto> repoServerShutdown() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestShutdownRepoServer();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/healthcheck/repository")
+    public ResponseEntity<OrchestratorResponseDto> repoServerHealthCheck() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestHealthCheckRepoServer();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/reset/repository")
+    public ResponseEntity<OrchestratorResponseDto> repoServerReset() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestResetRepoServer();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/startup/postgre")
     public ResponseEntity<OrchestratorResponseDto> postgreStartup() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();

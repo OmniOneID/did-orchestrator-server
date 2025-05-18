@@ -837,14 +837,17 @@ const App: React.FC = () => {
       {popupLedger && (
         <div id="popup-overlay-ledger" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
-            <button
+            {/* <button
               type="button"
               onClick={() => setPopupLedger(null)}
               className="absolute top-5 right-5 text-gray-500 hover:text-gray-700 px-1 py-1 text-xl"
             >
               X
-            </button>
+            </button> */}
             <h2 className="text-lg font-bold border-b pb-2 mb-4">Select Repository</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Please choose one of the repositories below to proceed with the ledger setup.
+            </p>
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
@@ -877,29 +880,38 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-
       {showResetConfirm && (
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white w-96 p-6 rounded-lg shadow-lg text-center relative">
-            <h2 className="text-lg font-bold mb-4">Reset Confirmation</h2>
-            <p className="mb-6 text-sm text-gray-700">
+        <div id="popup-overlay-reset" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+            <h2 className="text-lg font-bold border-b pb-2 mb-2">Reset Confirmation</h2>
+
+            <p className="text-sm text-gray-700 mb-4">
               Are you sure you want to initialize this repository?<br />
               This action cannot be undone.
             </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={handleConfirmYes}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-              >
-                Yes
-              </button>
-              <button
-                onClick={handleConfirmNo}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-              >
-                No
-              </button>
-            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleConfirmYes();
+              }}
+            >
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmNo}
+                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                >
+                  No
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

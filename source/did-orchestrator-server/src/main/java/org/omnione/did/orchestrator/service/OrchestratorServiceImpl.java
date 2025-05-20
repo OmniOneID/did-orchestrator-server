@@ -237,7 +237,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             chmodBuilder.start().waitFor();
 
             ProcessBuilder builder = new ProcessBuilder(
-                    "sh", "-c", "nohup " + fabricShellPath + "/start.sh " + blockChainProperties.getChannel() + " " + blockChainProperties.getChaincodeName() +
+                    "sh", "-c", "nohup " + fabricShellPath + "/start.sh " + blockChainProperties.getFabric().getChannel() + " " + blockChainProperties.getFabric().getChaincodeName() +
                     " > " + logFilePath + " 2>&1 &"
             );
 
@@ -343,7 +343,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
             String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/status.sh", blockChainProperties.getChannel(), blockChainProperties.getChaincodeName());
+            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/status.sh", blockChainProperties.getFabric().getChannel(), blockChainProperties.getFabric().getChaincodeName());
             builder.directory(new File(fabricShellPath));
             Process process = builder.start();
             String output = getProcessOutput(process);
@@ -392,16 +392,44 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     @Override
     public OrchestratorResponseDto requestStartupBesu() {
         log.info("requestStartupBesu");
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        response.setStatus("ERROR");
-        return response;
+        String besuShellPath = System.getProperty("user.dir") + "/shells/Besu";
+        String logFilePath = LOGS_PATH + "/besu.log";
+
+        try {
+            ProcessBuilder chmodBuilder = new ProcessBuilder("chmod", "+x", besuShellPath + "/start.sh");
+            chmodBuilder.start().waitFor();
+            System.out.println("besu start : " + blockChainProperties.getBesu().getChainId());
+            ProcessBuilder builder = new ProcessBuilder(
+                    "sh", "-c", "nohup " + besuShellPath + "/start.sh "  +
+                    " > " + logFilePath + " 2>&1 &"
+            );
+
+            builder.directory(new File(besuShellPath));
+            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            builder.start();
+            Thread.sleep(8000);
+            return requestHealthCheckBesu();
+        } catch (IOException | InterruptedException e) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
     }
 
     @Override
     public OrchestratorResponseDto requestShutdownBesu() {
         log.info("requestShutdownBesu");
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        response.setStatus("ERROR");
+        try {
+            String besuShellPath = System.getProperty("user.dir") + "/shells/Besu";
+            ProcessBuilder builder = new ProcessBuilder("sh", besuShellPath + "/stop.sh");
+            builder.directory(new File(besuShellPath));
+            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            builder.start();
+            Thread.sleep(3000);
+        } catch (IOException | InterruptedException e) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+        OrchestratorResponseDto response = requestHealthCheckBesu();
         return response;
     }
 
@@ -409,6 +437,21 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestHealthCheckBesu() {
         log.info("requestHealthCheckBesu");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            String besuShellPath = System.getProperty("user.dir") + "/shells/Besu";
+            ProcessBuilder builder = new ProcessBuilder("sh", besuShellPath + "/status.sh", "account-info.txt");
+            builder.directory(new File(besuShellPath));
+            Process process = builder.start();
+            String output = getProcessOutput(process);
+            log.info("besu output : " + output);
+            if (output.contains("200")) {
+                response.setStatus("UP");
+                return response;
+            }
+
+        } catch (IOException | InterruptedException e) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
         response.setStatus("ERROR");
         return response;
     }

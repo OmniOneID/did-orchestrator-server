@@ -18,8 +18,16 @@ management:
 server:
   port: 9001
 blockchain:
-  channel: mychannel
-  chaincodeName: opendid
+  fabric:
+    channel: mychannel
+    chaincodeName: opendid
+  besu:
+    channel: mychannel
+    chaincodeName: opendid
+    chainId: 1337
+    gasLimit: 10000000
+    gasPrice: 0
+    connectionTimeout: 10000
 database:
   port: 5430
   user: omn

@@ -179,7 +179,7 @@ build/
 .vscode/
 
 ### Some additional ignores (sort later)
-*.DS_Store
+###*.DS_Store
 *.sw?
 .#*
 *#
@@ -235,6 +235,3 @@ sketch
 # Ignore all local history of files
 .history
 .ionide
-
-### Orchestrator
-**/did-orchestrator-server/jars/

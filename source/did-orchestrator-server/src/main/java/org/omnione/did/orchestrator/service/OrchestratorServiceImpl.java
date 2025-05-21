@@ -100,6 +100,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         void onStartupFailed();
     }
 
+    interface BlockChainStartupCallback {
+        void onStartupComplete();
+        void onStartupFailed();
+    }
     /**
      * Starts all servers in the list if they are not already running.
      * This method checks all servers' status, and starts any server that is not already running.
@@ -246,7 +250,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             builder.redirectError(ProcessBuilder.Redirect.INHERIT);
             builder.start();
 
-            watchFabricLogs(logFilePath, new FabricStartupCallback() {
+            watchBlockChainLogs(logFilePath, new BlockChainStartupCallback() {
                 @Override
                 public void onStartupComplete() {
                     log.debug("Hyperledger Fabric is running successfully!");
@@ -264,49 +268,43 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         }
     }
 
-    /**
-     * Watches the Fabric startup logs for success or failure.
-     * This method monitors the log file and triggers the provided callback when the startup completes or fails.
-     *
-     * @param logFilePath the path to the Fabric log file
-     * @param callback the callback to invoke on startup completion or failure
-     */
-    private void watchFabricLogs(String logFilePath, FabricStartupCallback callback) {
-        File logFile = new File(logFilePath);
-        log.debug("Monitoring log file: " + logFilePath);
 
-        try {
-            while (!logFile.exists() || logFile.length() == 0) {
-                log.debug("Waiting for log file to be created...");
-                Thread.sleep(3000);
-            }
-
-            long lastReadPosition = 0;
-            while (true) {
-                try (RandomAccessFile reader = new RandomAccessFile(logFile, "r")) {
-                    reader.seek(lastReadPosition);
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        log.debug(line);
-
-                        if (line.contains(Constant.FABRIC_SUCCESS_CHAINCODE_MESSAGE) || line.contains(Constant.FABRIC_START_MESSAGE)) {
-                            logFile.delete();
-                            callback.onStartupComplete();
-                            return;
-                        }
-                        if (line.contains(Constant.FABRIC_FAIL_CHAINCODE_MESSAGE) || line.contains(Constant.FABRIC_FAIL_DOCKER_MESSAGE)) {
-                            callback.onStartupFailed();
-                            return;
-                        }
-                    }
-                    lastReadPosition = reader.getFilePointer();
-                }
-                Thread.sleep(3000);
-            }
-        } catch (InterruptedException | IOException e) {
-            callback.onStartupFailed();
-        }
-    }
+//    private void watchFabricLogs(String logFilePath, FabricStartupCallback callback) {
+//        File logFile = new File(logFilePath);
+//        log.debug("Monitoring log file: " + logFilePath);
+//
+//        try {
+//            while (!logFile.exists() || logFile.length() == 0) {
+//                log.debug("Waiting for log file to be created...");
+//                Thread.sleep(3000);
+//            }
+//
+//            long lastReadPosition = 0;
+//            while (true) {
+//                try (RandomAccessFile reader = new RandomAccessFile(logFile, "r")) {
+//                    reader.seek(lastReadPosition);
+//                    String line;
+//                    while ((line = reader.readLine()) != null) {
+//                        log.debug(line);
+//
+//                        if (line.contains(Constant.BLOCKCHAIN_SUCCESS_CHAINCODE_MESSAGE) || line.contains(Constant.BLOCKCHAIN_START_MESSAGE)) {
+//                            logFile.delete();
+//                            callback.onStartupComplete();
+//                            return;
+//                        }
+//                        if (line.contains(Constant.BLOCKCHAIN_FAIL_CHAINCODE_MESSAGE) || line.contains(Constant.BLOCKCHAIN_FAIL_DOCKER_MESSAGE)) {
+//                            callback.onStartupFailed();
+//                            return;
+//                        }
+//                    }
+//                    lastReadPosition = reader.getFilePointer();
+//                }
+//                Thread.sleep(3000);
+//            }
+//        } catch (InterruptedException | IOException e) {
+//            callback.onStartupFailed();
+//        }
+//    }
 
     /**
      * Shuts down Hyperledger Fabric by executing the `stop.sh` script.
@@ -377,7 +375,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             Process process = builder.start();
             String output = getProcessOutput(process);
 
-            if (output.contains(Constant.FABRIC_RESET_MESSAGE)) {
+            if (output.contains(Constant.BLOCKCHAIN_RESET_MESSAGE)) {
                 response.setStatus("UP");
                 return response;
             }
@@ -408,7 +406,19 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
             builder.redirectError(ProcessBuilder.Redirect.INHERIT);
             builder.start();
-            Thread.sleep(8000);
+            Thread.sleep(500);
+            watchBlockChainLogs(logFilePath, new BlockChainStartupCallback() {
+                @Override
+                public void onStartupComplete() {
+                    log.debug("Hyperledger Besu is running successfully!");
+                }
+
+                @Override
+                public void onStartupFailed() {
+                    log.error("Besu startup failed.");
+                }
+            });
+
             return requestHealthCheckBesu();
         } catch (IOException | InterruptedException e) {
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
@@ -439,7 +449,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
             String besuShellPath = System.getProperty("user.dir") + "/shells/Besu";
-            ProcessBuilder builder = new ProcessBuilder("sh", besuShellPath + "/status.sh", "account-info.txt");
+            ProcessBuilder builder = new ProcessBuilder("sh", besuShellPath + "/status.sh", "besu.dat");
             builder.directory(new File(besuShellPath));
             Process process = builder.start();
             String output = getProcessOutput(process);
@@ -459,10 +469,93 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestResetBesu() {
         log.info("requestResetBesu");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            String besuShellPath = System.getProperty("user.dir") + "/shells/Besu";
+            ProcessBuilder builder = new ProcessBuilder("sh", besuShellPath + "/reset.sh");
+            builder.directory(new File(besuShellPath));
+            Process process = builder.start();
+            String output = getProcessOutput(process);
+
+            if (output.contains(Constant.BLOCKCHAIN_RESET_MESSAGE)) {
+                response.setStatus("UP");
+                return response;
+            }
+
+        } catch (IOException | InterruptedException e) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
         response.setStatus("ERROR");
         return response;
     }
 
+    /**
+     * Watches the BlockChain startup logs for success or failure.
+     * This method monitors the log file and triggers the provided callback when the startup completes or fails.
+     *
+     * @param logFilePath the path to the BlockChain log file
+     * @param callback the callback to invoke on startup completion or failure
+     */
+    private void watchBlockChainLogs(String logFilePath, BlockChainStartupCallback callback) {
+        File logFile = new File(logFilePath);
+        log.debug("Monitoring log file: " + logFilePath);
+
+        try {
+            while (!logFile.exists() || logFile.length() == 0) {
+                log.debug("Waiting for log file to be created...");
+                Thread.sleep(3000);
+            }
+
+            long lastReadPosition = 0;
+            long lastHealthCheckTime = System.currentTimeMillis();
+            final long HEALTH_CHECK_INTERVAL = 3 * 60 * 1000; // 3 minutes
+
+            while (true) {
+                try (RandomAccessFile reader = new RandomAccessFile(logFile, "r")) {
+                    reader.seek(lastReadPosition);
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        log.debug(line);
+
+                        if (line.contains(Constant.BLOCKCHAIN_SUCCESS_CHAINCODE_MESSAGE) || line.contains(Constant.BLOCKCHAIN_START_MESSAGE)) {
+                            callback.onStartupComplete();
+                            return;
+                        }
+                        if (line.contains(Constant.BLOCKCHAIN_FAIL_CHAINCODE_MESSAGE) || line.contains(Constant.BLOCKCHAIN_FAIL_DOCKER_MESSAGE)) {
+                            callback.onStartupFailed();
+                            return;
+                        }
+                    }
+                    lastReadPosition = reader.getFilePointer();
+                }
+
+                // Health check every 3 minutes
+                long now = System.currentTimeMillis();
+                if (now - lastHealthCheckTime >= HEALTH_CHECK_INTERVAL) {
+                    log.debug("Performing blockchain health check...");
+
+                    OrchestratorResponseDto response = new OrchestratorResponseDto();
+                    if(logFilePath.contains("besu")){
+                        response = requestHealthCheckBesu();
+                    }
+                    if(logFilePath.contains("fabric")){
+                        response = requestHealthCheckFabric();
+                    }
+                    if (response.getStatus().equals("UP")) {
+                        log.debug("Blockchain health check successful. Triggering success callback.");
+                        callback.onStartupComplete();
+                        return;
+                    } else {
+                        log.debug("Blockchain health check failed. Will retry...");
+                    }
+
+                    lastHealthCheckTime = now;
+                }
+                Thread.sleep(3000);
+            }
+        } catch (InterruptedException | IOException e) {
+            callback.onStartupFailed();
+        }
+    }
 
     @Override
     public OrchestratorResponseDto requestStartupRepoServer() {

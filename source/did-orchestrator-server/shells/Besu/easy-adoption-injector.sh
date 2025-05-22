@@ -19,12 +19,14 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
     APP_YML="${JAR_PATH}/application.yml"
 
     WALLET_PATH=""
+    ZKP_WALLET_PATH=""
     case "$JAR_PATH" in
         *"/TA") 
             WALLET_PATH="${PWD}/../../jars/TA/tas.wallet"
             ;;
         *"/Issuer") 
             WALLET_PATH="${PWD}/../../jars/Issuer/issuer.wallet"
+            ZKP_WALLET_PATH="${PWD}/../../jars/Issuer/issuer.zkpwallet"
             ;;
         *"/Verifier") 
             WALLET_PATH="${PWD}/../../jars/Verifier/verifier.wallet"
@@ -118,6 +120,23 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
                 if (!wallet_found) print "wallet:";
                 print "  file-path: " wallet_path;
               }
+            }
+            ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
+        fi
+
+        # zkp-wallet.file-path
+        if [ ! -z "$ZKP_WALLET_PATH" ] && [[ "$JAR_PATH" == *"/Issuer" ]]; then
+            echo $ZKP_WALLET_PATH
+            awk -v wallet_path="$ZKP_WALLET_PATH" '
+            BEGIN { found=0; zkp_wallet_found=0 }
+            /^zkp-wallet:/ { zkp_wallet_found=1; in_zkp_wallet=1 }
+            in_zkp_wallet && /file-path:/ { found=1; sub(/file-path:.*/, "file-path: " wallet_path) }
+            { print }
+            END { 
+            if (!found) {
+                if (!zkp_wallet_found) print "zkp-wallet:";
+                print "  file-path: " wallet_path;
+            }
             }
             ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
         fi

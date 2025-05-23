@@ -37,10 +37,10 @@ public interface OrchestratorService {
 
 
     // repository server
-    OrchestratorResponseDto requestStartupRepoServer();
-    OrchestratorResponseDto requestShutdownRepoServer();
-    OrchestratorResponseDto requestHealthCheckRepoServer();
-    OrchestratorResponseDto requestResetRepoServer();
+    OrchestratorResponseDto requestStartupLedgerService();
+    OrchestratorResponseDto requestShutdownLedgerService();
+    OrchestratorResponseDto requestHealthCheckLedgerService();
+    OrchestratorResponseDto requestResetLedgerService();
 
     // PostgreSQL
     OrchestratorResponseDto requestStartupPostgre();

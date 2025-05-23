@@ -226,10 +226,10 @@ public class OrchestratorController {
     }
     //trust repository test
     @GetMapping("/startup/repository")
-    public ResponseEntity<OrchestratorResponseDto> repoServerStartup() {
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceStartup() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
-            response = orchestratorService.requestStartupRepoServer();
+            response = orchestratorService.requestStartupLedgerService();
         } catch (OpenDidException e) {
             response.setStatus("ERROR");
             return ResponseEntity.status(500).body(response);
@@ -238,10 +238,10 @@ public class OrchestratorController {
     }
 
     @GetMapping("/shutdown/repository")
-    public ResponseEntity<OrchestratorResponseDto> repoServerShutdown() {
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceShutdown() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
-            response = orchestratorService.requestShutdownRepoServer();
+            response = orchestratorService.requestShutdownLedgerService();
         } catch (OpenDidException e) {
             response.setStatus("ERROR");
             return ResponseEntity.status(500).body(response);
@@ -250,10 +250,10 @@ public class OrchestratorController {
     }
 
     @GetMapping("/healthcheck/repository")
-    public ResponseEntity<OrchestratorResponseDto> repoServerHealthCheck() {
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceHealthCheck() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
-            response = orchestratorService.requestHealthCheckRepoServer();
+            response = orchestratorService.requestHealthCheckLedgerService();
         } catch (OpenDidException e) {
             response.setStatus("ERROR");
             return ResponseEntity.status(500).body(response);
@@ -261,10 +261,10 @@ public class OrchestratorController {
         return ResponseEntity.ok(response);
     }
     @GetMapping("/reset/repository")
-    public ResponseEntity<OrchestratorResponseDto> repoServerReset() {
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceReset() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
-            response = orchestratorService.requestResetRepoServer();
+            response = orchestratorService.requestResetLedgerService();
         } catch (OpenDidException e) {
             response.setStatus("ERROR");
             return ResponseEntity.status(500).body(response);

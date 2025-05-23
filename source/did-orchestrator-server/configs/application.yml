@@ -28,6 +28,9 @@ blockchain:
     gasLimit: 10000000
     gasPrice: 0
     connectionTimeout: 10000
+  ledgerService:
+    port: 8100
+    file: did-ledger-service-server-1.0.1.jar
 database:
   port: 5430
   user: omn

@@ -18,9 +18,10 @@ JAR_NAMES=(
     "did-ca-server-${API_VERSION}.jar"
     "did-verifier-server-${API_VERSION}.jar"
     "did-wallet-server-${API_VERSION}.jar"
+    "did-ledger-service-server-${API_VERSION}.jar"
 )
 
-JAR_PATHS=("jars/API" "jars/Demo" "jars/Issuer" "jars/TA" "jars/CA" "jars/Verifier" "jars/Wallet")
+JAR_PATHS=("jars/API" "jars/Demo" "jars/Issuer" "jars/TA" "jars/CA" "jars/Verifier" "jars/Wallet" "jars/LS")
 
 fail_flag=0
 

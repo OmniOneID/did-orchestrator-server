@@ -226,9 +226,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
 
     /**
      * Starts Hyperledger Fabric if it is not already running.
-     * This method executes the `start.sh` script for Fabric, waits for startup logs, and checks the health of the Fabric server.
+     * This method executes the `start.sh` script for Fabric, waits for startup logs, and checks the health of the Fabric.
      *
-     * @return the status of the Fabric server (UP or ERROR)
+     * @return the status of the Fabric (UP or ERROR)
      */
     @Override
     public OrchestratorResponseDto requestStartupFabric() {
@@ -268,49 +268,11 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         }
     }
 
-
-//    private void watchFabricLogs(String logFilePath, FabricStartupCallback callback) {
-//        File logFile = new File(logFilePath);
-//        log.debug("Monitoring log file: " + logFilePath);
-//
-//        try {
-//            while (!logFile.exists() || logFile.length() == 0) {
-//                log.debug("Waiting for log file to be created...");
-//                Thread.sleep(3000);
-//            }
-//
-//            long lastReadPosition = 0;
-//            while (true) {
-//                try (RandomAccessFile reader = new RandomAccessFile(logFile, "r")) {
-//                    reader.seek(lastReadPosition);
-//                    String line;
-//                    while ((line = reader.readLine()) != null) {
-//                        log.debug(line);
-//
-//                        if (line.contains(Constant.BLOCKCHAIN_SUCCESS_CHAINCODE_MESSAGE) || line.contains(Constant.BLOCKCHAIN_START_MESSAGE)) {
-//                            logFile.delete();
-//                            callback.onStartupComplete();
-//                            return;
-//                        }
-//                        if (line.contains(Constant.BLOCKCHAIN_FAIL_CHAINCODE_MESSAGE) || line.contains(Constant.BLOCKCHAIN_FAIL_DOCKER_MESSAGE)) {
-//                            callback.onStartupFailed();
-//                            return;
-//                        }
-//                    }
-//                    lastReadPosition = reader.getFilePointer();
-//                }
-//                Thread.sleep(3000);
-//            }
-//        } catch (InterruptedException | IOException e) {
-//            callback.onStartupFailed();
-//        }
-//    }
-
     /**
      * Shuts down Hyperledger Fabric by executing the `stop.sh` script.
      * This method stops the Fabric service and checks its status after shutdown.
      *
-     * @return the status of the Fabric server (DOWN or ERROR)
+     * @return the status of the Fabric (DOWN or ERROR)
      */
     @Override
     public OrchestratorResponseDto requestShutdownFabric() {
@@ -330,10 +292,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     }
 
     /**
-     * Checks the health of the Hyperledger Fabric server.
+     * Checks the health of the Hyperledger Fabric.
      * This method checks whether Fabric is up and running by executing the `status.sh` script.
      *
-     * @return the health status of the Fabric server (UP or ERROR)
+     * @return the health status of the Fabric (UP or ERROR)
      */
     @Override
     public OrchestratorResponseDto requestHealthCheckFabric() {
@@ -387,6 +349,12 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         return response;
     }
 
+    /**
+     * Starts Hyperledger Besu if it is not already running.
+     * This method executes the `start.sh` script for Besu, waits for startup logs, and checks the health of the Besu.
+     *
+     * @return the status of the Besu (UP or ERROR)
+     */
     @Override
     public OrchestratorResponseDto requestStartupBesu() {
         log.info("requestStartupBesu");
@@ -425,6 +393,12 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         }
     }
 
+    /**
+     * Shuts down Hyperledger Besu by executing the `stop.sh` script.
+     * This method stops the Besu service and checks its status after shutdown.
+     *
+     * @return the status of the Besu (DOWN or ERROR)
+     */
     @Override
     public OrchestratorResponseDto requestShutdownBesu() {
         log.info("requestShutdownBesu");
@@ -443,6 +417,12 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         return response;
     }
 
+    /**
+     * Checks the health of the Hyperledger Besu.
+     * This method checks whether Besu is up and running by executing the `status.sh` script.
+     *
+     * @return the health status of the Besu (UP or ERROR)
+     */
     @Override
     public OrchestratorResponseDto requestHealthCheckBesu() {
         log.info("requestHealthCheckBesu");
@@ -465,6 +445,12 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         response.setStatus("ERROR");
         return response;
     }
+    /**
+     * Resets Hyperledger Besu by executing the `reset.sh` script.
+     * This method attempts to reset Fabric and checks if the reset was successful.
+     *
+     * @return the status of the Fabric reset (UP or ERROR)
+     */
     @Override
     public OrchestratorResponseDto requestResetBesu() {
         log.info("requestResetBesu");
@@ -556,33 +542,69 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             callback.onStartupFailed();
         }
     }
+    /**
+     * Starts Ledger Service if it is not already running.
+     * This method executes the `start.sh` script for Ledger Service, waits for startup logs, and checks the health of the Ledger Service.
+     *
+     * @return the status of the Ledger Service (UP or ERROR)
+     */
 
     @Override
-    public OrchestratorResponseDto requestStartupRepoServer() {
-        log.info("requestStartupRepoServer");
+    public OrchestratorResponseDto requestStartupLedgerService() {
+        log.info("requestStartupLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-        response.setStatus("ERROR");
+        response.setStatus("Unknown error");
+        try {
+            response.setStatus(startServer("8100"));
+        } catch (IOException | InterruptedException e) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
         return response;
     }
 
+    /**
+     * Shuts down Ledger Service by executing the `stop.sh` script.
+     * This method stops the Ledger Service and checks its status after shutdown.
+     *
+     * @return the status of the Ledger Service (DOWN or ERROR)
+     */
     @Override
-    public OrchestratorResponseDto requestShutdownRepoServer() {
-        log.info("requestShutdownRepoServer");
+    public OrchestratorResponseDto requestShutdownLedgerService() {
+        log.info("requestShutdownLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-        response.setStatus("ERROR");
+        response.setStatus("Unknown error");
+        try {
+            response.setStatus(stopServer("8100"));
+        } catch (InterruptedException e) {
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
         return response;
     }
 
+    /**
+     * Checks the health of the Ledger Service.
+     * This method checks whether Ledger Service is up and running by executing the `status.sh` script.
+     *
+     * @return the health status of the Ledger Service (UP or ERROR)
+     */
     @Override
-    public OrchestratorResponseDto requestHealthCheckRepoServer() {
-        log.info("requestHealthCheckRepoServer");
+    public OrchestratorResponseDto requestHealthCheckLedgerService() {
+        log.info("requestHealthCheckLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-        response.setStatus("ERROR");
+        response.setStatus("DOWN");
+        if(isServerRunning("8100"))
+            response.setStatus("UP");
         return response;
     }
+    /**
+     * Resets Ledger Service by executing the `reset.sh` script.
+     * This method attempts to reset Ledger Service and checks if the reset was successful.
+     *
+     * @return the status of the Ledger Service (UP or ERROR)
+     */
     @Override
-    public OrchestratorResponseDto requestResetRepoServer() {
-        log.info("requestResetRepoServer");
+    public OrchestratorResponseDto requestResetLedgerService() {
+        log.info("requestResetRepoLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         response.setStatus("ERROR");
         return response;

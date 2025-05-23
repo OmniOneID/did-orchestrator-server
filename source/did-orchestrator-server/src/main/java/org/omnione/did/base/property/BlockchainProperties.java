@@ -28,6 +28,7 @@ import java.util.Map;
 public class BlockchainProperties {
     private Fabric fabric;
     private Besu besu;
+    private LedgerService ledgerService;
 
     @Getter
     @Setter
@@ -45,5 +46,12 @@ public class BlockchainProperties {
         private int gasLimit;
         private int gasPrice;
         private int connectionTimeout;
+    }
+
+    @Getter
+    @Setter
+    public static class LedgerService {
+        private int port;
+        private String file;
     }
 }

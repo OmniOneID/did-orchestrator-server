@@ -6,13 +6,17 @@
 
 ## 1. 시스템 요구 사항
 OpenDID Orchestrator를 설치 및 구동하기 위해서는 아래 요구사항이 충족되어야 합니다.
+- **MacOS or Linux**
 - **Java 21**
 - **Gradle 7.0** 이상
+- **Node.js 22.12.0 이상**
 - **Git 설치**
 - **Bash 지원**
+- **Docker 지원**
 
 Git 설치를 위해서는 [Git 설치 가이드](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)를 참조해주세요.<br>
-Windows 환경의 경우 Bash 지원을 위해서는 WSL2 설치가 필요합니다. [WSL2 설치 가이드](https://learn.microsoft.com/en-us/windows/wsl/install)를 참조해주세요.
+Docker 설치는 [Docker 설치 가이드](https://docs.docker.com/get-started/get-docker/)를 참고하여 각 운영체제에 맞게 설치해주세요.<br>
+현재 Windows 환경은 공식적으로 지원되지 않습니다. VMware 등 가상화 소프트웨어를 통해 Linux 등을 설치하여 접근해주세요.
 
 ---
 
@@ -117,44 +121,17 @@ http://localhost:9001
 
 ---
 
-## 6. Hyperledger Fabric 및 PostgreSQL를 위한 Docker 구동
-OpenDID Orchestrator는 Hyperledger Fabric Network와 PostgreSQL DB를 사용합니다.  
-이러한 서비스를 구동하기 위해 Docker Desktop 또는 Colima를 실행해야 합니다. 아래는 각 운영체제별 실행 방법입니다.
+## 6. Hyperledger Besu 및 PostgreSQL를 위한 Docker 구동
+OpenDID Orchestrator는 Hyperledger Besu와 PostgreSQL DB를 사용합니다.  
+이러한 서비스를 구동하기 위해 Docker를 실행해야 합니다. 아래는 각 운영체제별 설치 및 실행 방법입니다.
 
-### Windows
-1. [Docker Desktop](https://www.docker.com/products/docker-desktop)을 다운로드 및 설치합니다.  
-2. 설치 후 Docker Desktop을 실행합니다.
+[Docker 설치 가이드](https://docs.docker.com/get-started/get-docker/)를 참조하여 Docker를 설치 및 실행합니다.
 
-### macOS
-1. [Colima](https://github.com/abiosoft/colima) 또는 [Docker Desktop](https://www.docker.com/products/docker-desktop)를 설치합니다.  
-2. Colima를 사용하는 경우, 다음 명령어로 Colima를 실행합니다:  
-```bash
-colima start
-```
-
-### Linux
-1. Docker를 설치합니다.  
-```bash
-sudo apt-get update
-sudo apt-get install docker.io docker-compose
-```
-2. Docker 서비스를 시작합니다.  
-```bash
-sudo systemctl start docker
-sudo systemctl enable docker
-```
+ex) `macOS`인 경우 Docker 설치 후 `colima start` 등의 명령어를 실행하여 Docker 실행 준비 완료
 
 ---
 
-## 7. Hyperledger Fabric 구동을 위한 Go 설치
-Hyperledger Fabric의 Chaincode가 Go 언어로 구성되어 있어 Go 설치가 필요합니다.<br>
-[Fabric 설치 가이드](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html)의 Go 설치 부분을 참조하여 Go를 설치해주세요.<br>
-
-위 절차까지 수행되면 Orchestrator를 사용하기 위한 모든 사전 준비가 완료되었습니다!
-
----
-
-## 8. Wallet 및 DID Document 생성
+## 7. Wallet 및 DID Document 생성
 오케스트레이터를 통해 전체 엔티티에 대한 Wallet 및 DID Document를 일괄 생성할 수 있습니다.<br>
 우상단에 위치한 **Generate All** 버튼을 클릭해주세요.<br>
 각 엔티티의 이름 및 기본 디폴트 패스워드를 기준으로 모든 엔티티들의 Wallet 및 DID Document가 자동 생성됩니다.<br>
@@ -166,16 +143,16 @@ Hyperledger Fabric의 Chaincode가 Go 언어로 구성되어 있어 Go 설치가
 
 ---
 
-## 9. 전체 엔티티 구동
+## 8. 전체 엔티티 구동
 
-브라우저에서 Orchestrator에 접속한 후, **All Entities** 버튼을 클릭하여 전체 엔티티들을 구동합니다.<br>
+브라우저에서 Orchestrator에 접속한 후, **Start Entities** 버튼을 클릭하여 전체 엔티티들을 구동합니다.<br>
 각 서비스 및 엔티티가 구동이 되면 녹색이 점등됩니다.<br>
 
 *각 서비스 및 엔티티는 전체 구동/중지 및 개별 구동/중지가 가능합니다.*
 
 ---
 
-## 10. 개별 엔티티 설정
+## 9. 개별 엔티티 설정
 
 Orchestrator의 역할은 이제 완료되었습니다.<br>
 개별 엔티티의 매뉴얼을 참조하고, **Settings**를 클릭하여 이동한 후, 개별 설정을 진행하세요.

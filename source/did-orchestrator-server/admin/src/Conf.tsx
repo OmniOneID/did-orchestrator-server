@@ -254,7 +254,7 @@ const Conf: React.FC = () => {
                 let visibleKey: string | null = null;
                 if (selectedIds.includes("besu")) {
                   visibleKey = "besu";
-                } else if (selectedIds.includes("repository")) {
+                } else if (selectedIds.includes("lss")) {
                   visibleKey = "ledgerService";
                 }
               

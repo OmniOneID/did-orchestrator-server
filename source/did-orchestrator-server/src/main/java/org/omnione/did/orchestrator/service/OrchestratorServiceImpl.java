@@ -34,16 +34,12 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.net.*;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import java.sql.Connection;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -554,14 +550,86 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         log.info("requestStartupLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         response.setStatus("Unknown error");
+        // db 구동 확인
+        if(doesLssDatabaseExist()){
+            log.info("'lss' database exists and is accessible.");
+
+        } else {
+            log.warn("'lss' database does not exist or is not accessible.");
+            response.setStatus("DOWN");
+            return response;
+        }
+        String lssFolder = "LSS";
+        String port = blockChainProperties.getLedgerService().getPort();
+
         try {
-            response.setStatus(startServer("8100"));
+
+
+            String jarFolder = System.getProperty("user.dir") + blockChainProperties.getLedgerService().getJarPath() + "/" + lssFolder;
+            String jarFilePath = jarFolder + "/" + blockChainProperties.getLedgerService().getFile();
+            String configFilePath = jarFolder + "/application.yml";
+            File jarFile = new File(jarFilePath);
+            File scriptFile = new File(System.getProperty("user.dir") + blockChainProperties.getLedgerService().getJarPath()  + "/start.sh");
+            if (!new File(configFilePath).exists()) {
+                log.info("requestStartupLedgerService configFilePath : " + configFilePath);
+                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            }
+
+            List<String> command = new ArrayList<>();
+            command.add("sh");
+            command.add(scriptFile.getAbsolutePath());
+            command.add(jarFile.getAbsolutePath());
+            command.add(port);
+            command.add(configFilePath);
+
+            log.info("Executing command: " + String.join(" ", command));
+
+            ProcessBuilder builder = new ProcessBuilder(command);
+
+            builder.directory(new File(System.getProperty("user.dir") + blockChainProperties.getLedgerService().getJarPath()));
+            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            Process process = builder.start();
+            log.debug("Server on port " + port + " started with nohup! Waiting for health check...");
+
+            int retries = 5;
+            while (retries-- > 0) {
+                Thread.sleep(1000);
+                if (isServerRunning(port)) {
+                    log.debug("Server on port " + port + " is running!");
+                    response.setStatus("UP");
+                }
+            }
+            log.error("Server on port " + port + " failed to start.");
+            response.setStatus("DOWN");
         } catch (IOException | InterruptedException e) {
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
         return response;
     }
 
+    private boolean doesLssDatabaseExist() {
+
+        String url = "jdbc:postgresql://localhost:" + databaseProperties.getPort() + "/postgres";
+        String user = databaseProperties.getUser();
+        String password = databaseProperties.getPassword();
+
+        boolean exists = false;
+        String query = "SELECT 1 FROM pg_database WHERE datname = 'lss'";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                exists = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return exists;
+    }
     /**
      * Shuts down Ledger Service by executing the `stop.sh` script.
      * This method stops the Ledger Service and checks its status after shutdown.
@@ -572,9 +640,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestShutdownLedgerService() {
         log.info("requestShutdownLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        String port = blockChainProperties.getLedgerService().getPort();
         response.setStatus("Unknown error");
         try {
-            response.setStatus(stopServer("8100"));
+            response.setStatus(stopServer(port));
         } catch (InterruptedException e) {
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -591,8 +660,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestHealthCheckLedgerService() {
         log.info("requestHealthCheckLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        String port = blockChainProperties.getLedgerService().getPort();
         response.setStatus("DOWN");
-        if(isServerRunning("8100"))
+        if(isServerRunning(port))
             response.setStatus("UP");
         return response;
     }
@@ -604,9 +674,60 @@ public class OrchestratorServiceImpl implements OrchestratorService{
      */
     @Override
     public OrchestratorResponseDto requestResetLedgerService() {
-        log.info("requestResetRepoLedgerService");
+        log.info("requestResetLedgerService");
+
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         response.setStatus("ERROR");
+
+        String baseUrl = "jdbc:postgresql://localhost:" + databaseProperties.getPort();
+        String user = databaseProperties.getUser();
+        String password = databaseProperties.getPassword();
+
+        String checkDbQuery = "SELECT 1 FROM pg_database WHERE datname = 'lss'";
+
+        try (
+                Connection adminConn = DriverManager.getConnection(baseUrl + "/postgres", user, password);
+                Statement checkStmt = adminConn.createStatement();
+                ResultSet rs = checkStmt.executeQuery(checkDbQuery)
+        ) {
+            if (!rs.next()) {
+                log.warn("Database 'lss' does not exist.");
+                response.setStatus("DB_NOT_FOUND");
+                return response;
+            }
+        } catch (SQLException e) {
+            log.error("Failed to check existence of 'lss' database", e);
+            return response;
+        }
+
+        // If lss DB exists, proceed to drop tables
+        String getTablesQuery = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'";
+
+        try (
+                Connection conn = DriverManager.getConnection(baseUrl + "/lss", user, password);
+                Statement stmt = conn.createStatement()
+        ) {
+            // Get list of tables
+            List<String> tables = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery(getTablesQuery)) {
+                while (rs.next()) {
+                    tables.add(rs.getString("table_name"));
+                }
+            }
+
+            // Drop all tables with CASCADE
+            stmt.execute("SET session_replication_role = 'replica';"); // Bypass FK constraints
+            for (String table : tables) {
+                log.info("Dropping table: " + table);
+                stmt.executeUpdate("DROP TABLE IF EXISTS \"" + table + "\" CASCADE;");
+            }
+            stmt.execute("SET session_replication_role = 'origin';");
+
+            response.setStatus("UP");
+        } catch (SQLException e) {
+            log.error("Failed to drop tables from 'lss' database", e);
+        }
+
         return response;
     }
 

@@ -29,7 +29,8 @@ blockchain:
     gasPrice: 0
     connectionTimeout: 10000
   ledgerService:
-    port: 8100
+    port: 8098
+    jarPath: /jars
     file: did-ledger-service-server-1.0.1.jar
 database:
   port: 5430

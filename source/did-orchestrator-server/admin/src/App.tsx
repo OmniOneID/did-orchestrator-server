@@ -867,8 +867,8 @@ const App: React.FC = () => {
                   Hyperledger Besu
                 </label><br />
                 <label className="inline-flex items-center">
-                  <input type="radio" name="repository" value="repository" className="mr-2" />
-                  Trust Repository
+                  <input type="radio" name="repository" value="lss" className="mr-2" />
+                  Ledger Service Server
                 </label>
               </div>
               <div className="flex justify-end">

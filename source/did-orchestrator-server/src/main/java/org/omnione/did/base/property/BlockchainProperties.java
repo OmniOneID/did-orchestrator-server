@@ -51,7 +51,8 @@ public class BlockchainProperties {
     @Getter
     @Setter
     public static class LedgerService {
-        private int port;
+        private String port;
+        private String jarPath;
         private String file;
     }
 }

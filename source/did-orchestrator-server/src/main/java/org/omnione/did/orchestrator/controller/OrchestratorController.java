@@ -16,7 +16,6 @@
 
 package org.omnione.did.orchestrator.controller;
 
-import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.property.ConfigProperties;
 import org.omnione.did.base.property.ServicesProperties;
@@ -224,8 +223,8 @@ public class OrchestratorController {
         }
         return ResponseEntity.ok(response);
     }
-    //trust repository test
-    @GetMapping("/startup/repository")
+    //ledger service server(db)
+    @GetMapping("/startup/lss")
     public ResponseEntity<OrchestratorResponseDto> ledgerServiceStartup() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
@@ -237,7 +236,7 @@ public class OrchestratorController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/shutdown/repository")
+    @GetMapping("/shutdown/lss")
     public ResponseEntity<OrchestratorResponseDto> ledgerServiceShutdown() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
@@ -249,7 +248,7 @@ public class OrchestratorController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/healthcheck/repository")
+    @GetMapping("/healthcheck/lss")
     public ResponseEntity<OrchestratorResponseDto> ledgerServiceHealthCheck() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
@@ -260,7 +259,7 @@ public class OrchestratorController {
         }
         return ResponseEntity.ok(response);
     }
-    @GetMapping("/reset/repository")
+    @GetMapping("/reset/lss")
     public ResponseEntity<OrchestratorResponseDto> ledgerServiceReset() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {

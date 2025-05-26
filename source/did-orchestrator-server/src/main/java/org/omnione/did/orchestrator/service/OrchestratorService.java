@@ -36,7 +36,7 @@ public interface OrchestratorService {
     OrchestratorResponseDto requestResetBesu();
 
 
-    // repository server
+    // ledger service server(DB)
     OrchestratorResponseDto requestStartupLedgerService();
     OrchestratorResponseDto requestShutdownLedgerService();
     OrchestratorResponseDto requestHealthCheckLedgerService();

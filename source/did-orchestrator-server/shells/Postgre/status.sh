@@ -7,7 +7,7 @@ fi
 
 DB_USER="$1"
 DB_PASSWORD="$2"
-DB_NAMES=("tas" "cas" "issuer" "verifier" "wallet")
+DB_NAMES=("tas" "cas" "issuer" "verifier" "wallet" "lss")
 
 export PGPASSWORD="$DB_PASSWORD"
 

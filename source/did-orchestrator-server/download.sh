@@ -21,7 +21,7 @@ JAR_NAMES=(
     "did-ledger-service-server-${API_VERSION}.jar"
 )
 
-JAR_PATHS=("jars/API" "jars/Demo" "jars/Issuer" "jars/TA" "jars/CA" "jars/Verifier" "jars/Wallet" "jars/LS")
+JAR_PATHS=("jars/API" "jars/Demo" "jars/Issuer" "jars/TA" "jars/CA" "jars/Verifier" "jars/Wallet" "jars/LSS")
 
 fail_flag=0
 

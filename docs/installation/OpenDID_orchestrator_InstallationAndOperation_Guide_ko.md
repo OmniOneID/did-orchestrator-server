@@ -8,7 +8,7 @@
 OpenDID Orchestrator를 설치 및 구동하기 위해서는 아래 요구사항이 충족되어야 합니다.
 - **MacOS or Linux**
 - **Java 21**
-- **Gradle 7.0** 이상
+- **Gradle 7.0 이상**
 - **Node.js 22.12.0 이상**
 - **Git 설치**
 - **Bash 지원**
@@ -31,11 +31,11 @@ git clone https://github.com/OmniOneID/did-orchestrator-server.git
 
 ## 3. download.sh 실행
 OpenDID Orchestrator는 개별 서버 엔티티들을 구동 및 관리하는 역할을 하므로, 각각의 개별 서버 엔티티 리소스에 대한 다운로드가 필요합니다.<br>
-아래 명령어를 터미널에 입력하여 download.sh를 실행하여 개별 서버 엔티티들을 다운로드하세요.
+아래 명령어를 터미널에 입력하여 download.sh를 버전 정보와 함께 실행하여 개별 서버 엔티티들을 다운로드하세요.
 
 ```bash
 cd did-orchestrator-server/source/did-orchestrator-server/
-sh download.sh
+sh download.sh 2.0.0
 ```
 
 ---
@@ -92,16 +92,16 @@ IntelliJ IDEA는 Java 개발에 널리 사용되는 통합 개발 환경(IDE)입
       cd build/libs
       ls
     ```
-- 이 명령어는 `did-orchestrator-server-1.0.0.jar` 파일을 생성합니다.
+- 이 명령어는 `did-orchestrator-server-2.0.0.jar` 파일을 생성합니다.
 
 
 ### 4.2.2. 서버 구동
 빌드된 JAR 파일을 사용하여 서버를 구동합니다:
 
 ```bash
-cp did-orchestrator-server-1.0.0.jar ../../
+cp did-orchestrator-server-2.0.0.jar ../../
 cd ../../
-java -jar did-orchestrator-server-1.0.0.jar
+java -jar did-orchestrator-server-2.0.0.jar
 ```
 
 ---

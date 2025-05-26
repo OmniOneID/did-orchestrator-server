@@ -122,10 +122,11 @@ http://localhost:9001
 ---
 
 ## 6. Hyperledger Besu 및 PostgreSQL를 위한 Docker 구동
-OpenDID Orchestrator는 Hyperledger Besu와 PostgreSQL DB를 사용합니다.  
+OpenDID Orchestrator는 Hyperledger Besu와 PostgreSQL DB를 사용합니다.<br>
 이러한 서비스를 구동하기 위해 Docker를 실행해야 합니다. 아래는 각 운영체제별 설치 및 실행 방법입니다.
 
-[Docker 설치 가이드](https://docs.docker.com/get-started/get-docker/)를 참조하여 Docker를 설치 및 실행합니다.
+[Docker 설치 가이드](https://docs.docker.com/get-started/get-docker/)를 참조하여 Docker를 설치 및 실행합니다.<br>
+해당 Docker는 `docker-compose` 명령어를 지원해야 합니다.
 
 ex) `macOS`인 경우 Docker 설치 후 `colima start` 등의 명령어를 실행하여 Docker 실행 준비 완료
 

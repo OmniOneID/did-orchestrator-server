@@ -8,12 +8,7 @@ ACCOUNT_INFO_FILE="$(pwd)/besu.dat"
 
 echo "Resetting Besu environment..."
 
-if [ "$(docker ps -a -q -f name=^/${CONTAINER_NAME}$)" ]; then
-    echo "Removing container: $CONTAINER_NAME"
-    docker rm "$CONTAINER_NAME"
-else
-    echo "Container $CONTAINER_NAME does not exist. Skipping."
-fi
+docker-compose down -v
 
 if [ -d "$CONTRACT_DIR" ]; then
     echo "Deleting contract directory: $CONTRACT_DIR"

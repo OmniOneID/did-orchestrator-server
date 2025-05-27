@@ -44,37 +44,14 @@ sh download.sh 2.0.0
 프로젝트 소스는 `source` 디렉토리 하위에 위치하며, 각 구동 방법에 따라 해당 디렉토리에서 소스를 불러와 설정해야 합니다.
 아래와 같이 크게 2가지 방법으로 서버 구동이 가능합니다.
 
-1. **IDE를 사용하는 방법**: 통합 개발 환경(IDE)에서 프로젝트를 열고, 실행 구성을 설정한 후 서버를 직접 실행할 수 있습니다.
+1. **Build 후 콘솔 명령어를 사용하는 방법**: 프로젝트를 빌드한 후, 생성된 JAR 파일을 콘솔에서 명령어(`java -jar`)로 실행하여 서버를 구동할 수 있습니다.
 
-2. **Build 후 콘솔 명령어를 사용하는 방법**: 프로젝트를 빌드한 후, 생성된 JAR 파일을 콘솔에서 명령어(`java -jar`)로 실행하여 서버를 구동할 수 있습니다.
+2. **IDE를 사용하는 방법**: 통합 개발 환경(IDE)에서 프로젝트를 열고, 실행 구성을 설정한 후 서버를 직접 실행할 수 있습니다.
 
-## 4.1. IntelliJ IDEA로 구동하기 (Gradle 지원)
-IntelliJ IDEA는 Java 개발에 널리 사용되는 통합 개발 환경(IDE)입니다. Open DID의 서버는 Gradle을 사용하여 빌드되므로, IntelliJ IDEA에서 쉽게 프로젝트를 설정하고 서버를 실행할 수 있습니다.
-
-### 4.1.1. IntelliJ IDEA 설치 및 설정
-1. IntelliJ를 설치합니다. (설치 방법은 아래 링크를 참조)
-
-> **참고 링크**
-> - [IntelliJ IDEA 다운로드](https://www.jetbrains.com/idea/download/)
-
-### 4.1.2. IntelliJ에서 프로젝트 열기
-- IntelliJ를 실행시키고 `File -> New -> Project from Existing Sources`를 선택합니다. 파일 선택 창이 나타나면 'source/did-orchestrator-server' 폴더를 선택합니다.
-- 프로젝트를 열면 build.gradle 파일이 자동으로 인식됩니다.
-- Gradle이 자동으로 필요한 의존성 파일들을 다운로드하며, 이 과정이 완료될 때까지 기다립니다.
-
-### 4.1.3. Gradle 빌드
-- IntelliJ IDEA의 `Gradle` 탭에서 `Tasks -> build -> build`를 실행합니다. 
-- 빌드가 성공적으로 완료되면, 프로젝트가 실행 가능한 상태로 준비됩니다.
-
-### 4.1.4. 서버 구동
-- IntelliJ IDEA의 Gradle 탭에서 Tasks -> application -> bootRun을 선택하고 실행합니다.
-- Gradle이 자동으로 서버를 빌드하고 실행합니다.
-- 콘솔 로그에서 "Started [ApplicationName] in [time] seconds" 메시지를 확인하여 서버가 정상적으로 실행되었는지 확인합니다.
-
-## 4.2. 콘솔 명령어로 구동하기
+## 4.1. 콘솔 명령어로 구동하기
 콘솔 명령어를 사용하여 Open DID 서버를 구동할 수 있습니다. 아래 절차는 Gradle을 이용해 프로젝트를 빌드하고, 생성된 JAR 파일을 사용하여 서버를 구동하는 과정입니다.
 
-### 4.2.1. Gradle 빌드 명령어
+### 4.1.1. Gradle 빌드 명령어
 - gradlew를 사용하여 소스를 빌드합니다.
   ```shell
     # 복제한 리포지토리로의 소스폴더로 이동
@@ -95,14 +72,39 @@ IntelliJ IDEA는 Java 개발에 널리 사용되는 통합 개발 환경(IDE)입
 - 이 명령어는 `did-orchestrator-server-2.0.0.jar` 파일을 생성합니다.
 
 
-### 4.2.2. 서버 구동
+### 4.1.2. 서버 구동
 빌드된 JAR 파일을 사용하여 서버를 구동합니다:
 
 ```bash
 cp did-orchestrator-server-2.0.0.jar ../../
 cd ../../
-java -jar did-orchestrator-server-2.0.0.jar
+sudo java -jar did-orchestrator-server-2.0.0.jar
 ```
+- Linux에서 실행 시 java를 `sudo`로 실행하거나 혹은 `root`로 실행이 필요합니다.
+
+## 4.2. IntelliJ IDEA로 구동하기 (Gradle 지원)
+IntelliJ IDEA는 Java 개발에 널리 사용되는 통합 개발 환경(IDE)입니다. Open DID의 서버는 Gradle을 사용하여 빌드되므로, IntelliJ IDEA에서 쉽게 프로젝트를 설정하고 서버를 실행할 수 있습니다.
+
+### 4.2.1. IntelliJ IDEA 설치 및 설정
+1. IntelliJ를 설치합니다. (설치 방법은 아래 링크를 참조)
+
+> **참고 링크**
+> - [IntelliJ IDEA 다운로드](https://www.jetbrains.com/idea/download/)
+
+### 4.2.2. IntelliJ에서 프로젝트 열기
+- IntelliJ를 실행시키고 `File -> New -> Project from Existing Sources`를 선택합니다. 파일 선택 창이 나타나면 'source/did-orchestrator-server' 폴더를 선택합니다.
+- 프로젝트를 열면 build.gradle 파일이 자동으로 인식됩니다.
+- Gradle이 자동으로 필요한 의존성 파일들을 다운로드하며, 이 과정이 완료될 때까지 기다립니다.
+
+### 4.2.3. Gradle 빌드
+- IntelliJ IDEA의 `Gradle` 탭에서 `Tasks -> build -> build`를 실행합니다. 
+- 빌드가 성공적으로 완료되면, 프로젝트가 실행 가능한 상태로 준비됩니다.
+
+### 4.2.4. 서버 구동
+- IntelliJ IDEA의 Gradle 탭에서 Tasks -> application -> bootRun을 선택하고 실행합니다.
+- Gradle이 자동으로 서버를 빌드하고 실행합니다.
+- 콘솔 로그에서 "Started [ApplicationName] in [time] seconds" 메시지를 확인하여 서버가 정상적으로 실행되었는지 확인합니다.
+- Linux에서 실행 시 IntelliJ 혹은 bootRun의 실행 권한이 `sudo` 혹은 `root`로 되어 있는지 확인해주세요.
 
 ---
 

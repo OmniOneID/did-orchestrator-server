@@ -123,8 +123,15 @@ http://localhost:9001
 
 ---
 
-## 6. Hyperledger Besu 및 PostgreSQL를 위한 Docker 구동
-OpenDID Orchestrator는 Hyperledger Besu와 PostgreSQL DB를 사용합니다.<br>
+## 6. Repository 선택
+OpenDID Orchestrator는 신뢰 저장소로서 `Hyperledger Besu`와 `Ledger Service Server`를 제공합니다.<br>
+브라우저에서 Orchestrator 접속 후 최초 팝업이 뜨면 원하는 저장소를 선택합니다.<br>
+Hyperledger Besu는 블록체인 기반의 분산 원장이며, Ledger Service Server는 RDBMS 기반의 경량화된 신뢰 저장소에 해당합니다.
+
+---
+
+## 7. Hyperledger Besu 및 PostgreSQL를 위한 Docker 구동
+OpenDID Orchestrator는 Docker 기반의 Hyperledger Besu와 PostgreSQL DB를 사용합니다.<br>
 이러한 서비스를 구동하기 위해 Docker를 실행해야 합니다. 아래는 각 운영체제별 설치 및 실행 방법입니다.
 
 [Docker 설치 가이드](https://docs.docker.com/get-started/get-docker/)를 참조하여 Docker를 설치 및 실행합니다.<br>
@@ -134,7 +141,7 @@ ex) `macOS`인 경우 Docker 설치 후 `colima start` 등의 명령어를 실�
 
 ---
 
-## 7. Wallet 및 DID Document 생성
+## 8. Wallet 및 DID Document 생성
 오케스트레이터를 통해 전체 엔티티에 대한 Wallet 및 DID Document를 일괄 생성할 수 있습니다.<br>
 우상단에 위치한 **Generate All** 버튼을 클릭해주세요.<br>
 각 엔티티의 이름 및 기본 디폴트 패스워드를 기준으로 모든 엔티티들의 Wallet 및 DID Document가 자동 생성됩니다.<br>
@@ -146,16 +153,16 @@ ex) `macOS`인 경우 Docker 설치 후 `colima start` 등의 명령어를 실�
 
 ---
 
-## 8. 전체 엔티티 구동
+## 9. 전체 엔티티 구동
 
 브라우저에서 Orchestrator에 접속한 후, **Start All** 버튼을 클릭하여 전체 엔티티들을 구동합니다.<br>
 각 서비스 및 엔티티가 구동이 되면 녹색이 점등됩니다.<br>
 
-*각 서비스 및 엔티티는 전체 구동/중지 및 개별 구동/중지가 가능합니다.*
+* 각 서비스 및 엔티티는 전체 구동/중지 및 개별 구동/중지가 가능합니다. *
 
 ---
 
-## 9. 개별 엔티티 설정
+## 10. 개별 엔티티 설정
 
 Orchestrator의 역할은 이제 완료되었습니다.<br>
 개별 엔티티의 매뉴얼을 참조하고, **Settings**를 클릭하여 이동한 후, 개별 설정을 진행하세요.

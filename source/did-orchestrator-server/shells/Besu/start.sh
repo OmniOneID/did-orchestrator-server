@@ -11,7 +11,7 @@ if [ ! -f "$MAKE_ACCOUNT_SCRIPT" ]; then
 
     if [ -f "$TAR_FILE" ]; then
         echo "Extracting $TAR_FILE..."
-        tar -xzvf "$TAR_FILE"
+        tar -xvf "$TAR_FILE"
     else
         echo "Cannot find compressed file $TAR_FILE. Exiting."
         exit 1
@@ -20,38 +20,9 @@ else
     echo "Contract files are ready."
 fi
 
+find "./$CONTRACT_DIR/contracts/" -name "*.sol" -exec sed -i '/Mac OS X/d' {} \;
 
-CONTAINER_NAME="opendid-besu-node"
-DATA_DIR="$(pwd)/data/besu-node"
-IMAGE="hyperledger/besu:latest"
-
-mkdir -p "$DATA_DIR"
-
-if [ "$(docker ps -a -q -f name=^/${CONTAINER_NAME}$)" ]; then
-    echo "Container already exists. Restarting container..."
-    docker start $CONTAINER_NAME
-else
-    echo "First-time run: Creating and starting container..."
-    docker run -d \
-        -p 8545:8545 \
-        -p 8546:8546 \
-        -p 30303:30303 \
-        -p 30303:30303/udp \
-        -v "$DATA_DIR":/opt/besu/data \
-        --name $CONTAINER_NAME \
-        $IMAGE \
-        --network=dev \
-        --miner-enabled \
-        --miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73 \
-        --rpc-http-cors-origins="all" \
-        --host-allowlist="*" \
-        --rpc-ws-enabled \
-        --rpc-http-enabled \
-        --data-path=/opt/besu/data \
-        --min-gas-price=0 \
-        --tx-pool-price-bump=0
-fi
-
+docker-compose up -d
 echo "Besu container started. Waiting..."
 sleep 5
 
@@ -64,6 +35,7 @@ fi
 
 if [ ! -f "node_modules/.bin/hardhat" ]; then
     echo "Hardhat is not installed locally. Installing..."
+    npm cache clean --force
     npm install --save-dev hardhat
 else
     echo "Hardhat is already installed locally."

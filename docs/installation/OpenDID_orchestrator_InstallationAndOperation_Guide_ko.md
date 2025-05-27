@@ -80,7 +80,7 @@ cp did-orchestrator-server-2.0.0.jar ../../
 cd ../../
 sudo java -jar did-orchestrator-server-2.0.0.jar
 ```
-- Linux에서 실행 시 java를 `sudo`로 실행하거나 혹은 `root`로 실행이 필요합니다.
+- Linux에서 실행 시 java를 `sudo`로 실행하거나 혹은 `root`로 반드시 실행이 필요합니다.
 
 ## 4.2. IntelliJ IDEA로 구동하기 (Gradle 지원)
 IntelliJ IDEA는 Java 개발에 널리 사용되는 통합 개발 환경(IDE)입니다. Open DID의 서버는 Gradle을 사용하여 빌드되므로, IntelliJ IDEA에서 쉽게 프로젝트를 설정하고 서버를 실행할 수 있습니다.

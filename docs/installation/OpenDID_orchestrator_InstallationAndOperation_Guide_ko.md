@@ -9,7 +9,7 @@ OpenDID Orchestrator를 설치 및 구동하기 위해서는 아래 요구사항
 - **MacOS or Linux**
 - **Java 21**
 - **Gradle 7.0 이상**
-- **Node.js 22.12.0 이상**
+- **Node.js 22.12.0**
 - **Git 설치**
 - **Bash 지원**
 - **Docker 지원**

@@ -20,7 +20,7 @@ else
     echo "Contract files are ready."
 fi
 
-find "./$CONTRACT_DIR/contracts/" -name "*.sol" -exec sed -i '/Mac OS X/d' {} \;
+find "./$CONTRACT_DIR/contracts/" -name "*.sol" -exec sed -i '/Mac OS X/d' {} \; 2>/dev/null
 
 docker-compose up -d
 echo "Besu container started. Waiting..."

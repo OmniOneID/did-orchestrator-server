@@ -41,19 +41,34 @@ const generateRandomDid = (): string => {
 
 const App: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
+  const [popupLedger, setPopupLedger] = useState<string | null>(null);
   const [popupDid, setPopupDid] = useState<string | null>(null);
   const [popupWallet, setPopupWallet] = useState<string | null>(null);
   const [popupGenAll, setPopupGenAll] = useState(false);
   const [config, setConfig] = useState<Config | null>(null);
   const [isEasySettingEnabled, setIsEasySettingEnabled] = useState(false);
+  const [refreshRepositories, setRefreshRepositories] = useState(0);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [targetRepoId, setTargetRepoId] = useState<string | null>(null);
 
   const [status, setStatus] = useState<string>(() => {
     const stored = localStorage.getItem("allStatus");
     return stored ? stored : "GRAY";
   });
 
+  const hasInitialized = useRef(false);
+
   useEffect(() => {
     localStorage.setItem("allStatus", status);
+
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+
+      const selected = localStorage.getItem("selectedRepositories");
+      if (!selected) {
+        setPopupLedger("open");
+      }
+    }
   }, [status]);
 
   useEffect(() => {
@@ -85,6 +100,20 @@ const App: React.FC = () => {
       if(status != "GRAY") statusAll();
     }
   };
+
+  // set to ledger
+  // const openPopupLedger = (id: string) => setPopupLedger(id);
+  const openPopupLedger = (id: string) => {
+    setPopupLedger(id);
+  
+    const existing = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
+  
+    if (!existing.includes(id)) {
+      const updated = [...existing, id];
+      localStorage.setItem("selectedRepositories", JSON.stringify(updated));
+    }
+  };
+  // const closePopupLedger = (id: string) => setPopupledger(id);
 
   const openPopupDid = (id: string) => setPopupDid(id);
   const closePopupDid = () => setPopupDid(null);
@@ -435,6 +464,7 @@ const App: React.FC = () => {
     stopAll: () => Promise<void>;
     getOverallStatus: () => string; 
     statusAll: () => Promise<string>;
+    resetRepository: (repoId: string, fromUser: boolean) => Promise<void>;
   }>(null);
 
   const serversRef = useRef<{
@@ -450,6 +480,26 @@ const App: React.FC = () => {
     stopDemo: () => Promise<string>;
     healthCheckDemo: () => Promise<string>;
   } | null>(null);
+
+  const handleConfirmReset = (repoId: string) => {
+    setTargetRepoId(repoId);
+    setShowResetConfirm(true);
+  };
+
+  const handleConfirmYes = () => {
+    if (targetRepoId && repositoriesRef.current?.resetRepository) {
+      repositoriesRef.current.resetRepository(targetRepoId, true);
+    }
+    setShowResetConfirm(false);
+    setTargetRepoId(null);
+    setPopupLedger("open");
+  };
+
+  const handleConfirmNo = () => {
+    setShowResetConfirm(false);
+    setTargetRepoId(null);
+  };
+
 
   const startAll = async () => {
     if (status === "PROGRESS") {
@@ -651,7 +701,12 @@ const App: React.FC = () => {
           </section>
 
           {/* Repositories Table */}
-          <Repositories ref={repositoriesRef} />
+          <Repositories
+            key={refreshRepositories}
+            ref={repositoriesRef} 
+            openPopupLedger={openPopupLedger}
+            onConfirmReset={handleConfirmReset}
+          />
 
           {/* Servers Table */}
           <Servers
@@ -778,6 +833,88 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* ledger Popup */}
+      {popupLedger && (
+        <div id="popup-overlay-ledger" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+            {/* <button
+              type="button"
+              onClick={() => setPopupLedger(null)}
+              className="absolute top-5 right-5 text-gray-500 hover:text-gray-700 px-1 py-1 text-xl"
+            >
+              X
+            </button> */}
+            <h2 className="text-lg font-bold border-b pb-2 mb-4">Select Repository</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Please choose one of the repositories below to proceed with the ledger setup.
+            </p>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const selected = formData.get("repository");
+
+              if (!selected) {
+                alert("Please select a repository.");
+                return;
+              }
+              localStorage.setItem("selectedRepositories", JSON.stringify([selected as string]));
+              setPopupLedger(null);
+              setRefreshRepositories(prev => prev + 1);
+            }}>
+              <div className="mb-4">
+                <label className="inline-flex items-center mb-2">
+                  <input type="radio" name="repository" value="besu" className="mr-2" />
+                  Hyperledger Besu
+                </label><br />
+                <label className="inline-flex items-center">
+                  <input type="radio" name="repository" value="lss" className="mr-2" />
+                  Ledger Service Server
+                </label>
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" className="w-full px-4 py-2 bg-blue-600 text-white rounded">
+                  Confirm
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showResetConfirm && (
+        <div id="popup-overlay-reset" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+            <h2 className="text-lg font-bold border-b pb-2 mb-2">Reset Confirmation</h2>
+
+            <p className="text-sm text-gray-700 mb-4">
+              Are you sure you want to initialize this repository?<br />
+              This action cannot be undone.
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleConfirmYes();
+              }}
+            >
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmNo}
+                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                >
+                  No
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Progress Overlay Modal */}
       {isSaving && <ProgressOverlay />}
     </div>

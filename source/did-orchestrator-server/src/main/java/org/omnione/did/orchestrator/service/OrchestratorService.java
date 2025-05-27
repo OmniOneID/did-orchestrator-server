@@ -29,6 +29,19 @@ public interface OrchestratorService {
     OrchestratorResponseDto requestHealthCheckFabric();
     OrchestratorResponseDto requestResetFabric();
 
+    //Hyperledger Besu
+    OrchestratorResponseDto requestStartupBesu();
+    OrchestratorResponseDto requestShutdownBesu();
+    OrchestratorResponseDto requestHealthCheckBesu();
+    OrchestratorResponseDto requestResetBesu();
+
+
+    // ledger service server(DB)
+    OrchestratorResponseDto requestStartupLedgerService();
+    OrchestratorResponseDto requestShutdownLedgerService();
+    OrchestratorResponseDto requestHealthCheckLedgerService();
+    OrchestratorResponseDto requestResetLedgerService();
+
     // PostgreSQL
     OrchestratorResponseDto requestStartupPostgre();
     OrchestratorResponseDto requestShutdownPostgre();

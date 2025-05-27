@@ -16,7 +16,6 @@
 
 package org.omnione.did.orchestrator.controller;
 
-import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.property.ConfigProperties;
 import org.omnione.did.base.property.ServicesProperties;
@@ -170,6 +169,101 @@ public class OrchestratorController {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
             response = orchestratorService.requestResetFabric();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/startup/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuStartup() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestStartupBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/shutdown/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuShutdown() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestShutdownBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/healthcheck/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuHealthCheck() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestHealthCheckBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reset/besu")
+    public ResponseEntity<OrchestratorResponseDto> besuReset() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestResetBesu();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+    //ledger service server(db)
+    @GetMapping("/startup/lss")
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceStartup() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestStartupLedgerService();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/shutdown/lss")
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceShutdown() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestShutdownLedgerService();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/healthcheck/lss")
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceHealthCheck() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestHealthCheckLedgerService();
+        } catch (OpenDidException e) {
+            response.setStatus("ERROR");
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/reset/lss")
+    public ResponseEntity<OrchestratorResponseDto> ledgerServiceReset() {
+        OrchestratorResponseDto response = new OrchestratorResponseDto();
+        try {
+            response = orchestratorService.requestResetLedgerService();
         } catch (OpenDidException e) {
             response.setStatus("ERROR");
             return ResponseEntity.status(500).body(response);

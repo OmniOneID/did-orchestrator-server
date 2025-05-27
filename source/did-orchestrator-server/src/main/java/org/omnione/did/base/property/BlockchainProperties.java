@@ -20,11 +20,39 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "blockchain")
 public class BlockchainProperties {
-    public String channel;
-    public String chaincodeName;
+    private Fabric fabric;
+    private Besu besu;
+    private LedgerService ledgerService;
 
+    @Getter
+    @Setter
+    public static class Fabric {
+        private String channel;
+        private String chaincodeName;
+    }
+
+    @Getter
+    @Setter
+    public static class Besu {
+        private String channel;
+        private String chaincodeName;
+        private String chainId;
+        private int gasLimit;
+        private int gasPrice;
+        private int connectionTimeout;
+    }
+
+    @Getter
+    @Setter
+    public static class LedgerService {
+        private String port;
+        private String jarPath;
+        private String file;
+    }
 }

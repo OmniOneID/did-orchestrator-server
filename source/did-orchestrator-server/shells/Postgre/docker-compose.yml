@@ -1,5 +1,5 @@
 services:
-  postgres:
+  postgres-opendid:
     container_name: postgre-opendid
     image: postgres:16.4
     restart: always

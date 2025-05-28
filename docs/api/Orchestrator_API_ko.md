@@ -1,11 +1,13 @@
 # Orchestrator API 문서
 
----
+- Subject: Orchestrator API Document
+- Writer: 김상준
+- Date: 2025-05-27
+- Version: v2.0.0
 
-- **일자**: 2025-02-24
-- **버전**: v1.0.0
-
----
+| Version          | Date       | History                           |
+| ---------------- | ---------- | ----------------------------------|
+| v2.0.0           | 2025-05-27 | 초기작성                            |
 
 ## 목차
 
@@ -18,18 +20,22 @@
    - [3.4. 특정 엔티티 종료](#34-특정-엔티티-종료)
    - [3.5. 특정 엔티티 상태 확인](#35-특정-엔티티-상태-확인)
    - [3.6. 특정 엔티티 리프레시](#36-특정-엔티티-리프레시)
-   - [3.7. HyperLedger Fabric 시작](#37-hyperledger-fabric-시작)
-   - [3.8. HyperLedger Fabric 종료](#38-hyperledger-fabric-종료)
-   - [3.9. HyperLedger Fabric 상태 확인](#39-hyperledger-fabric-상태-확인)
-   - [3.10. HyperLedger Fabric 초기화](#310-hyperledger-fabric-초기화)
-   - [3.11. PostgreSQL 시작](#311-postgresql-시작)
-   - [3.12. PostgreSQL 종료](#312-postgresql-종료)
-   - [3.13. PostgreSQL 상태 확인](#313-postgresql-상태-확인)
-   - [3.14. Wallet 생성](#314-wallet-생성)
-   - [3.15. Wallet 키쌍 생성](#315-wallet-키쌍-생성)
-   - [3.16. DID 문서 생성](#316-did-문서-생성)
-   - [3.17. 설정 조회](#317-설정-조회)
-   - [3.18. 설정 업데이트](#318-설정-업데이트)
+   - [3.7. HyperLedger Besu 시작](#37-hyperledger-besu-시작)
+   - [3.8. HyperLedger Besu 종료](#38-hyperledger-besu-종료)
+   - [3.9. HyperLedger Besu 상태 확인](#39-hyperledger-besu-상태-확인)
+   - [3.10. HyperLedger Besu 초기화](#310-hyperledger-besu-초기화)
+   - [3.11. Ledger Service Server 시작](#311-ledger-service-server-시작)
+   - [3.12. Ledger Service Server 종료](#312-ledger-service-server-종료)
+   - [3.13. Ledger Service Server 상태 확인](#313-ledger-service-server-상태-확인)
+   - [3.14. Ledger Service Server 초기화](#314-ledger-service-server-초기화)   
+   - [3.15. PostgreSQL 시작](#315-postgresql-시작)
+   - [3.16. PostgreSQL 종료](#316-postgresql-종료)
+   - [3.17. PostgreSQL 상태 확인](#317-postgresql-상태-확인)
+   - [3.18. Wallet 생성](#318-wallet-생성)
+   - [3.19. Wallet 키쌍 생성](#319-wallet-키쌍-생성)
+   - [3.20. DID 문서 생성](#320-did-문서-생성)
+   - [3.21. 설정 조회](#321-설정-조회)
+   - [3.22. 설정 업데이트](#322-설정-업데이트)
 4. [에러 코드](#4-에러-코드)
 5. [참고 사항](#5-참고-사항)
 
@@ -51,10 +57,14 @@
 | `특정 엔티티 종료`            | GET    | `/shutdown/{port}`           | 특정 포트의 엔티티 종료        |
 | `특정 엔티티 상태 확인`       | GET    | `/healthcheck/{port}`        | 특정 포트의 엔티티 상태 확인   |
 | `특정 엔티티 리프레시`        | GET    | `/refresh/{port}`            | 특정 포트의 엔티티 리프레시    |
-| `HyperLedger Fabric 시작`                | GET    | `/startup/fabric`            | HyperLedger Fabric 시작             |
-| `HyperLedger Fabric 종료`                | GET    | `/shutdown/fabric`           | HyperLedger Fabric 종료             |
-| `HyperLedger Fabric 상태 확인`           | GET    | `/healthcheck/fabric`        | HyperLedger Fabric 상태 확인        |
-| `HyperLedger Fabric 초기화`           | GET    | `/reset/fabric`        | HyperLedger Fabric 초기화        |
+| `HyperLedger Besu 시작`                | GET    | `/startup/besu`            | HyperLedger Besu 시작             |
+| `HyperLedger Besu 종료`                | GET    | `/shutdown/besu`           | HyperLedger Besu 종료             |
+| `HyperLedger Besu 상태 확인`           | GET    | `/healthcheck/besu`        | HyperLedger Besu 상태 확인        |
+| `HyperLedger Besu 초기화`           | GET    | `/reset/besu`        | HyperLedger Besu 초기화        |
+| `Ledger Service Server 시작`                | GET    | `/startup/lss`            | Ledger Service Server 시작             |
+| `Ledger Service Server 종료`                | GET    | `/shutdown/lss`           | Ledger Service Server 종료             |
+| `Ledger Service Server 상태 확인`           | GET    | `/healthcheck/lss`        | Ledger Service Server 상태 확인        |
+| `Ledger Service Server 초기화`           | GET    | `/reset/lss`        | Ledger Service Server 초기화        |
 | `PostgreSQL 시작`            | GET    | `/startup/postgre`           | PostgreSQL 시작         |
 | `PostgreSQL 종료`            | GET    | `/shutdown/postgre`          | PostgreSQL 종료         |
 | `PostgreSQL 상태 확인`       | GET    | `/healthcheck/postgre`       | PostgreSQL 상태 확인    |
@@ -200,16 +210,16 @@ curl -X GET "http://${Host}:9001/refresh/9001"
 
 ---
 
-### 3.7. HyperLedger Fabric 시작
+### 3.7. HyperLedger Besu 시작
 
-- **URL**: `/startup/fabric`
+- **URL**: `/startup/besu`
 - **Method**: `GET`
-- **설명**: HyperLedger Fabric 서비스의 시작을 수행합니다.
+- **설명**: HyperLedger Besu 서비스의 시작을 수행합니다.
 
 #### 요청 예시
 
 ```shell
-curl -X GET "http://${Host}:9001/startup/fabric"
+curl -X GET "http://${Host}:9001/startup/besu"
 ```
 
 #### 응답 예시
@@ -222,16 +232,16 @@ curl -X GET "http://${Host}:9001/startup/fabric"
 
 ---
 
-### 3.8. HyperLedger Fabric 종료
+### 3.8. HyperLedger Besu 종료
 
-- **URL**: `/shutdown/fabric`
+- **URL**: `/shutdown/besu`
 - **Method**: `GET`
-- **설명**: HyperLedger Fabric 서비스의 종료를 수행합니다.
+- **설명**: HyperLedger Besu 서비스의 종료를 수행합니다.
 
 #### 요청 예시
 
 ```shell
-curl -X GET "http://${Host}:9001/shutdown/fabric"
+curl -X GET "http://${Host}:9001/shutdown/besu"
 ```
 
 #### 응답 예시
@@ -244,16 +254,16 @@ curl -X GET "http://${Host}:9001/shutdown/fabric"
 
 ---
 
-### 3.9. HyperLedger Fabric 상태 확인
+### 3.9. HyperLedger Besu 상태 확인
 
-- **URL**: `/healthcheck/fabric`
+- **URL**: `/healthcheck/besu`
 - **Method**: `GET`
-- **설명**: HyperLedger Fabric 서비스의 상태 확인을 수행합니다.
+- **설명**: HyperLedger Besu 서비스의 상태 확인을 수행합니다.
 
 #### 요청 예시
 
 ```shell
-curl -X GET "http://${Host}:9001/healthcheck/fabric"
+curl -X GET "http://${Host}:9001/healthcheck/besu"
 ```
 
 #### 응답 예시
@@ -266,16 +276,16 @@ curl -X GET "http://${Host}:9001/healthcheck/fabric"
 
 ---
 
-### 3.10. HyperLedger Fabric 초기화
+### 3.10. HyperLedger Besu 초기화
 
-- **URL**: `/reset/fabric`
+- **URL**: `/reset/besu`
 - **Method**: `GET`
-- **설명**: HyperLedger Fabric 초기화를 수행합니다.
+- **설명**: HyperLedger Besu 초기화를 수행합니다.
 
 #### 요청 예시
 
 ```shell
-curl -X GET "http://${Host}:9001/reset/fabric"
+curl -X GET "http://${Host}:9001/reset/besu"
 ```
 
 #### 응답 예시
@@ -288,7 +298,95 @@ curl -X GET "http://${Host}:9001/reset/fabric"
 
 ---
 
-### 3.11. PostgreSQL 시작
+### 3.11. Ledger Service Server 시작
+
+- **URL**: `/startup/lss`
+- **Method**: `GET`
+- **설명**: Ledger Service Server의 시작을 수행합니다.
+
+#### 요청 예시
+
+```shell
+curl -X GET "http://${Host}:9001/startup/lss"
+```
+
+#### 응답 예시
+
+```json
+{
+  "status": "SUCCESS"
+}
+```
+
+---
+
+### 3.12. Ledger Service Server 종료
+
+- **URL**: `/shutdown/lss`
+- **Method**: `GET`
+- **설명**: Ledger Service Server의 종료를 수행합니다.
+
+#### 요청 예시
+
+```shell
+curl -X GET "http://${Host}:9001/shutdown/lss"
+```
+
+#### 응답 예시
+
+```json
+{
+  "status": "SUCCESS"
+}
+```
+
+---
+
+### 3.13. Ledger Service Server 상태 확인
+
+- **URL**: `/healthcheck/lss`
+- **Method**: `GET`
+- **설명**: Ledger Service Server의 상태 확인을 수행합니다.
+
+#### 요청 예시
+
+```shell
+curl -X GET "http://${Host}:9001/healthcheck/lss"
+```
+
+#### 응답 예시
+
+```json
+{
+  "status": "SUCCESS"
+}
+```
+
+---
+
+### 3.14. Ledger Service Server 초기화
+
+- **URL**: `/reset/lss`
+- **Method**: `GET`
+- **설명**: Ledger Service Server 초기화를 수행합니다.
+
+#### 요청 예시
+
+```shell
+curl -X GET "http://${Host}:9001/reset/lss"
+```
+
+#### 응답 예시
+
+```json
+{
+  "status": "SUCCESS"
+}
+```
+
+---
+
+### 3.15. PostgreSQL 시작
 
 - **URL**: `/startup/postgre`
 - **Method**: `GET`
@@ -310,7 +408,7 @@ curl -X GET "http://${Host}:9001/startup/postgre"
 
 ---
 
-### 3.12. PostgreSQL 종료
+### 3.16. PostgreSQL 종료
 
 - **URL**: `/shutdown/postgre`
 - **Method**: `GET`
@@ -332,7 +430,7 @@ curl -X GET "http://${Host}:9001/shutdown/postgre"
 
 ---
 
-### 3.13. PostgreSQL 상태 확인
+### 3.17. PostgreSQL 상태 확인
 
 - **URL**: `/healthcheck/postgre`
 - **Method**: `GET`
@@ -355,7 +453,7 @@ curl -X GET "http://${Host}:9001/healthcheck/postgre"
 ---
 
 
-### 3.14. Wallet 생성
+### 3.18. Wallet 생성
 
 - **URL**: `/create/wallet`
 - **Method**: `POST`
@@ -379,7 +477,7 @@ curl -X POST "http://${Host}:9001/create/wallet" \
 
 ---
 
-### 3.15. Wallet 키쌍 생성
+### 3.19. Wallet 키쌍 생성
 
 - **URL**: `/create/keys`
 - **Method**: `POST`
@@ -417,7 +515,7 @@ curl -X POST "http://${Host}:9001/create/keys" \
 
 ---
 
-### 3.16. DID 문서 생성
+### 3.20. DID 문서 생성
 
 - **URL**: `/create/diddoc`
 - **Method**: `POST`
@@ -459,7 +557,7 @@ curl -X POST "http://${Host}:9001/create/diddoc" \
 
 ---
 
-### 3.17. 설정 조회
+### 3.21. 설정 조회
 
 - **URL**: `/configs`
 - **Method**: `GET`
@@ -476,64 +574,79 @@ curl -X GET "http://${Host}:9001/configs"
 ```json
 {
   "blockchain": {
-    "channel": "mychannel",
-    "chaincodeName": "opendid"
+    "besu": {
+      "chainId": "1337",
+      "chaincodeName": "opendid",
+      "channel": "mychannel",
+      "connectionTimeout": 10000,
+      "gasLimit": 10000000,
+      "gasPrice": 0
+    },
+    "ledgerService": {
+      "file": "did-ledger-service-server-1.0.1.jar",
+      "jarPath": "/jars",
+      "port": "8098"
+    }
   },
   "database": {
-    "port": "5430",
-    "user": "omn",
+    "db": "omn",
     "password": "omn",
-    "db": "omn"
+    "port": "5430",
+    "user": "omn"
+  },
+  "generator": {
+    "easySettingModeEnabled": true
   },
   "services": {
+    "cliToolPath": "/tool",
+    "didDocPath": "/DIDDoc",
+    "jarPath": "/jars",
+    "logPath": "/logs",
     "server": {
       "tas": {
-        "name": "TAS",
-        "port": 8090,
-        "file": "did-ta-server-1.0.0.jar"
+        "file": "did-ta-server-1.0.1.jar",
+        "name": "TA",
+        "port": 8090
       },
       "issuer": {
+        "file": "did-issuer-server-1.0.1.jar",
         "name": "Issuer",
-        "port": 8091,
-        "file": "did-issuer-server-1.0.0.jar"
+        "port": 8091
       },
       "verifier": {
+        "file": "did-verifier-server-1.0.1.jar",
         "name": "Verifier",
-        "port": 8092,
-        "file": "did-verifier-server-1.0.0.jar"
+        "port": 8092
       },
       "api": {
+        "file": "did-api-server-1.0.1.jar",
         "name": "API",
-        "port": 8093,
-        "file": "did-api-server-1.0.0.jar"
+        "port": 8093
       },
       "cas": {
-        "name": "CAS",
-        "port": 8094,
-        "file": "did-cas-server-1.0.0.jar"
+        "file": "did-ca-server-1.0.1.jar",
+        "name": "CA",
+        "port": 8094
       },
       "wallet": {
-        "name": "WalletService",
-        "port": 8095,
-        "file": "did-wallet-server-1.0.0.jar"
+        "file": "did-wallet-server-1.0.1.jar",
+        "name": "Wallet",
+        "port": 8095
       },
       "demo": {
+        "file": "did-demo-server-1.0.1.jar",
         "name": "Demo",
-        "port": 8099,
-        "file": "did-demo-server-1.0.0.jar"
+        "port": 8099
       }
     },
-    "jarPath": "/jars",
-    "walletPath": "/wallet",
-    "didDocPath": "/DIDDoc",
-    "cliToolPath": "/tool"
+    "walletPath": "/wallet"
   }
 }
 ```
 
 ---
 
-### 3.18. 설정 업데이트
+### 3.22. 설정 업데이트
 
 - **URL**: `/configs`
 - **Method**: `POST`
@@ -546,57 +659,72 @@ curl -X POST "http://${Host}:9001/configs" \
 -H "Content-Type: application/json" \
 -d '{
   "blockchain": {
-    "channel": "mychannel2",
-    "chaincodeName": "opendid"
+    "besu": {
+      "chainId": "1337",
+      "chaincodeName": "opendid",
+      "channel": "mychannel",
+      "connectionTimeout": 10000,
+      "gasLimit": 10000000,
+      "gasPrice": 0
+    },
+    "ledgerService": {
+      "file": "did-ledger-service-server-1.0.1.jar",
+      "jarPath": "/jars",
+      "port": "8098"
+    }
   },
   "database": {
-    "port": "5430",
-    "user": "omn",
+    "db": "omn",
     "password": "omn",
-    "db": "omn"
+    "port": "5430",
+    "user": "omn"
+  },
+  "generator": {
+    "easySettingModeEnabled": true
   },
   "services": {
+    "cliToolPath": "/tool",
+    "didDocPath": "/DIDDoc",
+    "jarPath": "/jars",
+    "logPath": "/logs",
     "server": {
       "tas": {
-        "name": "TAS",
-        "port": 8090,
-        "file": "did-ta-server-1.0.0.jar"
+        "file": "did-ta-server-1.0.1.jar",
+        "name": "TA",
+        "port": 8090
       },
       "issuer": {
+        "file": "did-issuer-server-1.0.1.jar",
         "name": "Issuer",
-        "port": 8091,
-        "file": "did-issuer-server-1.0.0.jar"
+        "port": 8091
       },
       "verifier": {
+        "file": "did-verifier-server-1.0.1.jar",
         "name": "Verifier",
-        "port": 8092,
-        "file": "did-verifier-server-1.0.0.jar"
+        "port": 8092
       },
       "api": {
+        "file": "did-api-server-1.0.1.jar",
         "name": "API",
-        "port": 8093,
-        "file": "did-api-server-1.0.0.jar"
+        "port": 8093
       },
       "cas": {
-        "name": "CAS",
-        "port": 8094,
-        "file": "did-cas-server-1.0.0.jar"
+        "file": "did-ca-server-1.0.1.jar",
+        "name": "CA",
+        "port": 8094
       },
       "wallet": {
-        "name": "WalletService",
-        "port": 8095,
-        "file": "did-wallet-server-1.0.0.jar"
+        "file": "did-wallet-server-1.0.1.jar",
+        "name": "Wallet",
+        "port": 8095
       },
       "demo": {
+        "file": "did-demo-server-1.0.1.jar",
         "name": "Demo",
-        "port": 8099,
-        "file": "did-demo-server-1.0.0.jar"
+        "port": 8099
       }
     },
-    "jarPath": "/jars",
-    "walletPath": "/wallet",
-    "didDocPath": "/DIDDoc",
-    "cliToolPath": "/tool"
+    "walletPath": "/wallet"
   }
 }'
 ```

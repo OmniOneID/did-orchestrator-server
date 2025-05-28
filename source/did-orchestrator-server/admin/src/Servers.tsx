@@ -338,80 +338,98 @@ const Servers = forwardRef((props: ServerProps, ref) => {
         </thead>
         <tbody>
           {servers.map((server) => (
-            <tr key={server.id} className="border-b">
-              <td className="p-2 pl-6 all">
-                {StatusIcon(server.status)}
-              </td>
-              <td className="p-2 font-bold">
-                {server.name} ({server.port}) <button onClick={() => window.open(`/logs/server_${server.port}.log`)} className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded" title='By clicking this icon, you can view the logs.'>log</button>
-              </td>
-              <td className="p-2">
-                <div className="flex space-x-1">
+              <tr key={server.id} className="border-b">
+                <td className="p-2 pl-6 all">
+                  {StatusIcon(server.status)}
+                </td>
+                <td className="p-2 font-bold">
+                  {server.name} ({server.port})
                   <button
-                    className="bg-green-600 text-white px-2 py-1 rounded"
-                    onClick={() => startServer(server.id, server.port, true)}
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/logs/server_${server.port}.log`, {method: 'HEAD'});
+                          if (res.ok) {
+                            window.open(`/logs/server_${server.port}.log`);
+                          } else {
+                            alert('Log file not found.');
+                          }
+                        } catch (err) {
+                          alert('Log file not found.');
+                        }
+                      }}
+                      className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded"
+                      title="By clicking this icon, you can view the logs."
                   >
-                    Start
+                    log
                   </button>
-                  <button
-                    className="bg-[#ED207B] text-white px-2 py-1 rounded"
-                    onClick={() => stopServer(server.id, server.port, true)}
-                  >
-                    Stop
-                  </button>
-                  <button 
-                    className="bg-gray-600 text-white px-2 py-1 rounded"
-                    onClick={() => healthCheck(server.id, server.port, true)}
-                  >
-                    Status
-                  </button>
-                </div>
-              </td>
-              <td className="p-2">
-                <div className="flex space-x-1">
-              {server.id !== "api" && (
-                  <button 
-                  className="bg-gray-600 text-white px-2 py-1 rounded"
-                  onClick={() => window.open(`http://localhost:${server.port}`)}
-                  >
-                    Settings
-                  </button>
-              )}
-                  <button 
-                  className="bg-gray-600 text-white px-2 py-1 rounded"
-                  onClick={() => window.open(`http://localhost:${server.port}/swagger-ui/index.html`)}
-                  >
-                    Swagger
-                  </button>
-                </div>
-              </td>
-              {server.id !== "api" && (
+                </td>
                 <td className="p-2">
-                    <CSSTransition
-                      in={!isEasySettingEnabled}
-                      timeout={300}
-                      classNames="fade"
-                      unmountOnExit
-                    >
                   <div className="flex space-x-1">
                     <button
-                      className="bg-orange-500 text-white px-2 py-1 rounded"
-                      onClick={() => openPopupWallet(server.id)}
+                        className="bg-green-600 text-white px-2 py-1 rounded"
+                        onClick={() => startServer(server.id, server.port, true)}
                     >
-                      Wallet
+                      Start
                     </button>
                     <button
-                      className="bg-orange-500 text-white px-2 py-1 rounded"
-                      onClick={() => openPopupDid(server.id)}
+                        className="bg-[#ED207B] text-white px-2 py-1 rounded"
+                        onClick={() => stopServer(server.id, server.port, true)}
                     >
-                      DID Document
+                      Stop
+                    </button>
+                    <button
+                        className="bg-gray-600 text-white px-2 py-1 rounded"
+                        onClick={() => healthCheck(server.id, server.port, true)}
+                    >
+                      Status
                     </button>
                   </div>
-                  </CSSTransition>
                 </td>
-              )}
-              {server.id === "api" && <td></td>}
-            </tr>
+                <td className="p-2">
+                  <div className="flex space-x-1">
+                    {server.id !== "api" && (
+                        <button
+                            className="bg-gray-600 text-white px-2 py-1 rounded"
+                            onClick={() => window.open(`http://localhost:${server.port}`)}
+                        >
+                          Settings
+                        </button>
+                    )}
+                    <button
+                        className="bg-gray-600 text-white px-2 py-1 rounded"
+                        onClick={() => window.open(`http://localhost:${server.port}/swagger-ui/index.html`)}
+                    >
+                      Swagger
+                    </button>
+                  </div>
+                </td>
+                {server.id !== "api" && (
+                    <td className="p-2">
+                      <CSSTransition
+                          in={!isEasySettingEnabled}
+                          timeout={300}
+                          classNames="fade"
+                          unmountOnExit
+                      >
+                        <div className="flex space-x-1">
+                          <button
+                              className="bg-orange-500 text-white px-2 py-1 rounded"
+                              onClick={() => openPopupWallet(server.id)}
+                          >
+                            Wallet
+                          </button>
+                          <button
+                              className="bg-orange-500 text-white px-2 py-1 rounded"
+                              onClick={() => openPopupDid(server.id)}
+                          >
+                            DID Document
+                          </button>
+                        </div>
+                      </CSSTransition>
+                    </td>
+                )}
+                {server.id === "api" && <td></td>}
+              </tr>
           ))}
         </tbody>
       </table>

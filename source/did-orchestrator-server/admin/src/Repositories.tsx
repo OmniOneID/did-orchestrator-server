@@ -285,61 +285,79 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
         </thead>
         <tbody className="server-table">
           {repositories.map((repo) => (
-            <tr key={repo.id} className="border-b">
-              <td className="p-2 pl-6">
-                {StatusIcon(repo.status)}
-              </td>
-              <td className="p-2 font-bold">
-                {repo.name} <button onClick={() => window.open(`/logs/${repo.id}.log`)} className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded" title='By clicking this icon, you can view the logs.'>log</button>                
-              </td>
-              <td className="p-2">
-                <div className="flex space-x-1">
+              <tr key={repo.id} className="border-b">
+                <td className="p-2 pl-6">
+                  {StatusIcon(repo.status)}
+                </td>
+                <td className="p-2 font-bold">
+                  {repo.name}
                   <button
-                    className="bg-green-600 text-white px-2 py-1 rounded"
-                    onClick={() => startRepository(repo.id, true)}
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/logs/${repo.id}.log`, {method: 'HEAD'});
+                          if (res.ok) {
+                            window.open(`/logs/${repo.id}.log`);
+                          } else {
+                            alert('Log file not found.');
+                          }
+                        } catch (err) {
+                          alert('Log file not found.');
+                        }
+                      }}
+                      className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded"
+                      title="By clicking this icon, you can view the logs."
                   >
-                    Start
+                    log
                   </button>
-                  <button
-                    className="bg-[#ED207B] text-white px-2 py-1 rounded"
-                    onClick={() => stopRepository(repo.id, true)}
-                  >
-                    Stop
-                  </button>
-                  <button
-                    className="bg-gray-600 text-white px-2 py-1 rounded"
-                    onClick={() => healthCheck(repo.id, true)}
-                  >
-                    Status
-                  </button>
-                  {repo.name === "Hyperledger Besu" && (
-                  <button
-                    className="bg-[#0E76BD] text-white px-2 py-1 rounded"
-                    onClick={() => props.onConfirmReset(repo.id)}
-                    // onClick={() => resetRepository(repo.id, true)}
-                  >
-                    Reset
-                  </button>
-                  )}
-                  {repo.name === "Ledger Service Server" && (
-                  <button
-                    className="bg-[#0E76BD] text-white px-2 py-1 rounded"
-                    onClick={() => props.onConfirmReset(repo.id)}
-                    // onClick={() => resetRepository(repo.id, true)}
-                  >
-                    Reset
-                  </button>
-                  )}
-                </div>
-              </td>
-              <td className="p-2"></td>
-            </tr>
+                </td>
+                <td className="p-2">
+                  <div className="flex space-x-1">
+                    <button
+                        className="bg-green-600 text-white px-2 py-1 rounded"
+                        onClick={() => startRepository(repo.id, true)}
+                    >
+                      Start
+                    </button>
+                    <button
+                        className="bg-[#ED207B] text-white px-2 py-1 rounded"
+                        onClick={() => stopRepository(repo.id, true)}
+                    >
+                      Stop
+                    </button>
+                    <button
+                        className="bg-gray-600 text-white px-2 py-1 rounded"
+                        onClick={() => healthCheck(repo.id, true)}
+                    >
+                      Status
+                    </button>
+                    {repo.name === "Hyperledger Besu" && (
+                        <button
+                            className="bg-[#0E76BD] text-white px-2 py-1 rounded"
+                            onClick={() => props.onConfirmReset(repo.id)}
+                            // onClick={() => resetRepository(repo.id, true)}
+                        >
+                          Reset
+                        </button>
+                    )}
+                    {repo.name === "Ledger Service Server" && (
+                        <button
+                            className="bg-[#0E76BD] text-white px-2 py-1 rounded"
+                            onClick={() => props.onConfirmReset(repo.id)}
+                            // onClick={() => resetRepository(repo.id, true)}
+                        >
+                          Reset
+                        </button>
+                    )}
+                  </div>
+                </td>
+                <td className="p-2"></td>
+              </tr>
           ))}
         </tbody>
       </table>
     </section>
 
-    
+
   );
 });
 

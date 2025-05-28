@@ -85,6 +85,15 @@ did-orchestrator-server
 | &nbsp;&nbsp;&nbsp;┖ build.gradle | Gradle 빌드 설정 파일                    |
 | &nbsp;&nbsp;&nbsp;┖ README.md    | 소스 코드 개요 및 지침                   |
 
+## S/W 사양
+| 구분                | 내용                          |
+|--------------------|------------------------------|
+| OS                | MacOS, Linux                  |
+| Language          | Java 21                       |
+| IDE               | IntelliJ IDEA Ultimate Edition|
+| Compatibility     | Node.js 22.12.0, Hyperledger Besu 25.5.0 |
+| Test Environment  | macOS Sonoma, CentOS Stream 10, Oracle Linux 8.1 |
+
 ## 라이브러리
 
 이 프로젝트에서 사용되는 라이브러리는 아래와 같이 구성됩니다:

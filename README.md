@@ -85,6 +85,15 @@ Below is a description of each folder and file in the directory:
 | &nbsp;&nbsp;&nbsp;┖ build.gradle | Gradle build configuration file                |
 | &nbsp;&nbsp;&nbsp;┖ README.md    | Overview and instructions for the source code  |
 
+## S/W Specifications
+| Category           | Details                      |
+|--------------------|------------------------------|
+| OS                | MacOS, Linux                  |
+| Language          | Java 21                       |
+| IDE               | IntelliJ IDEA Ultimate Edition|
+| Compatibility     | Node.js 22.12.0, Hyperledger Besu 25.5.0 |
+| Test Environment  | macOS Sonoma, CentOS Stream 10, Oracle Linux 8.1 |
+
 ## Libraries
 
 The libraries used in this project are as follows:

@@ -582,7 +582,7 @@ curl -X GET "http://${Host}:9001/configs"
       "gasPrice": 0
     },
     "ledgerService": {
-      "file": "did-ledger-service-server-1.0.1.jar",
+      "file": "did-ledger-service-server-2.0.0.jar",
       "jarPath": "/jars",
       "port": "8098"
     }
@@ -603,37 +603,37 @@ curl -X GET "http://${Host}:9001/configs"
     "logPath": "/logs",
     "server": {
       "tas": {
-        "file": "did-ta-server-1.0.1.jar",
+        "file": "did-ta-server-2.0.0.jar",
         "name": "TA",
         "port": 8090
       },
       "issuer": {
-        "file": "did-issuer-server-1.0.1.jar",
+        "file": "did-issuer-server-2.0.0.jar",
         "name": "Issuer",
         "port": 8091
       },
       "verifier": {
-        "file": "did-verifier-server-1.0.1.jar",
+        "file": "did-verifier-server-2.0.0.jar",
         "name": "Verifier",
         "port": 8092
       },
       "api": {
-        "file": "did-api-server-1.0.1.jar",
+        "file": "did-api-server-2.0.0.jar",
         "name": "API",
         "port": 8093
       },
       "cas": {
-        "file": "did-ca-server-1.0.1.jar",
+        "file": "did-ca-server-2.0.0.jar",
         "name": "CA",
         "port": 8094
       },
       "wallet": {
-        "file": "did-wallet-server-1.0.1.jar",
+        "file": "did-wallet-server-2.0.0.jar",
         "name": "Wallet",
         "port": 8095
       },
       "demo": {
-        "file": "did-demo-server-1.0.1.jar",
+        "file": "did-demo-server-2.0.0.jar",
         "name": "Demo",
         "port": 8099
       }
@@ -667,7 +667,7 @@ curl -X POST "http://${Host}:9001/configs" \
       "gasPrice": 0
     },
     "ledgerService": {
-      "file": "did-ledger-service-server-1.0.1.jar",
+      "file": "did-ledger-service-server-2.0.0.jar",
       "jarPath": "/jars",
       "port": "8098"
     }
@@ -688,37 +688,37 @@ curl -X POST "http://${Host}:9001/configs" \
     "logPath": "/logs",
     "server": {
       "tas": {
-        "file": "did-ta-server-1.0.1.jar",
+        "file": "did-ta-server-2.0.0.jar",
         "name": "TA",
         "port": 8090
       },
       "issuer": {
-        "file": "did-issuer-server-1.0.1.jar",
+        "file": "did-issuer-server-2.0.0.jar",
         "name": "Issuer",
         "port": 8091
       },
       "verifier": {
-        "file": "did-verifier-server-1.0.1.jar",
+        "file": "did-verifier-server-2.0.0.jar",
         "name": "Verifier",
         "port": 8092
       },
       "api": {
-        "file": "did-api-server-1.0.1.jar",
+        "file": "did-api-server-2.0.0.jar",
         "name": "API",
         "port": 8093
       },
       "cas": {
-        "file": "did-ca-server-1.0.1.jar",
+        "file": "did-ca-server-2.0.0.jar",
         "name": "CA",
         "port": 8094
       },
       "wallet": {
-        "file": "did-wallet-server-1.0.1.jar",
+        "file": "did-wallet-server-2.0.0.jar",
         "name": "Wallet",
         "port": 8095
       },
       "demo": {
-        "file": "did-demo-server-1.0.1.jar",
+        "file": "did-demo-server-2.0.0.jar",
         "name": "Demo",
         "port": 8099
       }

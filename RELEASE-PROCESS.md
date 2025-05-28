@@ -28,9 +28,9 @@ Each module (repository) is managed independently, following these steps:
 
 2. **Create a Release Branch**  
    If there are changes or modifications, create a branch "release/QA-VX.Y.Z" for QA validation.
-   - Example: If there are bug fixes or minor improvements for V1.0.0, create a branch "release/QA-V1.0.1".
+   - Example: If there are bug fixes or minor improvements for V2.0.0, create a branch "release/QA-V2.0.0".
 
-   For modules without changes, use the existing version (V1.0.0) and the already distributed JAR or library.
+   For modules without changes, use the existing version (V2.0.0) and the already distributed JAR or library.
 
 3. **QA Validation**  
    - Perform QA validation on the Release branch, addressing any issues identified during the process.

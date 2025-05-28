@@ -29,14 +29,36 @@ interface Demo {
   status: string;
 }
 
-const defaultDemo: Demo = {
-  id: "demo",
-  name: "DEMO",
-  port: 8099,
-  status: "GRAY",
-};
-
 const Demo = forwardRef((props, ref) => {
+  const fetchDemo = (): Demo => {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "/configs", false);
+      xhr.send();
+
+      if (xhr.status !== 200) {
+        throw new Error("Failed to fetch demo configurations");
+      }
+
+      const data = JSON.parse(xhr.responseText);
+      
+      if (data.services && data.services.server && data.services.server.demo) {
+        const demoConfig = data.services.server.demo;
+        return {
+          id: "demo",
+          name: demoConfig.name,
+          port: demoConfig.port,
+          status: "GRAY"
+        };
+      }
+      
+      return {} as Demo;
+    } catch (error) {
+      console.error("Error fetching demo configurations:", error);
+      return {} as Demo;
+    }
+  };
+
   const [demo, setDemo] = useState<Demo>(() => {
     const stored = localStorage.getItem("demo");
     if (stored) {
@@ -44,10 +66,10 @@ const Demo = forwardRef((props, ref) => {
         return JSON.parse(stored) as Demo;
       } catch (e) {
         console.error("Error parsing demo from localStorage", e);
-        return defaultDemo;
+        return fetchDemo();
       }
     }
-    return defaultDemo;
+    return fetchDemo();
   });
 
   const [showDemoActionsAndInfo, setShowDemoActionsAndInfo] = useState(false);
@@ -133,6 +155,17 @@ const Demo = forwardRef((props, ref) => {
     await healthCheckDemo(false);
   };
 
+  const openWithDifferentPort = (newPort: string, additionalPath: string = '') => {
+    const url = new URL(window.location.href);
+    url.port = newPort;
+    
+    if (additionalPath) {
+      url.pathname = additionalPath.startsWith('/') ? additionalPath : '/' + additionalPath;
+    }
+    
+    window.open(url.toString());
+  };
+
   return (
     <section className="bg-white p-6 rounded shadow">
       <div className="flex justify-between items-center mb-4">
@@ -183,7 +216,24 @@ const Demo = forwardRef((props, ref) => {
                 unmountOnExit
             >
               <div>
-                {demo.name} ({demo.port}) <button onClick={() => window.open(`/logs/server_${demo.port}.log`)} className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded" title='By clicking this icon, you can view the logs.'>log</button> 
+                {demo.name} ({demo.port}) <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(`/logs/server_${demo.port}.log`, {method: 'HEAD'});
+                      if (res.ok) {
+                        window.open(`/logs/server_${demo.port}.log`);
+                      } else {
+                        alert('Log file not found.');
+                      }
+                    } catch (err) {
+                      alert('Log file not found.');
+                    }
+                  }}
+                  className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded"
+                  title="By clicking this icon, you can view the logs."
+              >
+                log
+              </button>
               </div>
             </CSSTransition>
           </td>
@@ -195,19 +245,19 @@ const Demo = forwardRef((props, ref) => {
                 unmountOnExit
             >
               <div className="flex space-x-1">
-              <button
+                <button
                     className="bg-green-600 text-white px-2 py-1 rounded"
                     onClick={() => startDemo(true)}
-                  >
-                    Start
-                  </button>
-                  <button
+                >
+                  Start
+                </button>
+                <button
                     className="bg-[#ED207B] text-white px-2 py-1 rounded"
                     onClick={() => stopDemo(true)}
-                  >
-                    Stop
-                  </button>
-                  <button 
+                >
+                  Stop
+                </button>
+                <button
                     className="bg-gray-600 text-white px-2 py-1 rounded"
                     onClick={() => healthCheckDemo(true)}
                   >
@@ -226,7 +276,7 @@ const Demo = forwardRef((props, ref) => {
               <div className="flex space-x-1">
                 <button
                     className="bg-gray-600 text-white px-3 py-1 rounded"
-                    onClick={() => window.open(`http://localhost:${demo.port}`)}
+                    onClick={() => openWithDifferentPort(`${demo.port}`, ``)}
                 >
                   Demo Site
                 </button>

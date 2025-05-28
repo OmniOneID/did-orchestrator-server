@@ -294,6 +294,17 @@ const Servers = forwardRef((props: ServerProps, ref) => {
     }
   };
 
+  const openWithDifferentPort = (newPort: string, additionalPath: string = '') => {
+    const url = new URL(window.location.href);
+    url.port = newPort;
+    
+    if (additionalPath) {
+      url.pathname = additionalPath.startsWith('/') ? additionalPath : '/' + additionalPath;
+    }
+    
+    window.open(url.toString());
+  };
+
   useImperativeHandle(ref, () => ({
     getOverallStatus,
     startAll,
@@ -343,8 +354,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
                   {StatusIcon(server.status)}
                 </td>
                 <td className="p-2 font-bold">
-                  {server.name} ({server.port})
-                  <button
+                  {server.name} ({server.port}) <button
                       onClick={async () => {
                         try {
                           const res = await fetch(`/logs/server_${server.port}.log`, {method: 'HEAD'});
@@ -390,14 +400,14 @@ const Servers = forwardRef((props: ServerProps, ref) => {
                     {server.id !== "api" && (
                         <button
                             className="bg-gray-600 text-white px-2 py-1 rounded"
-                            onClick={() => window.open(`http://localhost:${server.port}`)}
+                            onClick={() => openWithDifferentPort(`${server.port}`, ``)}
                         >
                           Settings
                         </button>
                     )}
                     <button
                         className="bg-gray-600 text-white px-2 py-1 rounded"
-                        onClick={() => window.open(`http://localhost:${server.port}/swagger-ui/index.html`)}
+                        onClick={() => openWithDifferentPort(`${server.port}`, `/swagger-ui/index.html`)}
                     >
                       Swagger
                     </button>

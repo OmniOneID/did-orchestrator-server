@@ -32,6 +32,7 @@ interface RepositoriesProps {
 
 const defaultRepos: Repository[] = [
   { id: "postgre", name: "PostgreSQL", status: "GRAY" },
+  { id: "fabric", name: "Hyperledger Fabric", status: "GRAY" },
   { id: "besu", name: "Hyperledger Besu", status: "GRAY" },
   { id: "lss", name: "Ledger Service Server", status: "GRAY" },
 ];
@@ -54,7 +55,18 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
   const alwaysInclude = ["postgre"];
   const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
 
-  const filteredRepos = defaultRepos.filter(repo =>
+  const stored = localStorage.getItem("repositories");
+  var baseRepos = [];
+  if (stored) {
+    baseRepos = JSON.parse(stored) as Repository[];
+    if(baseRepos.length == 1) { // postgre only case
+      baseRepos = defaultRepos;
+    }
+  } else {
+    baseRepos = defaultRepos;
+  }
+
+  const filteredRepos = baseRepos.filter(repo =>
     finalSelected.includes(repo.id)
   );
 
@@ -290,8 +302,7 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
                   {StatusIcon(repo.status)}
                 </td>
                 <td className="p-2 font-bold">
-                  {repo.name}
-                  <button
+                  {repo.name} <button
                       onClick={async () => {
                         try {
                           const res = await fetch(`/logs/${repo.id}.log`, {method: 'HEAD'});
@@ -330,6 +341,14 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
                     >
                       Status
                     </button>
+                    {/* {repo.name === "Hyperledger Fabric" && (
+                  <button
+                    className="bg-[#0E76BD] text-white px-2 py-1 rounded"
+                    onClick={() => resetRepository(repo.id, true)}
+                  >
+                    Reset
+                  </button>
+                  )} */}
                     {repo.name === "Hyperledger Besu" && (
                         <button
                             className="bg-[#0E76BD] text-white px-2 py-1 rounded"

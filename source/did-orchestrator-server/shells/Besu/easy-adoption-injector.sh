@@ -14,6 +14,12 @@ JAR_PATHS=(
 MY_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -n 1)
 BLOCKCHAIN_PATH="${PWD}/blockchain.properties"
 SETUP_PATH="${PWD}/../../jars"
+ORCHE_CONFIG_FILE="../../configs/application.yml"
+
+get_service_port() {
+    local service="$1"
+    grep -A 3 "${service}:" "$ORCHE_CONFIG_FILE" | grep "port:" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/'
+}
 
 for JAR_PATH in "${JAR_PATHS[@]}"; do
     APP_YML="${JAR_PATH}/application.yml"
@@ -21,23 +27,23 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
     WALLET_PATH=""
     ZKP_WALLET_PATH=""
     case "$JAR_PATH" in
-        *"/TA") 
+        *"/TA")
             WALLET_PATH="${PWD}/../../jars/TA/tas.wallet"
             ;;
-        *"/Issuer") 
+        *"/Issuer")
             WALLET_PATH="${PWD}/../../jars/Issuer/issuer.wallet"
             ZKP_WALLET_PATH="${PWD}/../../jars/Issuer/issuer.zkpwallet"
             ;;
-        *"/Verifier") 
+        *"/Verifier")
             WALLET_PATH="${PWD}/../../jars/Verifier/verifier.wallet"
             ;;
-        *"/CA") 
+        *"/CA")
             WALLET_PATH="${PWD}/../../jars/CA/cas.wallet"
             ;;
-        *"/Wallet") 
+        *"/Wallet")
             WALLET_PATH="${PWD}/../../jars/Wallet/wallet.wallet"
             ;;
-        *"/API") 
+        *"/API")
             WALLET_PATH="${PWD}/../../jars/API/api.wallet"
             ;;
     esac
@@ -62,7 +68,7 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
         in_spring && /^  profiles:/ { in_profiles=1 }
         in_profiles && /active:/ { found=1; sub(/active: .*/, "active: dev") }
         { print }
-        END { 
+        END {
           if (!found) {
             if (!spring_found) print "spring:";
             print "  profiles:";
@@ -93,16 +99,17 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
         }
         ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
 
-        # tas.url: http://$MY_IP:8090
-        awk -v my_ip="$MY_IP" '
+        # tas.url: http://$MY_IP:port
+	TAS_PORT=$(get_service_port "tas")
+	awk -v my_ip="$MY_IP" -v port="$TAS_PORT" '
         BEGIN { found=0; tas_found=0 }
         /^tas:/ { tas_found=1; in_tas=1 }
-        in_tas && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":8090") }
+	in_tas && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
         { print }
-        END { 
+        END {
           if (!found) {
             if (!tas_found) print "tas:";
-            print "  url: http://" my_ip ":8090";
+	    print "  url: http://" my_ip ":" port;
           }
         }
         ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
@@ -115,7 +122,7 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
             /^wallet:/ { wallet_found=1; in_wallet=1 }
             in_wallet && /file-path:/ { found=1; sub(/file-path:.*/, "file-path: " wallet_path) }
             { print }
-            END { 
+            END {
               if (!found) {
                 if (!wallet_found) print "wallet:";
                 print "  file-path: " wallet_path;
@@ -132,11 +139,77 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
             /^zkp-wallet:/ { zkp_wallet_found=1; in_zkp_wallet=1 }
             in_zkp_wallet && /file-path:/ { found=1; sub(/file-path:.*/, "file-path: " wallet_path) }
             { print }
-            END { 
+            END {
             if (!found) {
                 if (!zkp_wallet_found) print "zkp-wallet:";
                 print "  file-path: " wallet_path;
             }
+            }
+            ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
+        fi
+
+        # demo url
+        if [[ "$JAR_PATH" == *"/Demo" ]]; then
+            echo "Adding service URLs for Demo application"
+            
+            TAS_PORT=$(get_service_port "tas")
+            ISSUER_PORT=$(get_service_port "issuer")
+            VERIFIER_PORT=$(get_service_port "verifier")
+            CAS_PORT=$(get_service_port "cas")
+            
+            # tas.url: http://$MY_IP:$TAS_PORT
+            awk -v my_ip="$MY_IP" -v port="$TAS_PORT" '
+            BEGIN { found=0; tas_found=0 }
+            /^tas:/ { tas_found=1; in_tas=1 }
+            in_tas && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
+            { print }
+            END {
+              if (!found) {
+                if (!tas_found) print "tas:";
+                print "  url: http://" my_ip ":" port;
+              }
+            }
+            ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
+
+            # issuer.url: http://$MY_IP:$ISSUER_PORT
+            awk -v my_ip="$MY_IP" -v port="$ISSUER_PORT" '
+            BEGIN { found=0; issuer_found=0 }
+            /^issuer:/ { issuer_found=1; in_issuer=1 }
+            in_issuer && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
+            { print }
+            END {
+              if (!found) {
+                if (!issuer_found) print "issuer:";
+                print "  url: http://" my_ip ":" port;
+              }
+            }
+            ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
+
+            # verifier.url: http://$MY_IP:$VERIFIER_PORT
+            awk -v my_ip="$MY_IP" -v port="$VERIFIER_PORT" '
+            BEGIN { found=0; verifier_found=0 }
+            /^verifier:/ { verifier_found=1; in_verifier=1 }
+            in_verifier && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
+            { print }
+            END {
+              if (!found) {
+                if (!verifier_found) print "verifier:";
+                print "  url: http://" my_ip ":" port;
+              }
+            }
+            ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
+
+            # cas.url: http://$MY_IP:$CAS_PORT
+            awk -v my_ip="$MY_IP" -v port="$CAS_PORT" '
+            BEGIN { found=0; cas_found=0 }
+            /^cas:/ { cas_found=1; in_cas=1 }
+            in_cas && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
+            { print }
+            END {
+              if (!found) {
+                if (!cas_found) print "cas:";
+                print "  url: http://" my_ip ":" port;
+              }
             }
             ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
         fi

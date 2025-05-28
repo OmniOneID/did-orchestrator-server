@@ -26,16 +26,8 @@ import java.util.Map;
 @Setter
 @ConfigurationProperties(prefix = "blockchain")
 public class BlockchainProperties {
-    private Fabric fabric;
     private Besu besu;
     private LedgerService ledgerService;
-
-    @Getter
-    @Setter
-    public static class Fabric {
-        private String channel;
-        private String chaincodeName;
-    }
 
     @Getter
     @Setter

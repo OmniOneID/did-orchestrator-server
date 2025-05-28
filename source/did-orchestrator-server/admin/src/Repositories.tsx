@@ -32,7 +32,6 @@ interface RepositoriesProps {
 
 const defaultRepos: Repository[] = [
   { id: "postgre", name: "PostgreSQL", status: "GRAY" },
-  { id: "fabric", name: "Hyperledger Fabric", status: "GRAY" },
   { id: "besu", name: "Hyperledger Besu", status: "GRAY" },
   { id: "lss", name: "Ledger Service Server", status: "GRAY" },
 ];
@@ -313,14 +312,6 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
                   >
                     Status
                   </button>
-                  {/* {repo.name === "Hyperledger Fabric" && (
-                  <button
-                    className="bg-[#0E76BD] text-white px-2 py-1 rounded"
-                    onClick={() => resetRepository(repo.id, true)}
-                  >
-                    Reset
-                  </button>
-                  )} */}
                   {repo.name === "Hyperledger Besu" && (
                   <button
                     className="bg-[#0E76BD] text-white px-2 py-1 rounded"

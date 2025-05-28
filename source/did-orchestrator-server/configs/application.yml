@@ -18,9 +18,6 @@ management:
 server:
   port: 9001
 blockchain:
-  fabric:
-    channel: mychannel
-    chaincodeName: opendid
   besu:
     channel: mychannel
     chaincodeName: opendid

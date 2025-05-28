@@ -91,11 +91,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         return serverJarsFolder;
     }
 
-    interface FabricStartupCallback {
-        void onStartupComplete();
-        void onStartupFailed();
-    }
-
     interface BlockChainStartupCallback {
         void onStartupComplete();
         void onStartupFailed();
@@ -221,131 +216,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     }
 
     /**
-     * Starts Hyperledger Fabric if it is not already running.
-     * This method executes the `start.sh` script for Fabric, waits for startup logs, and checks the health of the Fabric.
-     *
-     * @return the status of the Fabric (UP or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestStartupFabric() {
-        log.info("requestStartupFabric");
-        String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-        String logFilePath = LOGS_PATH + "/fabric.log";
-        
-        try {
-            ProcessBuilder chmodBuilder = new ProcessBuilder("chmod", "+x", fabricShellPath + "/start.sh");
-            chmodBuilder.start().waitFor();
-
-            ProcessBuilder builder = new ProcessBuilder(
-                    "sh", "-c", "nohup " + fabricShellPath + "/start.sh " + blockChainProperties.getFabric().getChannel() + " " + blockChainProperties.getFabric().getChaincodeName() +
-                    " > " + logFilePath + " 2>&1 &"
-            );
-
-            builder.directory(new File(fabricShellPath));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-            builder.start();
-
-            watchBlockChainLogs(logFilePath, new BlockChainStartupCallback() {
-                @Override
-                public void onStartupComplete() {
-                    log.debug("Hyperledger Fabric is running successfully!");
-                }
-
-                @Override
-                public void onStartupFailed() {
-                    log.error("Fabric startup failed.");
-                }
-            });
-
-            return requestHealthCheckFabric();
-        } catch (IOException | InterruptedException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * Shuts down Hyperledger Fabric by executing the `stop.sh` script.
-     * This method stops the Fabric service and checks its status after shutdown.
-     *
-     * @return the status of the Fabric (DOWN or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestShutdownFabric() {
-        log.info("requestShutdownFabric");
-        try {
-            String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/stop.sh");
-            builder.directory(new File(fabricShellPath));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-            builder.start();
-        } catch (IOException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        OrchestratorResponseDto response = requestHealthCheckFabric();
-        return response;
-    }
-
-    /**
-     * Checks the health of the Hyperledger Fabric.
-     * This method checks whether Fabric is up and running by executing the `status.sh` script.
-     *
-     * @return the health status of the Fabric (UP or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestHealthCheckFabric() {
-        log.info("requestHealthCheckFabric");
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/status.sh", blockChainProperties.getFabric().getChannel(), blockChainProperties.getFabric().getChaincodeName());
-            builder.directory(new File(fabricShellPath));
-            Process process = builder.start();
-            String output = getProcessOutput(process);
-
-            if (output.contains("200")) {
-                response.setStatus("UP");
-                return response;
-            }
-
-        } catch (IOException | InterruptedException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        response.setStatus("ERROR");
-        return response;
-    }
-
-    /**
-     * Resets Hyperledger Fabric by executing the `reset.sh` script.
-     * This method attempts to reset Fabric and checks if the reset was successful.
-     *
-     * @return the status of the Fabric reset (UP or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestResetFabric() {
-        log.info("requestResetFabric");
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/reset.sh");
-            builder.directory(new File(fabricShellPath));
-            Process process = builder.start();
-            String output = getProcessOutput(process);
-
-            if (output.contains(Constant.BLOCKCHAIN_RESET_MESSAGE)) {
-                response.setStatus("UP");
-                return response;
-            }
-
-        } catch (IOException | InterruptedException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        response.setStatus("ERROR");
-        return response;
-    }
-
-    /**
      * Starts Hyperledger Besu if it is not already running.
      * This method executes the `start.sh` script for Besu, waits for startup logs, and checks the health of the Besu.
      *
@@ -443,9 +313,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     }
     /**
      * Resets Hyperledger Besu by executing the `reset.sh` script.
-     * This method attempts to reset Fabric and checks if the reset was successful.
+     * This method attempts to reset Besu and checks if the reset was successful.
      *
-     * @return the status of the Fabric reset (UP or ERROR)
+     * @return the status of the Besu reset (UP or ERROR)
      */
     @Override
     public OrchestratorResponseDto requestResetBesu() {
@@ -510,7 +380,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                     lastReadPosition = reader.getFilePointer();
                 }
 
-                // Health check every 3 minutes
                 long now = System.currentTimeMillis();
                 if (now - lastHealthCheckTime >= HEALTH_CHECK_INTERVAL) {
                     log.debug("Performing blockchain health check...");
@@ -518,9 +387,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                     OrchestratorResponseDto response = new OrchestratorResponseDto();
                     if(logFilePath.contains("besu")){
                         response = requestHealthCheckBesu();
-                    }
-                    if(logFilePath.contains("fabric")){
-                        response = requestHealthCheckFabric();
                     }
                     if (response.getStatus().equals("UP")) {
                         log.debug("Blockchain health check successful. Triggering success callback.");

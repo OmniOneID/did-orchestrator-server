@@ -23,11 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface OrchestratorService {
-    //Hyperledger Fabric
-    OrchestratorResponseDto requestStartupFabric();
-    OrchestratorResponseDto requestShutdownFabric();
-    OrchestratorResponseDto requestHealthCheckFabric();
-    OrchestratorResponseDto requestResetFabric();
 
     //Hyperledger Besu
     OrchestratorResponseDto requestStartupBesu();

@@ -128,54 +128,6 @@ public class OrchestratorController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/startup/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricStartup() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestStartupFabric();
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/shutdown/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricShutdown() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestShutdownFabric();
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/healthcheck/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricHealthCheck() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestHealthCheckFabric();
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/reset/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricReset() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestResetFabric();
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/startup/besu")
     public ResponseEntity<OrchestratorResponseDto> besuStartup() {
         OrchestratorResponseDto response = new OrchestratorResponseDto();

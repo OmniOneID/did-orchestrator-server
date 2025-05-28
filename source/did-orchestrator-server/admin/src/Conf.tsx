@@ -28,11 +28,6 @@ interface BesuConfig {
   gasPrice: number;
 }
 
-interface FabricConfig {
-  chaincodeName: string;
-  channel: string;
-}
-
 interface LedgerServiceConfig {
   file: string;
   port: number;
@@ -40,7 +35,6 @@ interface LedgerServiceConfig {
 
 interface BlockchainConfig {
   besu?: BesuConfig;
-  fabric?: FabricConfig;
   ledgerService?: LedgerServiceConfig;
   [key: string]: unknown;
 }

@@ -12,11 +12,18 @@ export POSTGRES_DB
 
 docker-compose up -d
 
-sleep 10
+echo "Waiting for database to be ready..."
 
-docker exec -it postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE tas;"
-docker exec -it postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE cas;"
-docker exec -it postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE issuer;"
-docker exec -it postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE verifier;"
-docker exec -it postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE wallet;"
-docker exec -it postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE lss;"
+until docker exec postgre-opendid pg_isready -U postgres > /dev/null 2>&1; do
+  echo "Waiting for PostgreSQL..."
+  sleep 2
+done
+
+echo "PostgreSQL is ready."
+
+docker exec postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE tas;"
+docker exec postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE cas;"
+docker exec postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE issuer;"
+docker exec postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE verifier;"
+docker exec postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE wallet;"
+docker exec postgre-opendid psql -U $POSTGRES_USER -c "CREATE DATABASE lss;"

@@ -14,9 +14,18 @@ docker-compose up -d
 
 echo "Waiting for database to be ready..."
 
+TIMEOUT=300
+ELAPSED=0
+
 until docker exec postgre-opendid pg_isready -U postgres > /dev/null 2>&1; do
-  echo "Waiting for PostgreSQL..."
-  sleep 2
+ echo "Waiting for PostgreSQL... (${ELAPSED}s elapsed)"
+ sleep 2
+ ELAPSED=$((ELAPSED + 2))
+ 
+ if [ $ELAPSED -ge $TIMEOUT ]; then
+   echo "Timeout: PostgreSQL did not become ready within 5 minutes."
+   exit 1
+ fi
 done
 
 echo "PostgreSQL is ready."

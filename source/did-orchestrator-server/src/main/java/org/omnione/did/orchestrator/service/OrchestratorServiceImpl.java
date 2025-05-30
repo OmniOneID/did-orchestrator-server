@@ -232,7 +232,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             chmodBuilder.start().waitFor();
             System.out.println("besu start : " + blockChainProperties.getBesu().getChainId());
             ProcessBuilder builder = new ProcessBuilder(
-                    "sh", "-c", "nohup " + besuShellPath + "/start.sh "  +
+                    "sh", "-c", "nohup " + besuShellPath + "/start.sh "  + getServerIp() +
                     " > " + logFilePath + " 2>&1 &"
             );
 

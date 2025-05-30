@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SERVER_IP=$1
 CONTRACT_DIR="did-besu-contract"
 MAKE_ACCOUNT_SCRIPT="$CONTRACT_DIR/scripts/make-account.js"
 DEPLOY_SCRIPT="$CONTRACT_DIR/scripts/deploy-contract.js"
@@ -97,4 +98,4 @@ evm.contract.privateKey=${PRIVATE_KEY}
 EOF
 
 # Run easy-adoption injector
-sh easy-adoption-injector.sh
+sh easy-adoption-injector.sh $SERVER_IP

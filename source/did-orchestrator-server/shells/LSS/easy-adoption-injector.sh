@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# apply to application.yml
+#apply to application.bak
 JAR_PATHS=(
     "${PWD}/../../jars/TA"
     "${PWD}/../../jars/Issuer"
@@ -12,9 +12,7 @@ JAR_PATHS=(
 )
 
 MY_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -n 1)
-GLOBAL_BLOCKCHAIN_PATH="${PWD}/blockchain.properties"
-TA_BLOCKCHAIN_PATH="${PWD}/TA/blockchain.properties"
-ISSUER_BLOCKCHAIN_PATH="${PWD}/Issuer/blockchain.properties"
+BLOCKCHAIN_PATH="${PWD}/blockchain.properties"
 SETUP_PATH="${PWD}/../../jars"
 ORCHE_CONFIG_FILE="../../configs/application.yml"
 
@@ -31,32 +29,22 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
     case "$JAR_PATH" in
         *"/TA")
             WALLET_PATH="${PWD}/../../jars/TA/tas.wallet"
-            BLOCKCHAIN_PATH="$TA_BLOCKCHAIN_PATH"
             ;;
         *"/Issuer")
             WALLET_PATH="${PWD}/../../jars/Issuer/issuer.wallet"
             ZKP_WALLET_PATH="${PWD}/../../jars/Issuer/issuer.zkpwallet"
-            BLOCKCHAIN_PATH="$ISSUER_BLOCKCHAIN_PATH"
             ;;
         *"/Verifier")
             WALLET_PATH="${PWD}/../../jars/Verifier/verifier.wallet"
-            BLOCKCHAIN_PATH="$GLOBAL_BLOCKCHAIN_PATH"
             ;;
         *"/CA")
             WALLET_PATH="${PWD}/../../jars/CA/cas.wallet"
-            BLOCKCHAIN_PATH="$GLOBAL_BLOCKCHAIN_PATH"
             ;;
         *"/Wallet")
             WALLET_PATH="${PWD}/../../jars/Wallet/wallet.wallet"
-            BLOCKCHAIN_PATH="$GLOBAL_BLOCKCHAIN_PATH"
             ;;
         *"/API")
             WALLET_PATH="${PWD}/../../jars/API/api.wallet"
-            BLOCKCHAIN_PATH="$GLOBAL_BLOCKCHAIN_PATH"
-            ;;
-        *"/Demo")
-            WALLET_PATH=""
-            BLOCKCHAIN_PATH="$GLOBAL_BLOCKCHAIN_PATH"
             ;;
     esac
 
@@ -89,7 +77,7 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
         }
         ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
 
-        # blockchain.file-path: appropriate path
+        # blockchain.file-path: ${PWD}/blockchain.properties
         awk -v bcpath="$BLOCKCHAIN_PATH" '
         BEGIN { found=0 }
         /^blockchain:/ { in_blockchain=1 }
@@ -98,7 +86,7 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
         END { if (!found) print "blockchain:\n  file-path: " bcpath }
         ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
 
-        # setup.base-url, setup.path
+        # setup.base-url: http://$MY_IP and setup.path: ${SETUP_PATH}
         awk -v setup_base_url="http://$MY_IP" -v setup_path="$SETUP_PATH" '
         BEGIN { found_base_url=0; found_path=0 }
         /^setup:/ { in_setup=1 }

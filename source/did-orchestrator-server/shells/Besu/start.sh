@@ -86,15 +86,52 @@ fi
 echo "Generating blockchain.properties..."
 
 # Generate blockchain.properties
-cat <<EOF > ${PWD}/blockchain.properties
-evm.network.url=http://localhost:8545
-evm.chainId=1337
-evm.gas.limit=10000000
-evm.gas.price=0
-evm.connection.timeout=10000
-evm.contract.address=${CONTRACT_ADDRESS}
-evm.contract.privateKey=${PRIVATE_KEY}
-EOF
+#cat <<EOF > ${PWD}/blockchain.properties
+#evm.network.url=http://localhost:8545
+#evm.chainId=1337
+#evm.gas.limit=10000000
+#evm.gas.price=0
+#evm.connection.timeout=10000
+#evm.contract.address=${CONTRACT_ADDRESS}
+#evm.contract.privateKey=${PRIVATE_KEY}
+#EOF
+
+# Generate blockchain.properties
+generate_blockchain_properties() {
+    local target_path="$1"
+    local include_private_key="$2"
+    local target_dir
+    target_dir="$(dirname "$target_path")"
+
+    if [ ! -d "$target_dir" ]; then
+        echo "Creating directory: $target_dir"
+        mkdir -p "$target_dir"
+    fi
+
+    if [ ! -f "$target_path" ]; then
+        echo "Generating blockchain.properties at: $target_path"
+        {
+            echo "evm.network.url=http://localhost:8545"
+            echo "evm.chainId=1337"
+            echo "evm.gas.limit=10000000"
+            echo "evm.gas.price=0"
+            echo "evm.connection.timeout=10000"
+            echo "evm.contract.address=${CONTRACT_ADDRESS}"
+            if [ "$include_private_key" = true ]; then
+                echo "evm.contract.privateKey=${PRIVATE_KEY}"
+            fi
+        } > "$target_path"
+    fi
+}
+
+COMMON_BLOCKCHAIN="${PWD}/blockchain.properties"
+generate_blockchain_properties "$COMMON_BLOCKCHAIN" false
+
+TA_BLOCKCHAIN_PATH="${PWD}/TA/blockchain.properties"
+generate_blockchain_properties "$TA_BLOCKCHAIN_PATH" true
+
+ISSUER_BLOCKCHAIN_PATH="${PWD}/Issuer/blockchain.properties"
+generate_blockchain_properties "$ISSUER_BLOCKCHAIN_PATH" true
 
 # Run easy-adoption injector
 sh easy-adoption-injector.sh

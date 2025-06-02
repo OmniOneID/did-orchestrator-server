@@ -379,7 +379,7 @@ public class OrchestratorController {
         Path CONFIG_PATH = Paths.get("repository.properties");
         String selected = payload.get("selected");
 
-        if (selected == null || (!selected.equals("besu") && !selected.equals("lss"))) {
+        if (selected != null && !selected.equals("besu") && !selected.equals("lss") && !selected.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -390,7 +390,7 @@ public class OrchestratorController {
                 Files.createFile(CONFIG_PATH);
             }
 
-            if (selected == null) {
+            if (selected == null || selected.isEmpty()) {
                 props.remove("selectedRepositories");
             } else {
                 props.setProperty("selectedRepositories", selected);

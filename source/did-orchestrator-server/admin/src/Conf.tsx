@@ -217,91 +217,101 @@ const Conf: React.FC = () => {
 
             <section className="bg-white p-6 rounded shadow mb-6">
               <h2 className="text-xl font-bold mb-4">Repositories</h2>
-            {/* Blockchain Section */}
-            <div className="mb-6">
-              <h3 className="text-lg font-bold mb-4">
-                Blockchain
-                <button
-                  onClick={(e) =>
-                    showToolTip(
-                      "The following settings are parameters for each blockchain module.<br>Each key contains multiple properties specific to that blockchain configuration.",
-                      e
-                    )
-                  }
-                  className="text-gray-500 hover:text-gray-700 ml-1"
-                >
-                  <HelpIcon width="0.9em" height="0.9em" />
-                </button>
-              </h3>
 
-              {(() => {
-                let selectedIds: string[] = [];
-                try {
-                  const parsed = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
-                  if (Array.isArray(parsed)) {
-                    selectedIds = parsed;
-                  }
-                } catch (e) {
-                  console.error("Error parsing selectedRepositories:", e);
-                }
+              {/* Blockchain Section */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-4">
+                  Blockchain
+                  <button
+                      onClick={(e) =>
+                          showToolTip(
+                              "The following settings are parameters for each blockchain module.<br>Each key contains multiple properties specific to that blockchain configuration.",
+                              e
+                          )
+                      }
+                      className="text-gray-500 hover:text-gray-700 ml-1"
+                  >
+                    <HelpIcon width="0.9em" height="0.9em" />
+                  </button>
+                </h3>
 
-                let visibleKey: string | null = null;
-                if (selectedIds.includes("besu")) {
-                  visibleKey = "besu";
-                } else if (selectedIds.includes("lss")) {
-                  visibleKey = "ledgerService";
-                }
-              
-                if (!visibleKey || !(visibleKey in config.blockchain)) {
+                {(() => {
+                  const [selected, setSelected] = useState<string | null>(null);
+
+                  useEffect(() => {
+                    fetch("/select")
+                        .then(res => res.json())
+                        .then(data => {
+                          if (data.selected === "besu" || data.selected === "lss") {
+                            setSelected(data.selected);
+                          }
+                        })
+                        .catch(err => {
+                          console.error("Failed to fetch repository choice:", err);
+                        });
+                  }, []);
+
+                  if (!selected) {
+                    return (
+                        <div className="text-sm text-gray-500 italic">
+                          Loading blockchain configuration...
+                        </div>
+                    );
+                  }
+
+                  const visibleKey = selected === "besu" ? "besu" : "ledgerService";
+
+                  if (!(visibleKey in config.blockchain)) {
+                    return (
+                        <div className="text-sm text-gray-500 italic">
+                          No blockchain configuration is visible for this selection.
+                        </div>
+                    );
+                  }
+
+                  const chainConfig = config.blockchain[visibleKey] as Record<string, any>;
+
                   return (
-                    <div className="text-sm text-gray-500 italic">
-                      No blockchain configuration is visible for this selection.
-                    </div>
-                  );
-                }
-
-                const chainConfig = config.blockchain[visibleKey] as Record<string, any>;
-
-                return (
-                  <div key={visibleKey} className="mb-4">
-                    <h4 className="text-md font-semibold mb-2 capitalize">{visibleKey}</h4>
-                    <table className="min-w-full mb-2">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="p-2 text-left w-48">Property</th>
-                          <th className="p-2 text-left w-96">Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(chainConfig).map(([propKey, propValue]) => (
-                          <tr key={propKey} className="border-b">
-                            <td className="p-2 font-bold capitalize">{propKey}</td>
-                            <td className="p-2">
-                              <input
-                                type="text"
-                                className="border rounded p-2 w-full"
-                                value={typeof propValue === 'object' ? JSON.stringify(propValue) : String(propValue)}
-                                onChange={(e) => {
-                                  const newBlockchain = {
-                                    ...config.blockchain,
-                                    [visibleKey!]: {
-                                      ...chainConfig,
-                                      [propKey]: isNaN(Number(propValue)) ? e.target.value : Number(e.target.value),
-                                    }
-                                  };
-                                  setConfig({ ...config, blockchain: newBlockchain });
-                                }}
-                                maxLength={50}
-                              />
-                            </td>
+                      <div key={visibleKey} className="mb-4">
+                        <h4 className="text-md font-semibold mb-2 capitalize">{visibleKey}</h4>
+                        <table className="min-w-full mb-2">
+                          <thead>
+                          <tr className="bg-gray-100">
+                            <th className="p-2 text-left w-48">Property</th>
+                            <th className="p-2 text-left w-96">Value</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })()}
-            </div>
+                          </thead>
+                          <tbody>
+                          {Object.entries(chainConfig).map(([propKey, propValue]) => (
+                              <tr key={propKey} className="border-b">
+                                <td className="p-2 font-bold capitalize">{propKey}</td>
+                                <td className="p-2">
+                                  <input
+                                      type="text"
+                                      className="border rounded p-2 w-full"
+                                      value={typeof propValue === 'object' ? JSON.stringify(propValue) : String(propValue)}
+                                      onChange={(e) => {
+                                        const newBlockchain = {
+                                          ...config.blockchain,
+                                          [visibleKey]: {
+                                            ...chainConfig,
+                                            [propKey]: isNaN(Number(propValue)) ? e.target.value : Number(e.target.value),
+                                          },
+                                        };
+                                        setConfig({ ...config, blockchain: newBlockchain });
+                                      }}
+                                      maxLength={50}
+                                  />
+                                </td>
+                              </tr>
+                          ))}
+                          </tbody>
+                        </table>
+                      </div>
+                  );
+                })()}
+              </div>
+
 
 
               {/* Database Section */}

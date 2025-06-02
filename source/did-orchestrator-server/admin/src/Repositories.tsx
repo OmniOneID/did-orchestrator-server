@@ -39,62 +39,95 @@ const defaultRepos: Repository[] = [
 
 const Repositories = forwardRef((props: RepositoriesProps, ref) => {
   const { openPopupLedger } = props;
-
   const [repositories, setRepositories] = useState<Repository[]>(() => {
-
-  let selectedIds: string[] = [];
-  try {
-    const parsed = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
-    if (Array.isArray(parsed)) {
-      selectedIds = parsed;
-    }
-  } catch (e) {
-    console.error("Error parsing selectedRepositories:", e);
-  }
-
-  const alwaysInclude = ["postgre"];
-  const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
-
-  const stored = localStorage.getItem("repositories");
-  var baseRepos = [];
-  if (stored) {
-    baseRepos = JSON.parse(stored) as Repository[];
-    if(baseRepos.length == 1) { // postgre only case
-      baseRepos = defaultRepos;
-    }
-  } else {
-    baseRepos = defaultRepos;
-  }
-
-  const filteredRepos = baseRepos.filter(repo =>
-    finalSelected.includes(repo.id)
-  );
-
-  localStorage.setItem("repositories", JSON.stringify(filteredRepos));
-
-  try {
     const stored = localStorage.getItem("repositories");
     if (stored) {
-      const parsed = JSON.parse(stored) as Repository[];
-      const merged = parsed.filter(repo => finalSelected.includes(repo.id));
-      return merged.length > 0 ? merged : filteredRepos;
+      try {
+        const parsed = JSON.parse(stored) as Repository[];
+        if (parsed.length === 1 && parsed[0].id === "postgre") {
+          return defaultRepos;
+        }
+        return parsed;
+      } catch (e) {
+        console.error("Error parsing repositories from localStorage", e);
+      }
     }
-  } catch (e) {
-    console.error("Error parsing repositories from localStorage", e);
-  }
-
-  return filteredRepos;
-
-    // if (stored) {
-    //   try {
-    //     return JSON.parse(stored) as Repository[];
-    //   } catch (e) {
-    //     console.error("Error parsing repositories from localStorage", e);
-    //     return defaultRepos;
-    //   }
-    // }
-    // return defaultRepos;
+    return defaultRepos;
   });
+
+  useEffect(() => {
+    const alwaysInclude = ["postgre"];
+
+    fetch("/select")
+        .then(res => res.json())
+        .then(data => {
+          const selected = data.selected;
+          const selectedIds = selected ? [selected] : [];
+
+          const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
+
+          const filtered: Repository[] = defaultRepos.filter(repo =>
+              finalSelected.includes(repo.id)
+          );
+          console.log("repositories : " +  JSON.stringify(filtered));
+          localStorage.setItem("repositories", JSON.stringify(filtered));
+          setRepositories(filtered);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch selectedRepositories from server:", err);
+        });
+  }, []);
+
+
+// const Repositories = forwardRef((props: RepositoriesProps, ref) => {
+//   const { openPopupLedger } = props;
+//
+//   const [repositories, setRepositories] = useState<Repository[]>(() => {
+//
+//   let selectedIds: string[] = [];
+//   try {
+//     const parsed = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
+//     if (Array.isArray(parsed)) {
+//       selectedIds = parsed;
+//     }
+//   } catch (e) {
+//     console.error("Error parsing selectedRepositories:", e);
+//   }
+//
+//   const alwaysInclude = ["postgre"];
+//   const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
+//
+//   const stored = localStorage.getItem("repositories");
+//   var baseRepos = [];
+//   if (stored) {
+//     baseRepos = JSON.parse(stored) as Repository[];
+//     if(baseRepos.length == 1) { // postgre only case
+//       baseRepos = defaultRepos;
+//     }
+//   } else {
+//     baseRepos = defaultRepos;
+//   }
+//
+//   const filteredRepos = baseRepos.filter(repo =>
+//     finalSelected.includes(repo.id)
+//   );
+//
+//   localStorage.setItem("repositories", JSON.stringify(filteredRepos));
+//
+//   try {
+//     const stored = localStorage.getItem("repositories");
+//     if (stored) {
+//       const parsed = JSON.parse(stored) as Repository[];
+//       const merged = parsed.filter(repo => finalSelected.includes(repo.id));
+//       return merged.length > 0 ? merged : filteredRepos;
+//     }
+//   } catch (e) {
+//     console.error("Error parsing repositories from localStorage", e);
+//   }
+//
+//   return filteredRepos;
+//
+//   });
 
   useEffect(() => {
     localStorage.setItem("repositories", JSON.stringify(repositories));
@@ -239,7 +272,14 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
         ];
 
         localStorage.setItem("repositories", JSON.stringify(postgreOnly));
-        localStorage.removeItem("selectedRepositories");
+        await fetch("/select", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ selected: "" })
+          // body: JSON.stringify({ selected: null })
+        });
 
         setRepositories(postgreOnly);
       } else {

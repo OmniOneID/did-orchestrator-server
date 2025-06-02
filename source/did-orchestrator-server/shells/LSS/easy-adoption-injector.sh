@@ -1,24 +1,31 @@
 #!/bin/bash
 
 #apply to application.bak
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 JAR_PATHS=(
-    "${PWD}/../../jars/TA"
-    "${PWD}/../../jars/Issuer"
-    "${PWD}/../../jars/Verifier"
-    "${PWD}/../../jars/CA"
-    "${PWD}/../../jars/Wallet"
-    "${PWD}/../../jars/API"
-    "${PWD}/../../jars/Demo"
+    "${SCRIPT_DIR}/../../jars/TA"
+    "${SCRIPT_DIR}/../../jars/Issuer"
+    "${SCRIPT_DIR}/../../jars/Verifier"
+    "${SCRIPT_DIR}/../../jars/CA"
+    "${SCRIPT_DIR}/../../jars/Wallet"
+    "${SCRIPT_DIR}/../../jars/API"
+    "${SCRIPT_DIR}/../../jars/Demo"
 )
 
-MY_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -n 1)
-BLOCKCHAIN_PATH="${PWD}/blockchain.properties"
-SETUP_PATH="${PWD}/../../jars"
-ORCHE_CONFIG_FILE="../../configs/application.yml"
+MY_IP=$1
+SETUP_PATH="${SCRIPT_DIR}/../../jars"
+ORCHE_CONFIG_FILE="${SCRIPT_DIR}/../../configs/application.yml"
 
 get_service_port() {
     local service="$1"
     grep -A 3 "${service}:" "$ORCHE_CONFIG_FILE" | grep "port:" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/'
+}
+
+get_service_port_lss() {
+    local service="$1"
+    grep -A 3 "^[[:space:]]*${service}:" "$ORCHE_CONFIG_FILE" | grep "port:" | sed 's/.*port:[[:space:]]*\([0-9]*\).*/\1/'
 }
 
 for JAR_PATH in "${JAR_PATHS[@]}"; do
@@ -28,23 +35,23 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
     ZKP_WALLET_PATH=""
     case "$JAR_PATH" in
         *"/TA")
-            WALLET_PATH="${PWD}/../../jars/TA/tas.wallet"
+            WALLET_PATH="${SCRIPT_DIR}/../../jars/TA/tas.wallet"
             ;;
         *"/Issuer")
-            WALLET_PATH="${PWD}/../../jars/Issuer/issuer.wallet"
-            ZKP_WALLET_PATH="${PWD}/../../jars/Issuer/issuer.zkpwallet"
+            WALLET_PATH="${SCRIPT_DIR}/../../jars/Issuer/issuer.wallet"
+            ZKP_WALLET_PATH="${SCRIPT_DIR}/../../jars/Issuer/issuer.zkpwallet"
             ;;
         *"/Verifier")
-            WALLET_PATH="${PWD}/../../jars/Verifier/verifier.wallet"
+            WALLET_PATH="${SCRIPT_DIR}/../../jars/Verifier/verifier.wallet"
             ;;
         *"/CA")
-            WALLET_PATH="${PWD}/../../jars/CA/cas.wallet"
+            WALLET_PATH="${SCRIPT_DIR}/../../jars/CA/cas.wallet"
             ;;
         *"/Wallet")
-            WALLET_PATH="${PWD}/../../jars/Wallet/wallet.wallet"
+            WALLET_PATH="${SCRIPT_DIR}/../../jars/Wallet/wallet.wallet"
             ;;
         *"/API")
-            WALLET_PATH="${PWD}/../../jars/API/api.wallet"
+            WALLET_PATH="${SCRIPT_DIR}/../../jars/API/api.wallet"
             ;;
     esac
 
@@ -61,29 +68,23 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
     if [ -f "$APP_YML" ]; then
         echo "Updating: $APP_YML"
 
-        # spring.profiles.active: dev
+        # spring.profiles.active: dev, lss
         awk '
         BEGIN { found=0; spring_found=0 }
         /^spring:/ { spring_found=1; in_spring=1 }
         in_spring && /^  profiles:/ { in_profiles=1 }
-        in_profiles && /active:/ { found=1; sub(/active: .*/, "active: dev") }
+        in_profiles && /active:/ {
+            found=1
+            sub(/active: .*/, "active: dev, lss")
+        }
         { print }
         END {
           if (!found) {
             if (!spring_found) print "spring:";
             print "  profiles:";
-            print "    active: dev";
+            print "    active: dev, lss";
           }
         }
-        ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
-
-        # blockchain.file-path: ${PWD}/blockchain.properties
-        awk -v bcpath="$BLOCKCHAIN_PATH" '
-        BEGIN { found=0 }
-        /^blockchain:/ { in_blockchain=1 }
-        in_blockchain && /file-path:/ { found=1; sub(/file-path:.*/, "file-path: " bcpath) }
-        { print }
-        END { if (!found) print "blockchain:\n  file-path: " bcpath }
         ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
 
         # setup.base-url: http://$MY_IP and setup.path: ${SETUP_PATH}
@@ -113,6 +114,21 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
           }
         }
         ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
+
+        # lss.url: http://$MY_IP:port
+  LEDGER_PORT=$(get_service_port "ledgerService")
+  awk -v my_ip="$MY_IP" -v port="$LEDGER_PORT" '
+      BEGIN { found=0; lss_found=0; in_lss=0 }
+      /^loss:/ { lss_found=1; in_lss=1 }
+      in_lss && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
+      { print }
+      END {
+          if (!found) {
+              if (!lss_found) print "lss:";
+              print "  url: http://" my_ip ":" port;
+          }
+      }
+  ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
 
         # wallet.file-path
         if [ ! -z "$WALLET_PATH" ]; then

@@ -447,6 +447,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             command.add(jarFile.getAbsolutePath());
             command.add(port);
             command.add(configFilePath);
+            command.add(getServerIp());
 
             log.info("Executing command: " + String.join(" ", command));
 

@@ -3,6 +3,7 @@
 JAR_FILE=$1
 PORT=$2
 CONFIG_PATH=$3
+SERVER_IP=$4
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOGS_PATH="$(dirname "$SCRIPT_DIR")/logs"
@@ -26,3 +27,5 @@ nohup java -jar "$JAR_FILE" --server.port="$PORT" --spring.config.additional-loc
 
 echo "Server on port $PORT started with config: $CONFIG_PATH"
 echo "Logging to: $LOG_FILE"
+# Run easy-adoption injector
+sh "$SCRIPT_DIR/easy-adoption-injector.sh" "$SERVER_IP"

@@ -232,7 +232,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             chmodBuilder.start().waitFor();
             System.out.println("besu start : " + blockChainProperties.getBesu().getChainId());
             ProcessBuilder builder = new ProcessBuilder(
-                    "sh", "-c", "nohup " + besuShellPath + "/start.sh "  +
+                    "sh", "-c", "nohup " + besuShellPath + "/start.sh "  + getServerIp() +
                     " > " + logFilePath + " 2>&1 &"
             );
 
@@ -952,6 +952,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     @Override
     public String getServerIp() {
         try {
+            // Priority: Check physical network interfaces first
+            List<String> candidateIps = new ArrayList<>();
+
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface iface = interfaces.nextElement();
@@ -960,15 +963,38 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                     continue;
                 }
 
+                // Exclude Docker bridge networks
+                String ifaceName = iface.getName().toLowerCase();
+                if (ifaceName.startsWith("docker") || ifaceName.startsWith("br-") ||
+                    ifaceName.equals("veth") || ifaceName.startsWith("veth")) {
+                    continue;
+                }
+
                 Enumeration<InetAddress> addresses = iface.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
 
                     if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
-                        return addr.getHostAddress();
+                        String ip = addr.getHostAddress();
+
+                        // Prioritize actual network ranges (192.168.x.x, 10.x.x.x)
+                        if (ip.startsWith("192.168.") || ip.startsWith("10.")) {
+                            return ip;
+                        }
+                        // Add to candidates if not Docker internal network
+                        else if (!ip.startsWith("172.17.") && !ip.startsWith("172.18.") &&
+                            !ip.startsWith("172.19.") && !ip.startsWith("172.20.")) {
+                            candidateIps.add(ip);
+                        }
                     }
                 }
             }
+
+            // If no priority IP found, return first candidate
+            if (!candidateIps.isEmpty()) {
+                return candidateIps.get(0);
+            }
+
         } catch (SocketException e) {
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }

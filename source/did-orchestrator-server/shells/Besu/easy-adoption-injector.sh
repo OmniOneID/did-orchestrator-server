@@ -11,7 +11,8 @@ JAR_PATHS=(
     "${PWD}/../../jars/Demo"
 )
 
-MY_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -n 1)
+#MY_IP=$(ifconfig | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -n 1)
+MY_IP=$1
 GLOBAL_BLOCKCHAIN_PATH="${PWD}/blockchain.properties"
 TA_BLOCKCHAIN_PATH="${PWD}/TA/blockchain.properties"
 ISSUER_BLOCKCHAIN_PATH="${PWD}/Issuer/blockchain.properties"

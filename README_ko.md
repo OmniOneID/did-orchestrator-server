@@ -92,7 +92,7 @@ did-orchestrator-server
 | Language          | Java 21                       |
 | IDE               | IntelliJ IDEA Ultimate Edition|
 | Compatibility     | Node.js 22.12.0, Hyperledger Besu 25.5.0 |
-| Test Environment  | macOS Sonoma, CentOS Stream 10, Oracle Linux 8.1 |
+| Test Environment  | macOS Sonoma, CentOS Stream 10, Oracle Linux 8.1 <br> Docker Engine - Community Version: 27.3.1 |
 
 ## 라이브러리
 

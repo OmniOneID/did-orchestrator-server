@@ -1,38 +1,50 @@
 #!/bin/bash
 
-if [ "$#" -ne 3 ]; then
-  echo "Usage: $0 <PGPORT> <PGUSER> <PGPASSWORD>"
-  echo "Example: $0 5430 omn omn"
+CONTAINER_NAME="postgre-opendid"
+
+if [ "$#" -ne 4 ]; then
+  echo "Usage: $0 <PGPORT> <PGUSER> <PGPASSWORD> <DB|all>"
+  echo "Available DB names: tas, cas, issuer, verifier, wallet"
+  echo "Example: $0 5432 omn omn issuer"
+  echo "         $0 5432 omn omn all"
   exit 1
 fi
 
 PGPORT=$1
 PGUSER=$2
 PGPASSWORD=$3
-PGHOST=localhost
+TARGET=$4
 
 export PGPASSWORD
 
-TARGET_DBS=(tas cas issuer verifier wallet)
+ALL_DBS=(tas cas issuer verifier wallet)
 
-echo "PostgreSQL Drop Tables Script (excluding 'lss')"
-echo "Host: $PGHOST  Port: $PGPORT  User: $PGUSER"
+if [ "$TARGET" = "all" ]; then
+  DBS=("${ALL_DBS[@]}")
+else
+  DBS=("$TARGET")
+fi
 
-for DB in "${TARGET_DBS[@]}"; do
+echo "Using Docker container: $CONTAINER_NAME"
+echo "Target database(s): ${DBS[*]}"
+
+for DB in "${DBS[@]}"; do
   echo "Processing database: $DB"
 
-  TABLES=$(psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$DB" -Atc \
+  TABLES=$(docker exec -e PGPASSWORD="$PGPASSWORD" "$CONTAINER_NAME" \
+    psql -U "$PGUSER" -p "$PGPORT" -d "$DB" -Atc \
     "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';")
 
   if [ -z "$TABLES" ]; then
-    echo "No tables found in $DB."
+    echo "⚠ No tables found in $DB."
     continue
   fi
 
   echo "Dropping tables in $DB:"
   for table in $TABLES; do
     echo "  - Dropping table: $table"
-    psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$DB" -c "DROP TABLE IF EXISTS \"$table\" CASCADE;"
+    docker exec -e PGPASSWORD="$PGPASSWORD" "$CONTAINER_NAME" \
+      psql -U "$PGUSER" -p "$PGPORT" -d "$DB" -c "DROP TABLE IF EXISTS \"$table\" CASCADE;"
   done
 
   echo "All tables dropped from $DB."

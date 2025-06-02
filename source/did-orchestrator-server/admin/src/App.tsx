@@ -58,16 +58,36 @@ const App: React.FC = () => {
 
   const hasInitialized = useRef(false);
 
+  // useEffect(() => {
+  //   localStorage.setItem("allStatus", status);
+  //
+  //   if (!hasInitialized.current) {
+  //     hasInitialized.current = true;
+  //
+  //     const selected = localStorage.getItem("selectedRepositories");
+  //     if (!selected) {
+  //       setPopupLedger("open");
+  //     }
+  //   }
+  // }, [status]);
+
   useEffect(() => {
     localStorage.setItem("allStatus", status);
 
     if (!hasInitialized.current) {
       hasInitialized.current = true;
 
-      const selected = localStorage.getItem("selectedRepositories");
-      if (!selected) {
-        setPopupLedger("open");
-      }
+      fetch("/select")
+          .then((res) => res.json())
+          .then((data) => {
+            if (!data.selected) {
+              setPopupLedger("open");
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to load repository choice:", err);
+            setPopupLedger("open");
+          });
     }
   }, [status]);
 
@@ -103,15 +123,29 @@ const App: React.FC = () => {
 
   // set to ledger
   // const openPopupLedger = (id: string) => setPopupLedger(id);
+  // const openPopupLedger = (id: string) => {
+  //   setPopupLedger(id);
+  //
+  //   const existing = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
+  //
+  //   if (!existing.includes(id)) {
+  //     const updated = [...existing, id];
+  //     localStorage.setItem("selectedRepositories", JSON.stringify(updated));
+  //   }
+  // };
+
   const openPopupLedger = (id: string) => {
     setPopupLedger(id);
-  
-    const existing = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
-  
-    if (!existing.includes(id)) {
-      const updated = [...existing, id];
-      localStorage.setItem("selectedRepositories", JSON.stringify(updated));
-    }
+
+    fetch("/select", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ selected: id }),
+    }).catch((err) => {
+      console.error("Failed to save repository choice:", err);
+    });
   };
   // const closePopupLedger = (id: string) => setPopupledger(id);
 
@@ -848,45 +882,65 @@ const App: React.FC = () => {
             <p className="text-sm text-gray-600 mb-4">
               Please choose one of the repositories below to proceed with the ledger setup.
             </p>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const selected = formData.get("repository");
+            {/*<form onSubmit={(e) => {*/}
+            {/*  e.preventDefault();*/}
+            {/*  const formData = new FormData(e.currentTarget);*/}
+            {/*  const selected = formData.get("repository");*/}
+            {/*  if (!selected) {*/}
+            {/*    alert("Please select a repository.");*/}
+            {/*    return;*/}
+            {/*  }*/}
+            {/*  localStorage.setItem("selectedRepositories", JSON.stringify([selected as string]));*/}
+            {/*  setPopupLedger(null);*/}
+            {/*  setRefreshRepositories(prev => prev + 1);*/}
+            {/*}}>*/}
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const selected = formData.get("repository");
 
-              if (!selected) {
-                alert("Please select a repository.");
-                return;
-              }
-              localStorage.setItem("selectedRepositories", JSON.stringify([selected as string]));
-              setPopupLedger(null);
-              setRefreshRepositories(prev => prev + 1);
-            }}>
-              <div className="mb-4">
-                <label className="inline-flex items-center mb-2">
-                  <input type="radio" name="repository" value="besu" className="mr-2" />
-                  Hyperledger Besu
-                </label><br />
-                <label className="inline-flex items-center">
-                  <input type="radio" name="repository" value="lss" className="mr-2" />
-                  Ledger Service Server
-                </label>
-              </div>
-              <div className="flex justify-end">
-                <button type="submit" className="w-full px-4 py-2 bg-blue-600 text-white rounded">
-                  Confirm
-                </button>
-              </div>
-            </form>
+                if (!selected) {
+                  alert("Please select a repository.");
+                  return;
+                }
+
+                fetch("/select", {
+                  method: "POST",
+                  headers: {"Content-Type": "application/json"},
+                  body: JSON.stringify({selected}),
+                }).then(() => {
+                  setPopupLedger(null);
+                  setRefreshRepositories(prev => prev + 1);
+                });
+              }}>
+
+                <div className="mb-4">
+                  <label className="inline-flex items-center mb-2">
+                    <input type="radio" name="repository" value="besu" className="mr-2"/>
+                    Hyperledger Besu
+                  </label><br/>
+                  <label className="inline-flex items-center">
+                    <input type="radio" name="repository" value="lss" className="mr-2"/>
+                    Ledger Service Server
+                  </label>
+                </div>
+                <div className="flex justify-end">
+                  <button type="submit" className="w-full px-4 py-2 bg-blue-600 text-white rounded">
+                    Confirm
+                  </button>
+                </div>
+              </form>
           </div>
         </div>
-      )}
+        )}
       {showResetConfirm && (
-        <div id="popup-overlay-reset" className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
-            <h2 className="text-lg font-bold border-b pb-2 mb-2">Reset Confirmation</h2>
+          <div id="popup-overlay-reset"
+               className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+              <h2 className="text-lg font-bold border-b pb-2 mb-2">Reset Confirmation</h2>
 
-            <p className="text-sm text-gray-700 mb-4">
-              Are you sure you want to initialize this repository?<br />
+              <p className="text-sm text-gray-700 mb-4">
+                Are you sure you want to initialize this repository?<br />
               This action cannot be undone.
             </p>
 

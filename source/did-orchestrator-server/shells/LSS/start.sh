@@ -6,7 +6,7 @@ CONFIG_PATH=$3
 SERVER_IP=$4
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-LOGS_PATH="$(dirname "$SCRIPT_DIR")/logs"
+LOGS_PATH="$(dirname "$SCRIPT_DIR")/../logs"
 
 mkdir -p "$LOGS_PATH"
 

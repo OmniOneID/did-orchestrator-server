@@ -567,14 +567,12 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             return response;
         }
 
-        // If lss DB exists, proceed to drop tables
         String getTablesQuery = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'";
 
         try (
                 Connection conn = DriverManager.getConnection(baseUrl + "/lss", user, password);
                 Statement stmt = conn.createStatement()
         ) {
-            // Get list of tables
             List<String> tables = new ArrayList<>();
             try (ResultSet rs = stmt.executeQuery(getTablesQuery)) {
                 while (rs.next()) {
@@ -582,8 +580,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                 }
             }
 
-            // Drop all tables with CASCADE
-            stmt.execute("SET session_replication_role = 'replica';"); // Bypass FK constraints
+            stmt.execute("SET session_replication_role = 'replica';");
             for (String table : tables) {
                 log.info("Dropping table: " + table);
                 stmt.executeUpdate("DROP TABLE IF EXISTS \"" + table + "\" CASCADE;");
@@ -608,10 +605,21 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestStartupPostgre() {
         log.info("requestStartupPostgre");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        String logFilePath = LOGS_PATH + "/postgre.log";
+
         try {
-            String postgreShellPath = System.getProperty("user.dir") + "/shells/Postgre";
-            ProcessBuilder builder = new ProcessBuilder("sh", postgreShellPath + "/start.sh", databaseProperties.getPort(), databaseProperties.getUser(), databaseProperties.getPassword(), databaseProperties.getDb());
-            builder.directory(new File(postgreShellPath));
+            String postgreShellPath = System.getProperty("user.dir") + "/shells/Postgre/start.sh";
+            File logFile = new File(logFilePath);
+
+            ProcessBuilder builder = new ProcessBuilder("sh", postgreShellPath,
+                    databaseProperties.getPort(),
+                    databaseProperties.getUser(),
+                    databaseProperties.getPassword(),
+                    databaseProperties.getDb());
+
+            builder.directory(new File(System.getProperty("user.dir") + "/shells/Postgre"));
+            builder.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+            builder.redirectError(ProcessBuilder.Redirect.appendTo(logFile));
 
             Process process = builder.start();
             String output = getProcessOutput(process);

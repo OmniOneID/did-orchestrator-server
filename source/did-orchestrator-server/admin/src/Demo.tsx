@@ -41,7 +41,7 @@ const Demo = forwardRef((props, ref) => {
       }
 
       const data = JSON.parse(xhr.responseText);
-      
+
       if (data.services && data.services.server && data.services.server.demo) {
         const demoConfig = data.services.server.demo;
         return {
@@ -51,7 +51,7 @@ const Demo = forwardRef((props, ref) => {
           status: "GRAY"
         };
       }
-      
+
       return {} as Demo;
     } catch (error) {
       console.error("Error fetching demo configurations:", error);
@@ -84,6 +84,37 @@ const Demo = forwardRef((props, ref) => {
 
     var allStatus = localStorage.getItem("allStatus")
     setShowDemoActionsAndInfo(allStatus === "GREEN");
+  };
+
+  const waitForDemoHealth = async (mode: string, maxRetries = 10, interval = 2000) => {
+    for (let i = 0; i < maxRetries; i++) {
+      await new Promise((resolve) => setTimeout(resolve, interval));
+      try {
+        const response = await fetch(`/healthcheck/${demo.port}`, { method: "GET" });
+        if (response.ok) {
+          const data = await response.json();
+          if (mode === "start") {
+            if (data.status === "UP") {
+              setDemo((prev) => ({ ...prev, status: "GREEN" }));
+              console.log(`Demo is now UP`);
+              return;
+            }
+          }
+          if (mode === "stop") {
+            if (data.status === "DOWN") {
+              setDemo((prev) => ({ ...prev, status: "RED" }));
+              console.log(`Demo is now DOWN`);
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error checking demo health status:", error);
+      }
+    }
+
+    console.log(`Demo is still DOWN after retries`);
+    setDemo((prev) => ({ ...prev, status: "RED" }));
   };
 
   useImperativeHandle(ref, () => ({
@@ -127,13 +158,13 @@ const Demo = forwardRef((props, ref) => {
       const response = await fetch(`/startup/${demo.port}`, { method: "GET" });
       if (response.ok) {
         console.log("Demo started successfully");
+        await waitForDemoHealth("start");
       } else {
         console.error("Failed to start demo");
       }
     } catch (error) {
       console.error("Error starting demo:", error);
     }
-    await healthCheckDemo(false);
   };
 
   const stopDemo = async (fromUser: boolean = false) => {
@@ -146,46 +177,46 @@ const Demo = forwardRef((props, ref) => {
       const response = await fetch(`/shutdown/${demo.port}`, { method: "GET" });
       if (response.ok) {
         console.log("Demo stopped successfully");
+        await waitForDemoHealth("stop");
       } else {
         console.error("Failed to stop demo");
       }
     } catch (error) {
       console.error("Error stopping demo:", error);
     }
-    await healthCheckDemo(false);
   };
 
   const openWithDifferentPort = (newPort: string, additionalPath: string = '') => {
     const url = new URL(window.location.href);
     url.port = newPort;
-    
+
     if (additionalPath) {
       url.pathname = additionalPath.startsWith('/') ? additionalPath : '/' + additionalPath;
     }
-    
+
     window.open(url.toString());
   };
 
   return (
-    <section className="bg-white p-6 rounded shadow">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">
-          Demo
-          <button
-            onClick={(e) =>
-              showToolTip(
-                "You can control the Demo below once all the Entities above are running.<br>The Actions, Info, and other items will be activated at that time.",
-                e
-              )
-            }
-            className="text-gray-500 hover:text-gray-700 ml-1"
-          >
-            <HelpIcon width="0.9em" height="0.9em" />
-          </button>
-        </h2>
-      </div>
-      <table className="w-full text-left border-collapse">
-        <thead>
+      <section className="bg-white p-6 rounded shadow">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">
+            Demo
+            <button
+                onClick={(e) =>
+                    showToolTip(
+                        "You can control the Demo below once all the Entities above are running.<br>The Actions, Info, and other items will be activated at that time.",
+                        e
+                    )
+                }
+                className="text-gray-500 hover:text-gray-700 ml-1"
+            >
+              <HelpIcon width="0.9em" height="0.9em" />
+            </button>
+          </h2>
+        </div>
+        <table className="w-full text-left border-collapse">
+          <thead>
           <tr className="bg-gray-100">
             <th className="p-2 w-20">Status</th>
             <th className="p-2 w-56">Name</th>
@@ -193,101 +224,101 @@ const Demo = forwardRef((props, ref) => {
             <th className="p-2 w-48">Info</th>
             <th className="p-2 w-48">Generators</th>
           </tr>
-        </thead>
-        <tbody className="server-table">
-        <tr className="border-b">
-          <td className="p-2 pl-6 demo">
-            <CSSTransition
-                in={showDemoActionsAndInfo}
-                timeout={300}
-                classNames="fade"
-                unmountOnExit
-            >
-              <div>
-                {StatusIcon(demo.status)}
-              </div>
-            </CSSTransition>
-          </td>
-          <td className="p-2 font-bold">
-            <CSSTransition
-                in={showDemoActionsAndInfo}
-                timeout={300}
-                classNames="fade"
-                unmountOnExit
-            >
-              <div>
-                {demo.name} ({demo.port}) <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch(`/logs/server_${demo.port}.log`, {method: 'HEAD'});
-                      if (res.ok) {
-                        window.open(`/logs/server_${demo.port}.log`);
-                      } else {
+          </thead>
+          <tbody className="server-table">
+          <tr className="border-b">
+            <td className="p-2 pl-6 demo">
+              <CSSTransition
+                  in={showDemoActionsAndInfo}
+                  timeout={300}
+                  classNames="fade"
+                  unmountOnExit
+              >
+                <div>
+                  {StatusIcon(demo.status)}
+                </div>
+              </CSSTransition>
+            </td>
+            <td className="p-2 font-bold">
+              <CSSTransition
+                  in={showDemoActionsAndInfo}
+                  timeout={300}
+                  classNames="fade"
+                  unmountOnExit
+              >
+                <div>
+                  {demo.name} ({demo.port}) <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/logs/server_${demo.port}.log`, {method: 'HEAD'});
+                        if (res.ok) {
+                          window.open(`/logs/server_${demo.port}.log`);
+                        } else {
+                          alert('Log file not found.');
+                        }
+                      } catch (err) {
                         alert('Log file not found.');
                       }
-                    } catch (err) {
-                      alert('Log file not found.');
-                    }
-                  }}
-                  className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded"
-                  title="By clicking this icon, you can view the logs."
+                    }}
+                    className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded"
+                    title="By clicking this icon, you can view the logs."
+                >
+                  log
+                </button>
+                </div>
+              </CSSTransition>
+            </td>
+            <td className="p-2">
+              <CSSTransition
+                  in={showDemoActionsAndInfo}
+                  timeout={300}
+                  classNames="fade"
+                  unmountOnExit
               >
-                log
-              </button>
-              </div>
-            </CSSTransition>
-          </td>
-          <td className="p-2">
-            <CSSTransition
-                in={showDemoActionsAndInfo}
-                timeout={300}
-                classNames="fade"
-                unmountOnExit
-            >
-              <div className="flex space-x-1">
-                <button
-                    className="bg-green-600 text-white px-2 py-1 rounded"
-                    onClick={() => startDemo(true)}
-                >
-                  Start
-                </button>
-                <button
-                    className="bg-[#ED207B] text-white px-2 py-1 rounded"
-                    onClick={() => stopDemo(true)}
-                >
-                  Stop
-                </button>
-                <button
-                    className="bg-gray-600 text-white px-2 py-1 rounded"
-                    onClick={() => healthCheckDemo(true)}
+                <div className="flex space-x-1">
+                  <button
+                      className="bg-green-600 text-white px-2 py-1 rounded"
+                      onClick={() => startDemo(true)}
+                  >
+                    Start
+                  </button>
+                  <button
+                      className="bg-[#ED207B] text-white px-2 py-1 rounded"
+                      onClick={() => stopDemo(true)}
+                  >
+                    Stop
+                  </button>
+                  <button
+                      className="bg-gray-600 text-white px-2 py-1 rounded"
+                      onClick={() => healthCheckDemo(true)}
                   >
                     Status
                   </button>
-              </div>
-            </CSSTransition>
-          </td>
-          <td className="p-2">
-            <CSSTransition
-                in={showDemoActionsAndInfo}
-                timeout={300}
-                classNames="fade"
-                unmountOnExit
-            >
-              <div className="flex space-x-1">
-                <button
-                    className="bg-gray-600 text-white px-3 py-1 rounded"
-                    onClick={() => openWithDifferentPort(`${demo.port}`, ``)}
-                >
-                  Demo Site
-                </button>
-              </div>
-            </CSSTransition>
-          </td>
-          <td className="p-2"></td>
-        </tr>
-        </tbody>
-      </table>
-    </section>
+                </div>
+              </CSSTransition>
+            </td>
+            <td className="p-2">
+              <CSSTransition
+                  in={showDemoActionsAndInfo}
+                  timeout={300}
+                  classNames="fade"
+                  unmountOnExit
+              >
+                <div className="flex space-x-1">
+                  <button
+                      className="bg-gray-600 text-white px-3 py-1 rounded"
+                      onClick={() => openWithDifferentPort(`${demo.port}`, ``)}
+                  >
+                    Demo Site
+                  </button>
+                </div>
+              </CSSTransition>
+            </td>
+            <td className="p-2"></td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
   );
 });
 

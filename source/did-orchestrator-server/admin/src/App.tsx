@@ -58,19 +58,6 @@ const App: React.FC = () => {
 
   const hasInitialized = useRef(false);
 
-  // useEffect(() => {
-  //   localStorage.setItem("allStatus", status);
-  //
-  //   if (!hasInitialized.current) {
-  //     hasInitialized.current = true;
-  //
-  //     const selected = localStorage.getItem("selectedRepositories");
-  //     if (!selected) {
-  //       setPopupLedger("open");
-  //     }
-  //   }
-  // }, [status]);
-
   useEffect(() => {
     localStorage.setItem("allStatus", status);
 
@@ -120,19 +107,6 @@ const App: React.FC = () => {
       if(status != "GRAY") statusAll();
     }
   };
-
-  // set to ledger
-  // const openPopupLedger = (id: string) => setPopupLedger(id);
-  // const openPopupLedger = (id: string) => {
-  //   setPopupLedger(id);
-  //
-  //   const existing = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
-  //
-  //   if (!existing.includes(id)) {
-  //     const updated = [...existing, id];
-  //     localStorage.setItem("selectedRepositories", JSON.stringify(updated));
-  //   }
-  // };
 
   const openPopupLedger = (id: string) => {
     setPopupLedger(id);

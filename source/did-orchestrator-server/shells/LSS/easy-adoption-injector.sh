@@ -116,10 +116,10 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
         ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
 
         # lss.url: http://$MY_IP:port
-  LEDGER_PORT=$(get_service_port "ledgerService")
+  LEDGER_PORT=$(get_service_port_lss "ledgerService")
   awk -v my_ip="$MY_IP" -v port="$LEDGER_PORT" '
       BEGIN { found=0; lss_found=0; in_lss=0 }
-      /^loss:/ { lss_found=1; in_lss=1 }
+      /^lss:/ { lss_found=1; in_lss=1 }
       in_lss && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
       { print }
       END {
@@ -185,6 +185,21 @@ for JAR_PATH in "${JAR_PATHS[@]}"; do
                 print "  url: http://" my_ip ":" port;
               }
             }
+            ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
+
+            # lss.url: http://$MY_IP:port
+            LEDGER_PORT=$(get_service_port_lss "ledgerService")
+            awk -v my_ip="$MY_IP" -v port="$LEDGER_PORT" '
+                BEGIN { found=0; lss_found=0; in_lss=0 }
+                /^lss:/ { lss_found=1; in_lss=1 }
+                in_lss && /url:/ { found=1; sub(/url:.*/, "url: http://" my_ip ":" port) }
+                { print }
+                END {
+                    if (!found) {
+                        if (!lss_found) print "lss:";
+                        print "  url: http://" my_ip ":" port;
+                    }
+                }
             ' "$APP_YML" > temp.yml && mv temp.yml "$APP_YML"
 
             # issuer.url: http://$MY_IP:$ISSUER_PORT

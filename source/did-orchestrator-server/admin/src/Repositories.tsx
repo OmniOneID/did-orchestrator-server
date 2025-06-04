@@ -85,56 +85,6 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
   }, []);
 
 
-// const Repositories = forwardRef((props: RepositoriesProps, ref) => {
-//   const { openPopupLedger } = props;
-//
-//   const [repositories, setRepositories] = useState<Repository[]>(() => {
-//
-//   let selectedIds: string[] = [];
-//   try {
-//     const parsed = JSON.parse(localStorage.getItem("selectedRepositories") || "[]");
-//     if (Array.isArray(parsed)) {
-//       selectedIds = parsed;
-//     }
-//   } catch (e) {
-//     console.error("Error parsing selectedRepositories:", e);
-//   }
-//
-//   const alwaysInclude = ["postgre"];
-//   const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
-//
-//   const stored = localStorage.getItem("repositories");
-//   var baseRepos = [];
-//   if (stored) {
-//     baseRepos = JSON.parse(stored) as Repository[];
-//     if(baseRepos.length == 1) { // postgre only case
-//       baseRepos = defaultRepos;
-//     }
-//   } else {
-//     baseRepos = defaultRepos;
-//   }
-//
-//   const filteredRepos = baseRepos.filter(repo =>
-//     finalSelected.includes(repo.id)
-//   );
-//
-//   localStorage.setItem("repositories", JSON.stringify(filteredRepos));
-//
-//   try {
-//     const stored = localStorage.getItem("repositories");
-//     if (stored) {
-//       const parsed = JSON.parse(stored) as Repository[];
-//       const merged = parsed.filter(repo => finalSelected.includes(repo.id));
-//       return merged.length > 0 ? merged : filteredRepos;
-//     }
-//   } catch (e) {
-//     console.error("Error parsing repositories from localStorage", e);
-//   }
-//
-//   return filteredRepos;
-//
-//   });
-
   useEffect(() => {
     localStorage.setItem("repositories", JSON.stringify(repositories));
   }, [repositories]);
@@ -146,13 +96,6 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
       return;
     }
 
-    /*
-    setRepositories((prevRepos) =>
-      prevRepos.map((repo) =>
-        repo.id === repoId ? { ...repo, status: "PROGRESS" } : repo
-      )
-    );
-    */
 
     try {
       const response = await fetch(`/healthcheck/${repoId}`, {

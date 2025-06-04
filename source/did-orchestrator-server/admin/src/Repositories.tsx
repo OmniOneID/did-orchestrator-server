@@ -52,12 +52,14 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
         console.error("Error parsing repositories from localStorage", e);
       }
     }
-    return defaultRepos;
+    return [];
   });
 
   useEffect(() => {
     const alwaysInclude = ["postgre"];
 
+    const stored = localStorage.getItem("repositories");
+    const storedRepos = stored ? JSON.parse(stored) as Repository[] : [];
     fetch("/select")
         .then(res => res.json())
         .then(data => {
@@ -66,12 +68,16 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
 
           const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
 
-          const filtered: Repository[] = defaultRepos.filter(repo =>
-              finalSelected.includes(repo.id)
-          );
+          const filtered: Repository[] = defaultRepos
+              .filter(repo => finalSelected.includes(repo.id))
+              .map(repo => {
+                const storedRepo = storedRepos.find(r => r.id === repo.id);
+                return storedRepo ? { ...repo, status: storedRepo.status } : repo;
+              });
+
+          setRepositories(filtered);
           console.log("repositories : " +  JSON.stringify(filtered));
           localStorage.setItem("repositories", JSON.stringify(filtered));
-          setRepositories(filtered);
         })
         .catch((err) => {
           console.error("Failed to fetch selectedRepositories from server:", err);

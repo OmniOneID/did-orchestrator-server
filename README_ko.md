@@ -108,6 +108,10 @@ did-orchestrator-server
 Orchestrator 서버의 설치 및 구성에 대한 자세한 지침은 아래 가이드를 참조하십시오:
 - [OpenDID Orchestrator 서버 설치 및 운영 가이드](docs/installation/OpenDID_orchestrator_InstallationAndOperation_Guide_ko.md)  
 
+## 전제 조건
+
+- Orchestrator 서버와 그 구성 요소들은 현재 모두 단일 장비 내에서 운영되는 것을 전제로 합니다. 즉, 데이터베이스, 블록체인, 서버 등이 모두 로컬에 설치되어 동작하도록 구성되어 있으며, 이 중 일부를 원격에 분산하여 구성하는 것은 허용되지 않습니다. 또한 단일 서버에서 운영하는 것을 기준으로 합니다.
+
 ## API 참고 문서
 
 - **Orchestrator API**: Orchestrator 서버의 API 엔드포인트 및 사용법에 대한 자세한 참고 자료입니다.

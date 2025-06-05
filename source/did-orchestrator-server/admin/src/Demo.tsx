@@ -197,6 +197,8 @@ const Demo = forwardRef((props, ref) => {
     window.open(url.toString());
   };
 
+  const isAllStatusLastGreen = localStorage.getItem("allStatusLast") === "GREEN";
+
   return (
       <section className="bg-white p-6 rounded shadow">
         <div className="flex justify-between items-center mb-4">
@@ -229,9 +231,9 @@ const Demo = forwardRef((props, ref) => {
           <tr className="border-b">
             <td className="p-2 pl-6 demo">
               <CSSTransition
-                  in={showDemoActionsAndInfo}
-                  timeout={300}
-                  classNames="fade"
+                  in={isAllStatusLastGreen || showDemoActionsAndInfo}
+                  timeout={isAllStatusLastGreen ? 0 : 300}
+                  classNames={isAllStatusLastGreen ? "" : "fade"}
                   unmountOnExit
               >
                 <div>
@@ -241,9 +243,9 @@ const Demo = forwardRef((props, ref) => {
             </td>
             <td className="p-2 font-bold">
               <CSSTransition
-                  in={showDemoActionsAndInfo}
-                  timeout={300}
-                  classNames="fade"
+                  in={isAllStatusLastGreen || showDemoActionsAndInfo}
+                  timeout={isAllStatusLastGreen ? 0 : 300}
+                  classNames={isAllStatusLastGreen ? "" : "fade"}
                   unmountOnExit
               >
                 <div>
@@ -270,9 +272,9 @@ const Demo = forwardRef((props, ref) => {
             </td>
             <td className="p-2">
               <CSSTransition
-                  in={showDemoActionsAndInfo}
-                  timeout={300}
-                  classNames="fade"
+                  in={isAllStatusLastGreen || showDemoActionsAndInfo}
+                  timeout={isAllStatusLastGreen ? 0 : 300}
+                  classNames={isAllStatusLastGreen ? "" : "fade"}
                   unmountOnExit
               >
                 <div className="flex space-x-1">
@@ -299,9 +301,9 @@ const Demo = forwardRef((props, ref) => {
             </td>
             <td className="p-2">
               <CSSTransition
-                  in={showDemoActionsAndInfo}
-                  timeout={300}
-                  classNames="fade"
+                  in={isAllStatusLastGreen || showDemoActionsAndInfo}
+                  timeout={isAllStatusLastGreen ? 0 : 300}
+                  classNames={isAllStatusLastGreen ? "" : "fade"}
                   unmountOnExit
               >
                 <div className="flex space-x-1">

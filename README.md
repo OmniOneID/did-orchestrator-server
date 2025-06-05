@@ -108,6 +108,10 @@ The libraries used in this project are as follows:
 For detailed instructions on installing and configuring the Orchestrator server, refer to the guide below:
 - [OpenDID Orchestrator Server Installation and Operation Guide](docs/installation/OpenDID_orchestrator_InstallationAndOperation_Guide.md)
 
+## Prerequisites
+
+The Orchestrator server and its components are currently assumed to operate on a single machine. That is, the database, blockchain, and servers are all configured to run locally. Distributing any of these components to remote environments is not permitted. The entire system is designed based on single-server operation.
+
 ## API Reference Documentation
 
 - **Orchestrator API**: Detailed reference material for Orchestrator server API endpoints and usage.

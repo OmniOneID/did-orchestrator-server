@@ -449,7 +449,7 @@ const App: React.FC = () => {
 
       if (!walletResponse.ok) {
         const errorData = await walletResponse.json();
-        alert(`Wallet creation failed: ${errorData.message || "Unknown error."}`);
+        alert(`DID Document creation failed: ${errorData.message || "Unknown error."}`);
         return;
       }
 

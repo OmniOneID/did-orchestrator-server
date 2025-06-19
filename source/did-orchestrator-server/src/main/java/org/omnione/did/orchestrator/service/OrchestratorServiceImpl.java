@@ -80,14 +80,14 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     private Map<String, String> initializeServerJars() {
         Map<String, String> serverJars = new HashMap<>();
         servicesProperties.getServer().forEach((key, serverDetail) ->
-                serverJars.put(String.valueOf(serverDetail.getPort()), serverDetail.getFile()));
+            serverJars.put(String.valueOf(serverDetail.getPort()), serverDetail.getFile()));
         return serverJars;
     }
 
     private Map<String, String> initializeServerJarsFolder() {
         Map<String, String> serverJarsFolder = new HashMap<>();
         servicesProperties.getServer().forEach((key, serverDetail) ->
-                serverJarsFolder.put(String.valueOf(serverDetail.getPort()), serverDetail.getName()));
+            serverJarsFolder.put(String.valueOf(serverDetail.getPort()), serverDetail.getName()));
         return serverJarsFolder;
     }
 
@@ -232,8 +232,8 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             chmodBuilder.start().waitFor();
             System.out.println("besu start : " + blockChainProperties.getBesu().getChainId());
             ProcessBuilder builder = new ProcessBuilder(
-                    "sh", "-c", "nohup " + besuShellPath + "/start.sh "  + getServerIp() +
-                    " > " + logFilePath + " 2>&1 &"
+                "sh", "-c", "nohup " + besuShellPath + "/start.sh "  + getServerIp() +
+                " > " + logFilePath + " 2>&1 &"
             );
 
             builder.directory(new File(besuShellPath));
@@ -479,8 +479,8 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         String query = "SELECT 1 FROM pg_database WHERE datname = 'lss'";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
 
             if (rs.next()) {
                 exists = true;
@@ -547,9 +547,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         String checkDbQuery = "SELECT 1 FROM pg_database WHERE datname = 'lss'";
 
         try (
-                Connection adminConn = DriverManager.getConnection(baseUrl + "/postgres", user, password);
-                Statement checkStmt = adminConn.createStatement();
-                ResultSet rs = checkStmt.executeQuery(checkDbQuery)
+            Connection adminConn = DriverManager.getConnection(baseUrl + "/postgres", user, password);
+            Statement checkStmt = adminConn.createStatement();
+            ResultSet rs = checkStmt.executeQuery(checkDbQuery)
         ) {
             if (!rs.next()) {
                 log.warn("Database 'lss' does not exist.");
@@ -564,8 +564,8 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         String getTablesQuery = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'";
 
         try (
-                Connection conn = DriverManager.getConnection(baseUrl + "/lss", user, password);
-                Statement stmt = conn.createStatement()
+            Connection conn = DriverManager.getConnection(baseUrl + "/lss", user, password);
+            Statement stmt = conn.createStatement()
         ) {
             List<String> tables = new ArrayList<>();
             try (ResultSet rs = stmt.executeQuery(getTablesQuery)) {
@@ -606,10 +606,10 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             File logFile = new File(logFilePath);
 
             ProcessBuilder builder = new ProcessBuilder("sh", postgreShellPath,
-                    databaseProperties.getPort(),
-                    databaseProperties.getUser(),
-                    databaseProperties.getPassword(),
-                    databaseProperties.getDb());
+                databaseProperties.getPort(),
+                databaseProperties.getUser(),
+                databaseProperties.getPassword(),
+                databaseProperties.getDb());
 
             builder.directory(new File(System.getProperty("user.dir") + "/shells/Postgre"));
             builder.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
@@ -745,35 +745,87 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         Process process = null;
         BufferedWriter writer = null;
         OutputStreamWriter outputStreamWriter = null;
+        BufferedReader reader = null;
+        BufferedReader errorReader = null;
 
         try {
 
             ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_wallet.sh", fileName);
             builder.directory(new File(CLI_TOOL_DIR));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            // Use PIPE instead of INHERIT to capture output
+            builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+            builder.redirectError(ProcessBuilder.Redirect.PIPE);
 
             process = builder.start();
 
+            // Write password to process input
             outputStreamWriter = new OutputStreamWriter(process.getOutputStream());
             writer = new BufferedWriter(outputStreamWriter);
-
             writer.write(password);
             writer.newLine();
             writer.flush();
+            writer.close(); // Close input stream to allow process to continue
 
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                log.debug("Wallet creation successful.");
-            } else {
-                log.error("Wallet creation failed.");
-                response.setStatus("ERROR");
-                return response;
+            // Read output streams
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder errorOutput = new StringBuilder();
+
+            // Read standard output
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+                log.debug("stdout: " + line);
             }
 
-        } catch (IOException | InterruptedException e) {
+            // Read error output
+            while ((line = errorReader.readLine()) != null) {
+                errorOutput.append(line).append("\n");
+                log.debug("stderr: " + line);
+            }
+
+            int exitCode = process.waitFor();
+
+            // Check for WalletException string in output
+            String combinedOutput = output.toString() + errorOutput.toString();
+            boolean hasWalletException = combinedOutput.contains(Constant.CLI_WALLET_EXCEPTION_MESSAGE) || combinedOutput.contains(Constant.CLI_CRYPTO_EXCEPTION_MESSAGE);
+
+            if (exitCode == 0 && !hasWalletException) {
+                log.debug("Wallet creation successful.");
+                response.setStatus("SUCCESS");
+            } else {
+                if (hasWalletException) {
+                    log.error("Wallet creation failed: WalletException detected in output");
+                } else {
+                    log.error("Wallet creation failed with exit code: " + exitCode);
+                }
+                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            }
+
+        } catch (IOException | InterruptedException | OpenDidException e) {
+            log.error("Exception during wallet creation", e);
+            response.setStatus("ERROR");
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         } finally {
+            // Resource cleanup
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stdout.");
+                }
+            }
+
+            if (errorReader != null) {
+                try {
+                    errorReader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stderr.");
+                }
+            }
+
             if (writer != null) {
                 try {
                     writer.close();
@@ -795,7 +847,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             }
         }
 
-        response.setStatus("SUCCESS");
         return response;
     }
 
@@ -812,41 +863,94 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto createKeys(String fileName, String password, List<String> keyIds) {
         log.debug("createKeys : " + fileName + " / " + password);
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-//        String[] keyId = {"assert", "auth", "keyagree", "invoke"};
+
         Process process = null;
         BufferedWriter writer = null;
         OutputStreamWriter outputStreamWriter = null;
+        BufferedReader reader = null;
+        BufferedReader errorReader = null;
+
         for(int i = 0; i < keyIds.size(); i++) {
             try {
                 log.debug("createKeys : " + fileName + " / " + password + " / " + keyIds.get(i));
                 ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_keys.sh", fileName + ".wallet", keyIds.get(i));
                 builder.directory(new File(CLI_TOOL_DIR));
-                builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-                builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+                // Use PIPE instead of INHERIT to capture output
+                builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+                builder.redirectError(ProcessBuilder.Redirect.PIPE);
 
                 process = builder.start();
 
+                // Write password to process input
                 outputStreamWriter = new OutputStreamWriter(process.getOutputStream());
                 writer = new BufferedWriter(outputStreamWriter);
-
                 writer.write(password);
                 writer.newLine();
                 writer.flush();
+                writer.close(); // Close input stream to allow process to continue
+
+                // Read output streams
+                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+                StringBuilder output = new StringBuilder();
+                StringBuilder errorOutput = new StringBuilder();
+
+                // Read standard output
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                    log.debug("stdout: " + line);
+                }
+
+                // Read error output
+                while ((line = errorReader.readLine()) != null) {
+                    errorOutput.append(line).append("\n");
+                    log.debug("stderr: " + line);
+                }
 
                 int exitCode = process.waitFor();
-                if (exitCode == 0) {
+
+                // Check for WalletException string in output
+                String combinedOutput = output.toString() + errorOutput.toString();
+                boolean hasWalletException = combinedOutput.contains(Constant.CLI_WALLET_EXCEPTION_MESSAGE) || combinedOutput.contains(Constant.CLI_CRYPTO_EXCEPTION_MESSAGE);
+
+                if (exitCode == 0 && !hasWalletException) {
                     log.debug("Keypair creation successful.");
                 } else {
-                    log.error("Keypair creation failed.");
-                    response.setStatus("ERROR");
-                    return response;
+                    if (hasWalletException) {
+                        log.error("Keypair creation failed: WalletException detected in output");
+                    } else {
+                        log.error("Keypair creation failed with exit code: " + exitCode);
+                    }
+                    throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
                 }
+
                 if (process.isAlive()) {
                     process.destroy();
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException | OpenDidException e) {
+                log.error("Exception during keypair creation", e);
+                response.setStatus("ERROR");
                 throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
             } finally {
+                // Resource cleanup
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        log.error("Error closing BufferedReader for stdout.");
+                    }
+                }
+
+                if (errorReader != null) {
+                    try {
+                        errorReader.close();
+                    } catch (IOException e) {
+                        log.error("Error closing BufferedReader for stderr.");
+                    }
+                }
+
                 if (writer != null) {
                     try {
                         writer.close();
@@ -891,34 +995,86 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         Process process = null;
         BufferedWriter writer = null;
         OutputStreamWriter outputStreamWriter = null;
+        BufferedReader reader = null;
+        BufferedReader errorReader = null;
 
         try {
             ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_did_doc.sh", fileName + ".wallet", fileName + ".did", did, controller, type);
             builder.directory(new File(CLI_TOOL_DIR));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            // Use PIPE instead of INHERIT to capture output
+            builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+            builder.redirectError(ProcessBuilder.Redirect.PIPE);
 
             process = builder.start();
 
+            // Write password to process input
             outputStreamWriter = new OutputStreamWriter(process.getOutputStream());
             writer = new BufferedWriter(outputStreamWriter);
-
             writer.write(password);
             writer.newLine();
             writer.flush();
+            writer.close(); // Close input stream to allow process to continue
+
+            // Read output streams
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder errorOutput = new StringBuilder();
+
+            // Read standard output
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+                log.debug("stdout: " + line);
+            }
+
+            // Read error output
+            while ((line = errorReader.readLine()) != null) {
+                errorOutput.append(line).append("\n");
+                log.debug("stderr: " + line);
+            }
 
             int exitCode = process.waitFor();
-            if (exitCode == 0) {
+
+            // Check for WalletException string in output
+            String combinedOutput = output.toString() + errorOutput.toString();
+            boolean hasWalletException = combinedOutput.contains(Constant.CLI_WALLET_EXCEPTION_MESSAGE) || combinedOutput.contains(Constant.CLI_CRYPTO_EXCEPTION_MESSAGE);
+
+            if (exitCode == 0 && !hasWalletException) {
                 log.debug("DID Documents creation successful.");
                 response.setStatus("SUCCESS");
                 return response;
             } else {
-                log.error("DID Documents creation failed.");
+                if (hasWalletException) {
+                    log.error("DID Documents creation failed: WalletException detected in output");
+                } else {
+                    log.error("DID Documents creation failed with exit code: " + exitCode);
+                }
+                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | OpenDidException e) {
+            log.error("Exception during DID document creation", e);
+            response.setStatus("ERROR");
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         } finally {
+            // Resource cleanup
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stdout.");
+                }
+            }
+
+            if (errorReader != null) {
+                try {
+                    errorReader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stderr.");
+                }
+            }
 
             if (writer != null) {
                 try {
@@ -939,10 +1095,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             if (process != null) {
                 process.destroy();
             }
-
         }
-        response.setStatus("ERROR");
-        return response;
     }
 
     /**
@@ -1187,6 +1340,3 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     }
 
 }
-
-
-

@@ -433,20 +433,14 @@ public class OrchestratorServiceImpl implements OrchestratorService{
 
             String jarFolder = System.getProperty("user.dir") + blockChainProperties.getLedgerService().getJarPath() + "/" + lssFolder;
             String jarFilePath = jarFolder + "/" + blockChainProperties.getLedgerService().getFile();
-            String configFilePath = jarFolder + "/application.yml";
             File jarFile = new File(jarFilePath);
             File scriptFile = new File(System.getProperty("user.dir") + "/shells/LSS/start.sh");
-            if (!new File(configFilePath).exists()) {
-                log.info("requestStartupLedgerService configFilePath : " + configFilePath);
-                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-            }
 
             List<String> command = new ArrayList<>();
             command.add("sh");
             command.add(scriptFile.getAbsolutePath());
             command.add(jarFile.getAbsolutePath());
             command.add(port);
-            command.add(configFilePath);
             command.add(getServerIp());
 
             log.info("Executing command: " + String.join(" ", command));

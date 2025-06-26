@@ -426,7 +426,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             return response;
         }
         String lssFolder = "LSS";
-        String port = blockChainProperties.getLedgerService().getPort();
+        String port = String.valueOf(blockChainProperties.getLedgerService().getPort());
 
         try {
 
@@ -501,7 +501,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestShutdownLedgerService() {
         log.info("requestShutdownLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-        String port = blockChainProperties.getLedgerService().getPort();
+        String port = String.valueOf(blockChainProperties.getLedgerService().getPort());
         response.setStatus("Unknown error");
         try {
             response.setStatus(stopServer(port));
@@ -521,7 +521,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestHealthCheckLedgerService() {
         log.info("requestHealthCheckLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-        String port = blockChainProperties.getLedgerService().getPort();
+        String port = String.valueOf(blockChainProperties.getLedgerService().getPort());
         response.setStatus("DOWN");
         if(isServerRunning(port))
             response.setStatus("UP");
@@ -606,7 +606,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             File logFile = new File(logFilePath);
 
             ProcessBuilder builder = new ProcessBuilder("sh", postgreShellPath,
-                databaseProperties.getPort(),
+                String.valueOf(databaseProperties.getPort()),
                 databaseProperties.getUser(),
                 databaseProperties.getPassword(),
                 databaseProperties.getDb());

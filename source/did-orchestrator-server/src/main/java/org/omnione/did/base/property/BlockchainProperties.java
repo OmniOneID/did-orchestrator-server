@@ -34,7 +34,7 @@ public class BlockchainProperties {
     public static class Besu {
         private String channel;
         private String chaincodeName;
-        private String chainId;
+        private int chainId;
         private int gasLimit;
         private int gasPrice;
         private int connectionTimeout;
@@ -43,7 +43,7 @@ public class BlockchainProperties {
     @Getter
     @Setter
     public static class LedgerService {
-        private String port;
+        private int port;
         private String jarPath;
         private String file;
     }

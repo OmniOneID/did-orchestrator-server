@@ -41,7 +41,13 @@ interface BlockchainConfig {
 
 interface Config {
   blockchain: BlockchainConfig;
-  database: { [key: string]: string };
+  // database: { [key: string]: string };
+  database: {
+      db: string;
+      password: string;
+      port: number;
+      user: string;
+  };
   services: {
     server: {
       [key: string]: {

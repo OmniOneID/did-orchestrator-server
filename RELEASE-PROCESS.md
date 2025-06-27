@@ -28,9 +28,9 @@ Each module (repository) is managed independently, following these steps:
 
 2. **Create a Release Branch**  
    If there are changes or modifications, create a branch "release/QA-VX.Y.Z" for QA validation.
-   - Example: If there are bug fixes or minor improvements for V1.0.0, create a branch "release/QA-V1.0.1".
+   - Example: If there are bug fixes or minor improvements for V2.0.0, create a branch "release/QA-V2.0.0".
 
-   For modules without changes, use the existing version (V1.0.0) and the already distributed JAR or library.
+   For modules without changes, use the existing version (V2.0.0) and the already distributed JAR or library.
 
 3. **QA Validation**  
    - Perform QA validation on the Release branch, addressing any issues identified during the process.
@@ -52,7 +52,7 @@ Each module (repository) is managed independently, following these steps:
 After QA approval, manage the complete version control of all modules in a separate repository called [did-release](https://github.com/OmniOneID/did-release/).
 
 1. **Managing QA Request Branches**  
-   - Create a directory for the QA request version (format: W.X.Y.Z, e.g., V1.0.1.0). The directory name should be /release-VW.X.Y.Z (e.g., /release-V1.0.1.0).
+   - Create a directory for the QA request version (format: W.X.Y.Z, e.g., V2.0.0.0). The directory name should be /release-VW.X.Y.Z (e.g., /release-V2.0.0.0).
    - Gather the version names of the branches created for QA validation (release/QA-VX.Y.Z) and document version information and modifications in a table within the directory. Name the file 'QA-PLAN-VW.X.Y.Z.md' and register it in the issue menu of the `did-release` repository.
    - Include versions of unchanged modules as well.
 
@@ -66,11 +66,11 @@ After QA approval, manage the complete version control of all modules in a separ
    
    - Example:
 
-   ## Release Note V1.0.1.0
+   ## Release Note V2.0.0.0
 
    | Repository     | Version | Changelog                                                                       | Release |
    | -------------- | ------- | ------------------------------------------------------------------------------- | ------- |
-   | did-orchestrator-server | V1.0.0  | [Changelog](https://github.com/OmniOneID/did-orchestrator-server/blob/main/CHANGELOG.md) |         |
+   | did-orchestrator-server | V2.0.0  | [Changelog](https://github.com/OmniOneID/did-orchestrator-server/blob/main/CHANGELOG.md) |         |
 
 <br>
 

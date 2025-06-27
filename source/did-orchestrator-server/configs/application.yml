@@ -18,8 +18,17 @@ management:
 server:
   port: 9001
 blockchain:
-  channel: mychannel
-  chaincodeName: opendid
+  besu:
+    channel: mychannel
+    chaincodeName: opendid
+    chainId: 1337
+    gasLimit: 10000000
+    gasPrice: 0
+    connectionTimeout: 10000
+  ledgerService:
+    port: 8098
+    jarPath: /jars
+    file: did-ledger-service-server-2.0.0.jar
 database:
   port: 5430
   user: omn
@@ -35,31 +44,31 @@ services:
     tas:
       name: TA
       port: 8090
-      file: did-ta-server-1.0.1.jar
+      file: did-ta-server-2.0.0.jar
     issuer:
       name: Issuer
       port: 8091
-      file: did-issuer-server-1.0.1.jar
+      file: did-issuer-server-2.0.0.jar
     verifier:
       name: Verifier
       port: 8092
-      file: did-verifier-server-1.0.1.jar
+      file: did-verifier-server-2.0.0.jar
     api:
       name: API
       port: 8093
-      file: did-api-server-1.0.1.jar
+      file: did-api-server-2.0.0.jar
     cas:
       name: CA
       port: 8094
-      file: did-ca-server-1.0.1.jar
+      file: did-ca-server-2.0.0.jar
     wallet:
       name: Wallet
       port: 8095
-      file: did-wallet-server-1.0.1.jar
+      file: did-wallet-server-2.0.0.jar
     demo:
       name: Demo
       port: 8099
-      file: did-demo-server-1.0.1.jar
+      file: did-demo-server-2.0.0.jar
 generator:
   easySettingModeEnabled: true
 logging:

@@ -1,23 +1,30 @@
-# OpenDID Orchestrator Installation and Operation Guide
+# OpenDID Orchestrator Installation and Running Guide
 
-This document explains how to install and run OpenDID Orchestrator. Follow the steps below to proceed.
+This document describes how to install and run the OpenDID Orchestrator. Follow the steps below.
 
 ---
 
 ## 1. System Requirements
-To install and run OpenDID Orchestrator, the following requirements must be met:
-- **Java 17** or higher
-- **Gradle 7.0** or higher
+
+To install and run OpenDID Orchestrator, make sure the following requirements are met:
+
+- **MacOS or Linux**
+- **Java 21**
+- **Gradle 7.0 or higher**
+- **Node.js 22.12.0**
 - **Git installed**
 - **Bash support**
+- **Docker support**
 
-For Git installation, refer to the [Git Installation Guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).<br>
-For Windows environments, WSL2 installation is required for Bash support. Refer to the [WSL2 Installation Guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+To install Git, refer to the [Git Installation Guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).  
+For Docker installation, refer to the [Docker Installation Guide](https://docs.docker.com/get-started/get-docker/) to install it for your OS.  
+Currently, Windows is not officially supported. Please use VMware or other virtualization software to install Linux.
 
 ---
 
-## 2. Clone the did-orchestrator-server Repository
-Clone the OpenDID Orchestrator project to your local environment. Run the following command in the terminal to download the project:
+## 2. Clone did-orchestrator-server from Git
+
+Clone the OpenDID Orchestrator project to your local environment by entering the following command in the terminal:
 
 ```bash
 git clone https://github.com/OmniOneID/did-orchestrator-server.git
@@ -26,167 +33,160 @@ git clone https://github.com/OmniOneID/did-orchestrator-server.git
 ---
 
 ## 3. Run download.sh
-Since OpenDID Orchestrator manages and operates individual server entities, you need to download the configuration for each entity.<br>
-Run the following command in the terminal to execute `download.sh` and download the individual server entities:
+
+OpenDID Orchestrator manages and runs individual server entities. You need to download the resources for these servers.  
+Enter the following command in the terminal to run `download.sh` with the version information and download the server entities:
 
 ```bash
 cd did-orchestrator-server/source/did-orchestrator-server/
-sh download.sh
+sh download.sh 2.0.0
 ```
 
 ---
 
 ## 4. Running the Server
-The project source is located under the `source` directory, and you need to load the source and configure it based on the chosen execution method.
-There are two main ways to run the server:
 
-1. **Using an IDE**: Open the project in an Integrated Development Environment (IDE), configure the execution settings, and run the server directly.
+The project source is located under the `source` directory. There are two main ways to run the server:
 
-2. **Using console commands after building**: Build the project, then use the generated JAR file to run the server via console command (`java -jar`).
+1. **Using the console command after building**: Build the project and run the generated JAR file using the console command (`java -jar`).
+2. **Using an IDE**: Open the project in an Integrated Development Environment (IDE), set up the run configuration, and start the server.
 
-## 4.1. Running with IntelliJ IDEA (Gradle Support)
-IntelliJ IDEA is a widely used IDE for Java development. Since OpenDID Orchestrator uses Gradle for building, you can easily set up the project and run the server in IntelliJ IDEA.
+### 4.1. Running with Console Commands
 
-### 4.1.1. Install and Set Up IntelliJ IDEA
-1. Install IntelliJ (refer to the link below for installation instructions):
+Use the following steps to build the project with Gradle and run the server with the generated JAR file.
 
-> **Reference Links**
-> - [Download IntelliJ IDEA](https://www.jetbrains.com/idea/download/)
+#### 4.1.1. Gradle Build Commands
 
-### 4.1.2. Open the Project in IntelliJ
-- Open IntelliJ and select `File -> New -> Project from Existing Sources`. When prompted, select the 'source/did-orchestrator-server' folder.
-- The `build.gradle` file will be automatically recognized.
-- Gradle will download the necessary dependencies. Wait until the process is complete.
+- Move to the source folder of the cloned repository and give execution permission to `gradlew`:
 
-### 4.1.3. Build with Gradle
-- In IntelliJ IDEA, navigate to the `Gradle` tab and run `Tasks -> build -> build`.
-- Once the build is successfully completed, the project is ready to run.
-
-### 4.1.4. Running the Server
-- In the IntelliJ IDEA Gradle tab, select `Tasks -> application -> bootRun` and run it.
-- Gradle will automatically build and start the server.
-- Check the console log for the message "Started [ApplicationName] in [time] seconds" to confirm successful execution.
-
-## 4.2. Running with Console Commands
-You can run the OpenDID server using console commands. The following steps involve building the project with Gradle and running the server using the generated JAR file.
-
-### 4.2.1. Build with Gradle
-- Use Gradle Wrapper to build the source.
   ```shell
-    # Navigate to the cloned repository's source folder
-    cd source/did-orchestrator-server
-
-    # Grant execution permission to Gradle Wrapper
-    chmod 755 ./gradlew
-
-    # Clean build the project (delete previous build files and build anew)
-    ./gradlew clean build
+  cd source/did-orchestrator-server
+  chmod 755 ./gradlew
+  ./gradlew clean build
   ```
 
-- Navigate to the build folder and verify the generated JAR file.
-    ```shell
-      cd build/libs
-      ls
-    ```
-- This command will generate the file `did-orchestrator-server-1.0.0.jar`.
+- Move to the build folder and confirm the JAR file is generated:
 
+  ```shell
+  cd build/libs
+  ls
+  ```
 
-### 4.2.2. Running the Server
-Run the built JAR file:
+- This will generate the `did-orchestrator-server-2.0.0.jar` file.
+
+#### 4.1.2. Running the Server
+
+Use the following commands to run the server:
 
 ```bash
-cp did-orchestrator-server-1.0.0.jar ../../
+cp did-orchestrator-server-2.0.0.jar ../../
 cd ../../
-java -jar did-orchestrator-server-1.0.0.jar
+sudo java -jar did-orchestrator-server-2.0.0.jar
 ```
+
+- On Linux, make sure to run as `sudo` or as `root`.
 
 ---
 
-## 5. Accessing Orchestrator via Browser
+### 4.2. Running with IntelliJ IDEA (Gradle Support)
 
-Once the Orchestrator server is running successfully, access it via a browser using the following URL. The default port is `9001`.
+IntelliJ IDEA is a popular IDE for Java development. OpenDID’s server uses Gradle, making it easy to configure and run in IntelliJ IDEA.
+
+#### 4.2.1. Installing IntelliJ IDEA
+
+Install IntelliJ IDEA using the following link:
+
+> [IntelliJ IDEA Download](https://www.jetbrains.com/idea/download/)
+
+#### 4.2.2. Open the Project in IntelliJ IDEA
+
+- In IntelliJ, go to `File -> New -> Project from Existing Sources` and select the `source/did-orchestrator-server` folder.
+- When opening the project, the `build.gradle` file will be automatically detected.
+- Wait for Gradle to finish downloading the necessary dependencies.
+
+#### 4.2.3. Build the Project with Gradle
+
+- In the Gradle tab in IntelliJ, execute `Tasks -> build -> build`.
+- Once the build is complete, the project will be ready to run.
+
+#### 4.2.4. Run the Server
+
+- In IntelliJ’s Gradle tab, find `Tasks -> application -> bootRun` and run it.
+- Gradle will build and start the server.
+- Check the console log for “Started [ApplicationName] in [time] seconds” to confirm successful startup.
+- On Linux, ensure the run is executed as `sudo` or `root`.
+
+---
+
+## 5. Accessing the Orchestrator in Browser
+
+Once the server is running, open your browser and navigate to:
 
 ```
-http://<your_current_IP>:9001
+http://<current_IP>:9001
 ```
 
-For example, if running locally:
+For example, if you’re running it locally:
+
 ```
 http://localhost:9001
 ```
 
 ---
 
-## 6. Running Hyperledger Fabric and PostgreSQL via Docker
-OpenDID Orchestrator uses the Hyperledger Fabric Network and PostgreSQL database.
-To run these services, Docker Desktop or Colima must be running.
+## 6. Repository Selection
 
-### Windows
-1. Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop).  
-2. Start Docker Desktop after installation.
-
-### macOS
-1. Install either [Colima](https://github.com/abiosoft/colima) or [Docker Desktop](https://www.docker.com/products/docker-desktop).
-2. If using Colima, run the following command:
-```bash
-colima start
-```
-
-### Linux
-1. Install Docker.
-```bash
-sudo apt-get update
-sudo apt-get install docker.io docker-compose
-```
-2. Start the Docker service.
-```bash
-sudo systemctl start docker
-sudo systemctl enable docker
-```
+OpenDID Orchestrator provides `Hyperledger Besu` and `Ledger Service Server` as trusted storage repositories.  
+When you first access the Orchestrator in the browser, you’ll be prompted to choose the desired repository.  
+Hyperledger Besu is a blockchain-based distributed ledger, while Ledger Service Server uses a lightweight RDBMS-based trusted storage.
 
 ---
 
-## 7. Installing Go for Running Hyperledger Fabric
-Since the Chaincode in Hyperledger Fabric is written in Go, Go must be installed.<br>
-Please refer to the Go installation section in the [Fabric Installation Guide](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html) to install Go.<br>
+## 7. Running Hyperledger Besu and PostgreSQL with Docker
 
-Once you have completed this step, all the prerequisites for using the Orchestrator will be ready!
+OpenDID Orchestrator uses Docker to run Hyperledger Besu and PostgreSQL DB.  
+You’ll need to start these services using Docker. Refer to the [Docker Installation Guide](https://docs.docker.com/get-started/get-docker/) for setup instructions.  
+Ensure your Docker environment supports `docker-compose`.
 
----
-
-## 8. Generating Wallets and DID Documents
-You can automatically generate Wallets and DID Documents for entities in bulk.<br>
-Click the **Generate All** button in the upper right corner.<br>
-Wallets and DID Documents will be automatically created using each entity's default name and a shared default password.<br>
-
-### Generating for Individual Entities
-To manually generate a wallet or DID document for a specific entity, go to the **Configuration** tab and switch **easySettingModeEnabled** to **false** and save.<br>
-This will activate the individual create buttons for each entry, allowing you to manually enter the name and password to create them.
-However, if you use this method, generated wallets need to be configured in the entity settings page with a path and password.
+For example, on macOS, run `colima start` after installing Docker.
 
 ---
 
-## 9. Starting All Entities
+## 8. Creating Wallets and DID Documents
 
-Access Orchestrator via a browser and click the **Start All** button to run all entities.<br>
-When each service and entity is started, they will be indicated with a green light.<br>
+Use the **Generate All** button in the Orchestrator’s top-right corner to create wallets and DID Documents for all entities automatically.  
+Each entity’s wallet and DID Document will be created using the default entity names and passwords.
 
-*Each service and entity can be fully started/stopped or started/stopped individually.*
+### Creating for Individual Entities
+
+To manually create wallets or DID Documents for specific entities, go to the **Configuration** tab and set **easySettingModeEnabled** to **false**.  
+After saving, individual buttons will become available to manually enter names and passwords to generate them.
+
+Note: For manually generated wallets, you must also manually configure the path and password on the entity’s settings page.
 
 ---
 
-## 10. Setting up individual entities.
+## 9. Running All Entities
 
-The role of the Orchestrator is now complete.<br>
-Refer to the manuals of the individual entities, click **Settings** to navigate, and then proceed with the individual configurations.
+In the browser, after accessing the Orchestrator, click the **Start All** button to start all entities.  
+Each service and entity will light up green when running.
+
+* You can also start/stop individual entities or all at once. *
+
+---
+
+## 10. Configuring Individual Entities
+
+Once the Orchestrator is running, refer to each entity’s manual for additional configuration.  
+Click the **Settings** button to navigate to the entity-specific settings page.
 
 ---
 
 ## Additional Notes
 
-- If any service or entity fails to start, check the logs for troubleshooting. Click the log icon on the right side of the entity name.<br>
+If any services or entities fail to start, you can check the logs by clicking the log icon to the right of the entity name.
 
 ---
 
-Now, OpenDID Orchestrator is successfully running.  
-For further inquiries, please use the project's [issue tracker](https://github.com/OmniOneID/did-orchestrator-server/issues).
+The OpenDID Orchestrator is now fully operational.  
+For additional questions, use the project’s [Issue Tracker](https://github.com/OmniOneID/did-orchestrator-server/issues).

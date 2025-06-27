@@ -27,28 +27,34 @@ did-orchestrator-server
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── LICENSE
-├── dependencies-license.md
 ├── MAINTAINERS.md
 ├── README.md
 ├── README_ko.md
 ├── RELEASE-PROCESS.md
 ├── SECURITY.md
+├── dependencies-license.md
 ├── docs
-│    ├── api
-│    │    └── Orchestrator_API_ko.md
-│    ├── installation
-│    │    └── Orchestrator_installation_Guide.md
-│    └── manual
-│         └── Orchestrator_manual.md
+│   ├── api
+│   │   ├── Orchestrator_API.md
+│   │   └── Orchestrator_API_ko.md
+│   ├── installation
+│   │   ├── OpenDID_orchestrator_InstallationAndOperation_Guide.md
+│   │   └── OpenDID_orchestrator_InstallationAndOperation_Guide_ko.md
+│   └── manual
+│       ├── orchestrator_manual.md
+│       └── orchestrator_manual_ko.md
 └── source
     └── did-orchestrator-server
-        ├── gradle
-        ├── libs
-        ├── src
+        ├── README.md
         ├── admin
+        ├── build.gradle
+        ├── configs
+        ├── gradle
+        ├── jars
+        ├── logs
         ├── shells
-        └── build.gradle
-        └── README.md
+        ├── src
+        └── tool
 ```
 
 <br/>
@@ -79,6 +85,15 @@ Below is a description of each folder and file in the directory:
 | &nbsp;&nbsp;&nbsp;┖ build.gradle | Gradle build configuration file                |
 | &nbsp;&nbsp;&nbsp;┖ README.md    | Overview and instructions for the source code  |
 
+## S/W Specifications
+| Category           | Details                      |
+|--------------------|------------------------------|
+| OS                | MacOS, Linux                  |
+| Language          | Java 21                       |
+| IDE               | IntelliJ IDEA Ultimate Edition|
+| Compatibility     | Node.js 22.12.0, Hyperledger Besu 25.5.0 |
+| Test Environment  | macOS Sonoma, CentOS Stream 10, Oracle Linux 8.1 <br> Docker Engine - Community Version: 27.3.1 |
+
 ## Libraries
 
 The libraries used in this project are as follows:
@@ -92,6 +107,10 @@ The libraries used in this project are as follows:
 
 For detailed instructions on installing and configuring the Orchestrator server, refer to the guide below:
 - [OpenDID Orchestrator Server Installation and Operation Guide](docs/installation/OpenDID_orchestrator_InstallationAndOperation_Guide.md)
+
+## Prerequisites
+
+The Orchestrator server and its components are currently assumed to operate on a single machine. That is, the database, blockchain, and servers are all configured to run locally. Distributing any of these components to remote environments is not permitted. The entire system is designed based on single-server operation.
 
 ## API Reference Documentation
 

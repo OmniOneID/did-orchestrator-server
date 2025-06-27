@@ -27,28 +27,34 @@ did-orchestrator-server
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── LICENSE
-├── dependencies-license.md
 ├── MAINTAINERS.md
 ├── README.md
 ├── README_ko.md
 ├── RELEASE-PROCESS.md
 ├── SECURITY.md
+├── dependencies-license.md
 ├── docs
-│    ├── api
-│    │    └── Orchestrator_API_ko.md
-│    ├── installation
-│    │    └── Orchestrator_installation_Guide.md
-│    └── manual
-│         └── Orchestrator_manual.md
+│   ├── api
+│   │   ├── Orchestrator_API.md
+│   │   └── Orchestrator_API_ko.md
+│   ├── installation
+│   │   ├── OpenDID_orchestrator_InstallationAndOperation_Guide.md
+│   │   └── OpenDID_orchestrator_InstallationAndOperation_Guide_ko.md
+│   └── manual
+│       ├── orchestrator_manual.md
+│       └── orchestrator_manual_ko.md
 └── source
     └── did-orchestrator-server
-        ├── gradle
-        ├── libs
-        ├── src
+        ├── README.md
         ├── admin
-        ├── shells
         ├── build.gradle
-        └── README.md
+        ├── configs
+        ├── gradle
+        ├── jars
+        ├── logs
+        ├── shells
+        ├── src
+        └── tool
 ```
 
 <br/>
@@ -79,6 +85,15 @@ did-orchestrator-server
 | &nbsp;&nbsp;&nbsp;┖ build.gradle | Gradle 빌드 설정 파일                    |
 | &nbsp;&nbsp;&nbsp;┖ README.md    | 소스 코드 개요 및 지침                   |
 
+## S/W 사양
+| 구분                | 내용                          |
+|--------------------|------------------------------|
+| OS                | MacOS, Linux                  |
+| Language          | Java 21                       |
+| IDE               | IntelliJ IDEA Ultimate Edition|
+| Compatibility     | Node.js 22.12.0, Hyperledger Besu 25.5.0 |
+| Test Environment  | macOS Sonoma, CentOS Stream 10, Oracle Linux 8.1 <br> Docker Engine - Community Version: 27.3.1 |
+
 ## 라이브러리
 
 이 프로젝트에서 사용되는 라이브러리는 아래와 같이 구성됩니다:
@@ -92,6 +107,10 @@ did-orchestrator-server
 
 Orchestrator 서버의 설치 및 구성에 대한 자세한 지침은 아래 가이드를 참조하십시오:
 - [OpenDID Orchestrator 서버 설치 및 운영 가이드](docs/installation/OpenDID_orchestrator_InstallationAndOperation_Guide_ko.md)  
+
+## 전제 조건
+
+- Orchestrator 서버와 그 구성 요소들은 현재 모두 단일 장비 내에서 운영되는 것을 전제로 합니다. 즉, 데이터베이스, 블록체인, 서버 등이 모두 로컬에 설치되어 동작하도록 구성되어 있으며, 이 중 일부를 원격에 분산하여 구성하는 것은 허용되지 않습니다. 또한 단일 서버에서 운영하는 것을 기준으로 합니다.
 
 ## API 참고 문서
 

@@ -1,11 +1,10 @@
 services:
-  postgres:
+  postgres-opendid:
     container_name: postgre-opendid
     image: postgres:16.4
     restart: always
     volumes:
       - postgre_opendid_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "${POSTGRES_PORT}:5432"
     environment:

@@ -24,7 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "database")
 public class DatabaseProperties {
-    public String port;
+    public int port;
     public String user;
     public String password;
     public String db;

@@ -19,9 +19,35 @@ import HelpIcon from './icons/HelpIcon';
 import showToolTip from "./Tooltip";
 import ProgressOverlay from './ProgressOverlay';
 
+interface BesuConfig {
+  chainId: string;
+  chaincodeName: string;
+  channel: string;
+  connectionTimeout: number;
+  gasLimit: number;
+  gasPrice: number;
+}
+
+interface LedgerServiceConfig {
+  file: string;
+  port: number;
+}
+
+interface BlockchainConfig {
+  besu?: BesuConfig;
+  ledgerService?: LedgerServiceConfig;
+  [key: string]: unknown;
+}
+
 interface Config {
-  blockchain: { [key: string]: string };
-  database: { [key: string]: string };
+  blockchain: BlockchainConfig;
+  // database: { [key: string]: string };
+  database: {
+      db: string;
+      password: string;
+      port: number;
+      user: string;
+  };
   services: {
     server: {
       [key: string]: {
@@ -34,6 +60,74 @@ interface Config {
   };
   generator: { [key: string]: boolean };
 }
+
+const BlockchainConfigSection: React.FC<{ config: any, setConfig: (c: any) => void }> = ({ config, setConfig }) => {
+  const [selected, setSelected] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/select")
+        .then(res => res.json())
+        .then(data => {
+          if (data.selected === "besu" || data.selected === "lss") {
+            setSelected(data.selected);
+          }
+        })
+        .catch(err => {
+          console.error("Failed to fetch repository choice:", err);
+        });
+  }, []);
+
+  if (!selected) {
+    return <div className="text-sm text-gray-500 italic">Loading blockchain configuration...</div>;
+  }
+
+  const visibleKey = selected === "besu" ? "besu" : "ledgerService";
+
+  if (!(visibleKey in config.blockchain)) {
+    return <div className="text-sm text-gray-500 italic">No blockchain configuration is visible for this selection.</div>;
+  }
+
+  const chainConfig = config.blockchain[visibleKey] as Record<string, any>;
+
+  return (
+      <div key={visibleKey} className="mb-4">
+        <h4 className="text-md font-semibold mb-2 capitalize">{visibleKey}</h4>
+        <table className="min-w-full mb-2">
+          <thead>
+          <tr className="bg-gray-100">
+            <th className="p-2 text-left w-48">Property</th>
+            <th className="p-2 text-left w-96">Value</th>
+          </tr>
+          </thead>
+          <tbody>
+          {Object.entries(chainConfig).map(([propKey, propValue]) => (
+              <tr key={propKey} className="border-b">
+                <td className="p-2 font-bold capitalize">{propKey}</td>
+                <td className="p-2">
+                  <input
+                      type="text"
+                      className="border rounded p-2 w-full"
+                      value={typeof propValue === 'object' ? JSON.stringify(propValue) : String(propValue)}
+                      onChange={(e) => {
+                        const newBlockchain = {
+                          ...config.blockchain,
+                          [visibleKey]: {
+                            ...chainConfig,
+                            [propKey]: isNaN(Number(propValue)) ? e.target.value : Number(e.target.value),
+                          },
+                        };
+                        setConfig({ ...config, blockchain: newBlockchain });
+                      }}
+                      maxLength={50}
+                  />
+                </td>
+              </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
+  );
+};
 
 const Conf: React.FC = () => {
   const [config, setConfig] = useState<Config | null>(null);
@@ -197,46 +291,25 @@ const Conf: React.FC = () => {
 
             <section className="bg-white p-6 rounded shadow mb-6">
               <h2 className="text-xl font-bold mb-4">Repositories</h2>
+
               {/* Blockchain Section */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold mb-4">
                   Blockchain
                   <button
-                    onClick={(e) =>
-                      showToolTip(
-                        "The following settings are parameters applied when running Hyperledger Fabric. <br>Their meanings are as follows: <br> - Channel: The name of the channel created when running Fabric.<br> - ChaincodeName: The name of the chaincode deployed when running Fabric.",
-                        e
-                      )
-                    }
-                    className="text-gray-500 hover:text-gray-700 ml-1"
+                      onClick={(e) =>
+                          showToolTip(
+                              "The following settings are parameters for each blockchain module.<br>Each key contains multiple properties specific to that blockchain configuration.",
+                              e
+                          )
+                      }
+                      className="text-gray-500 hover:text-gray-700 ml-1"
                   >
                     <HelpIcon width="0.9em" height="0.9em" />
                   </button>
                 </h3>
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="p-2 text-left w-48">Key</th>
-                      <th className="p-2 text-left w-96">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(config.blockchain).map(([key, value]) => (
-                      <tr key={key} className="border-b">
-                        <td className="p-2 font-bold capitalize">{key}</td>
-                        <td className="p-2">
-                          <input
-                            type="text"
-                            className="border rounded p-2 w-full"
-                            value={value}
-                            onChange={(e) => handleConfigChange('blockchain', key, e)}
-                            maxLength={30}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+                <BlockchainConfigSection config={config} setConfig={setConfig} />
               </div>
 
               {/* Database Section */}

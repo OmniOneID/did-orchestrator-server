@@ -25,26 +25,65 @@ interface Repository {
   status: string;
 }
 
-interface RepositoriesProps {}
+interface RepositoriesProps {
+  openPopupLedger: (id: string) => void;
+  onConfirmReset: (repoId: string) => void;
+}
 
 const defaultRepos: Repository[] = [
-  { id: "fabric", name: "Hyperledger Fabric", status: "GRAY" },
   { id: "postgre", name: "PostgreSQL", status: "GRAY" },
+  { id: "fabric", name: "Hyperledger Fabric", status: "GRAY" },
+  { id: "besu", name: "Hyperledger Besu", status: "GRAY" },
+  { id: "lss", name: "Ledger Service Server", status: "GRAY" },
 ];
 
 const Repositories = forwardRef((props: RepositoriesProps, ref) => {
+  const { openPopupLedger } = props;
   const [repositories, setRepositories] = useState<Repository[]>(() => {
     const stored = localStorage.getItem("repositories");
     if (stored) {
       try {
-        return JSON.parse(stored) as Repository[];
+        const parsed = JSON.parse(stored) as Repository[];
+        if (parsed.length === 1 && parsed[0].id === "postgre") {
+          return defaultRepos;
+        }
+        return parsed;
       } catch (e) {
         console.error("Error parsing repositories from localStorage", e);
-        return defaultRepos;
       }
     }
-    return defaultRepos;
+    return [];
   });
+
+  useEffect(() => {
+    const alwaysInclude = ["postgre"];
+
+    const stored = localStorage.getItem("repositories");
+    const storedRepos = stored ? JSON.parse(stored) as Repository[] : [];
+    fetch("/select")
+        .then(res => res.json())
+        .then(data => {
+          const selected = data.selected;
+          const selectedIds = selected ? [selected] : [];
+
+          const finalSelected = Array.from(new Set([...selectedIds, ...alwaysInclude]));
+
+          const filtered: Repository[] = defaultRepos
+              .filter(repo => finalSelected.includes(repo.id))
+              .map(repo => {
+                const storedRepo = storedRepos.find(r => r.id === repo.id);
+                return storedRepo ? { ...repo, status: storedRepo.status } : repo;
+              });
+
+          setRepositories(filtered);
+          console.log("repositories : " +  JSON.stringify(filtered));
+          localStorage.setItem("repositories", JSON.stringify(filtered));
+        })
+        .catch((err) => {
+          console.error("Failed to fetch selectedRepositories from server:", err);
+        });
+  }, []);
+
 
   useEffect(() => {
     localStorage.setItem("repositories", JSON.stringify(repositories));
@@ -57,13 +96,6 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
       return;
     }
 
-    /*
-    setRepositories((prevRepos) =>
-      prevRepos.map((repo) =>
-        repo.id === repoId ? { ...repo, status: "PROGRESS" } : repo
-      )
-    );
-    */
 
     try {
       const response = await fetch(`/healthcheck/${repoId}`, {
@@ -183,6 +215,22 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
       });
       if (response.ok) {
         console.log(`Repository ${repoId} reset successfully`);
+
+        const postgreOnly = [
+          { id: "postgre", name: "PostgreSQL", status: "GRAY" }
+        ];
+
+        localStorage.setItem("repositories", JSON.stringify(postgreOnly));
+        await fetch("/select", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ selected: "" })
+          // body: JSON.stringify({ selected: null })
+        });
+
+        setRepositories(postgreOnly);
       } else {
         console.error(`Failed to reset repository ${repoId}`);
       }
@@ -219,6 +267,7 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
     startAll,
     stopAll,
     statusAll,
+    resetRepository,
   }));
 
   return (
@@ -237,49 +286,86 @@ const Repositories = forwardRef((props: RepositoriesProps, ref) => {
         </thead>
         <tbody className="server-table">
           {repositories.map((repo) => (
-            <tr key={repo.id} className="border-b">
-              <td className="p-2 pl-6">
-                {StatusIcon(repo.status)}
-              </td>
-              <td className="p-2 font-bold">
-                {repo.name} <button onClick={() => window.open(`/logs/${repo.id}.log`)} className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded" title='By clicking this icon, you can view the logs.'>log</button>                
-              </td>
-              <td className="p-2">
-                <div className="flex space-x-1">
-                  <button
-                    className="bg-green-600 text-white px-2 py-1 rounded"
-                    onClick={() => startRepository(repo.id, true)}
+              <tr key={repo.id} className="border-b">
+                <td className="p-2 pl-6">
+                  {StatusIcon(repo.status)}
+                </td>
+                <td className="p-2 font-bold">
+                  {repo.name} <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/logs/${repo.id}.log`, {method: 'HEAD'});
+                          if (res.ok) {
+                            window.open(`/logs/${repo.id}.log`);
+                          } else {
+                            alert('Log file not found.');
+                          }
+                        } catch (err) {
+                          alert('Log file not found.');
+                        }
+                      }}
+                      className="text-black text-xs text-[8.5px] w-[30px] h-[25px] border border-gray-300 rounded"
+                      title="By clicking this icon, you can view the logs."
                   >
-                    Start
+                    log
                   </button>
-                  <button
-                    className="bg-[#ED207B] text-white px-2 py-1 rounded"
-                    onClick={() => stopRepository(repo.id, true)}
-                  >
-                    Stop
-                  </button>
-                  <button
-                    className="bg-gray-600 text-white px-2 py-1 rounded"
-                    onClick={() => healthCheck(repo.id, true)}
-                  >
-                    Status
-                  </button>
-                  {repo.name === "Hyperledger Fabric" && (
+                </td>
+                <td className="p-2">
+                  <div className="flex space-x-1">
+                    <button
+                        className="bg-green-600 text-white px-2 py-1 rounded"
+                        onClick={() => startRepository(repo.id, true)}
+                    >
+                      Start
+                    </button>
+                    <button
+                        className="bg-[#ED207B] text-white px-2 py-1 rounded"
+                        onClick={() => stopRepository(repo.id, true)}
+                    >
+                      Stop
+                    </button>
+                    <button
+                        className="bg-gray-600 text-white px-2 py-1 rounded"
+                        onClick={() => healthCheck(repo.id, true)}
+                    >
+                      Status
+                    </button>
+                    {/* {repo.name === "Hyperledger Fabric" && (
                   <button
                     className="bg-[#0E76BD] text-white px-2 py-1 rounded"
                     onClick={() => resetRepository(repo.id, true)}
                   >
                     Reset
                   </button>
-                  )}
-                </div>
-              </td>
-              <td className="p-2"></td>
-            </tr>
+                  )} */}
+                    {repo.name === "Hyperledger Besu" && (
+                        <button
+                            className="bg-[#0E76BD] text-white px-2 py-1 rounded"
+                            onClick={() => props.onConfirmReset(repo.id)}
+                            // onClick={() => resetRepository(repo.id, true)}
+                        >
+                          Reset
+                        </button>
+                    )}
+                    {repo.name === "Ledger Service Server" && (
+                        <button
+                            className="bg-[#0E76BD] text-white px-2 py-1 rounded"
+                            onClick={() => props.onConfirmReset(repo.id)}
+                            // onClick={() => resetRepository(repo.id, true)}
+                        >
+                          Reset
+                        </button>
+                    )}
+                  </div>
+                </td>
+                <td className="p-2"></td>
+              </tr>
           ))}
         </tbody>
       </table>
     </section>
+
+
   );
 });
 

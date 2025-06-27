@@ -14,12 +14,19 @@ if [ ! -f "$JAR_FILE" ]; then
     exit 1
 fi
 
+if [ -z "$CONFIG_PATH" ] || [ ! -f "$CONFIG_PATH" ]; then
+    echo "ERROR: Configuration file not found: $CONFIG_PATH" >&2
+    exit 1
+fi
 
- if [ -z "$CONFIG_PATH" ] || [ ! -f "$CONFIG_PATH" ]; then
-     echo "ERROR: Configuration file not found: $CONFIG_PATH" >&2
-     exit 1
- fi
 
- nohup java -jar "$JAR_FILE" --server.port="$PORT" --spring.config.additional-location="file:$CONFIG_PATH" > "$LOGS_PATH/server_$PORT.log" 2>&1 &
+if [[ "$JAR_FILE" == *LSS* ]]; then
+    LOG_FILE="$LOGS_PATH/lss.log"
+else
+    LOG_FILE="$LOGS_PATH/server_$PORT.log"
+fi
 
- echo "Server on port $PORT started with config: $CONFIG_PATH"
+nohup java -jar "$JAR_FILE" --server.port="$PORT" --spring.config.additional-location="file:$CONFIG_PATH" > "$LOG_FILE" 2>&1 &
+
+echo "Server on port $PORT started with config: $CONFIG_PATH"
+echo "Logging to: $LOG_FILE"

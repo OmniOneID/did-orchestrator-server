@@ -8,4 +8,4 @@ fi
 FILENAME=$1
 KEYID=$2
 
-java -jar did-cli-tool-server-1.0.0.jar walletManager addKey -m $FILENAME -i $KEYID -t 1 -p
+java -jar did-cli-tool-server-2.0.0.jar walletManager addKey -m $FILENAME -i $KEYID -t 1 -p

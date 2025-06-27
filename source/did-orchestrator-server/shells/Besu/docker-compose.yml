@@ -1,0 +1,26 @@
+services:
+  besu:
+    image: docker.io/hyperledger/besu:latest
+    container_name: opendid-besu-node
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+      - "30303:30303"
+      - "30303:30303/udp"
+    volumes:
+      - besu_opendid_data:/opt/besu/data
+    command: >
+      --network=dev
+      --data-path=/opt/besu/data
+      --miner-enabled
+      --miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73
+      --rpc-http-cors-origins=all
+      --rpc-http-max-active-connections=10000
+      --host-allowlist=*
+      --rpc-ws-enabled
+      --rpc-http-enabled
+      --min-gas-price=0
+      --tx-pool-price-bump=0
+
+volumes:
+  besu_opendid_data:

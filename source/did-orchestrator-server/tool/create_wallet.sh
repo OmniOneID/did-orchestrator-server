@@ -7,4 +7,4 @@ fi
 
 FILENAME=$1
 
-java -jar did-cli-tool-server-1.0.0.jar walletManager createWallet -m $FILENAME -p
+java -jar did-cli-tool-server-2.0.0.jar walletManager createWallet -m $FILENAME -p

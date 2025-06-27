@@ -80,20 +80,15 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     private Map<String, String> initializeServerJars() {
         Map<String, String> serverJars = new HashMap<>();
         servicesProperties.getServer().forEach((key, serverDetail) ->
-                serverJars.put(String.valueOf(serverDetail.getPort()), serverDetail.getFile()));
+            serverJars.put(String.valueOf(serverDetail.getPort()), serverDetail.getFile()));
         return serverJars;
     }
 
     private Map<String, String> initializeServerJarsFolder() {
         Map<String, String> serverJarsFolder = new HashMap<>();
         servicesProperties.getServer().forEach((key, serverDetail) ->
-                serverJarsFolder.put(String.valueOf(serverDetail.getPort()), serverDetail.getName()));
+            serverJarsFolder.put(String.valueOf(serverDetail.getPort()), serverDetail.getName()));
         return serverJarsFolder;
-    }
-
-    interface FabricStartupCallback {
-        void onStartupComplete();
-        void onStartupFailed();
     }
 
     interface BlockChainStartupCallback {
@@ -221,131 +216,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     }
 
     /**
-     * Starts Hyperledger Fabric if it is not already running.
-     * This method executes the `start.sh` script for Fabric, waits for startup logs, and checks the health of the Fabric.
-     *
-     * @return the status of the Fabric (UP or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestStartupFabric() {
-        log.info("requestStartupFabric");
-        String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-        String logFilePath = LOGS_PATH + "/fabric.log";
-        
-        try {
-            ProcessBuilder chmodBuilder = new ProcessBuilder("chmod", "+x", fabricShellPath + "/start.sh");
-            chmodBuilder.start().waitFor();
-
-            ProcessBuilder builder = new ProcessBuilder(
-                    "sh", "-c", "nohup " + fabricShellPath + "/start.sh " + blockChainProperties.getFabric().getChannel() + " " + blockChainProperties.getFabric().getChaincodeName() +
-                    " > " + logFilePath + " 2>&1 &"
-            );
-
-            builder.directory(new File(fabricShellPath));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-            builder.start();
-
-            watchBlockChainLogs(logFilePath, new BlockChainStartupCallback() {
-                @Override
-                public void onStartupComplete() {
-                    log.debug("Hyperledger Fabric is running successfully!");
-                }
-
-                @Override
-                public void onStartupFailed() {
-                    log.error("Fabric startup failed.");
-                }
-            });
-
-            return requestHealthCheckFabric();
-        } catch (IOException | InterruptedException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * Shuts down Hyperledger Fabric by executing the `stop.sh` script.
-     * This method stops the Fabric service and checks its status after shutdown.
-     *
-     * @return the status of the Fabric (DOWN or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestShutdownFabric() {
-        log.info("requestShutdownFabric");
-        try {
-            String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/stop.sh");
-            builder.directory(new File(fabricShellPath));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-            builder.start();
-        } catch (IOException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        OrchestratorResponseDto response = requestHealthCheckFabric();
-        return response;
-    }
-
-    /**
-     * Checks the health of the Hyperledger Fabric.
-     * This method checks whether Fabric is up and running by executing the `status.sh` script.
-     *
-     * @return the health status of the Fabric (UP or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestHealthCheckFabric() {
-        log.info("requestHealthCheckFabric");
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/status.sh", blockChainProperties.getFabric().getChannel(), blockChainProperties.getFabric().getChaincodeName());
-            builder.directory(new File(fabricShellPath));
-            Process process = builder.start();
-            String output = getProcessOutput(process);
-
-            if (output.contains("200")) {
-                response.setStatus("UP");
-                return response;
-            }
-
-        } catch (IOException | InterruptedException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        response.setStatus("ERROR");
-        return response;
-    }
-
-    /**
-     * Resets Hyperledger Fabric by executing the `reset.sh` script.
-     * This method attempts to reset Fabric and checks if the reset was successful.
-     *
-     * @return the status of the Fabric reset (UP or ERROR)
-     */
-    @Override
-    public OrchestratorResponseDto requestResetFabric() {
-        log.info("requestResetFabric");
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            String fabricShellPath = System.getProperty("user.dir") + "/shells/Fabric";
-            ProcessBuilder builder = new ProcessBuilder("sh", fabricShellPath + "/reset.sh");
-            builder.directory(new File(fabricShellPath));
-            Process process = builder.start();
-            String output = getProcessOutput(process);
-
-            if (output.contains(Constant.BLOCKCHAIN_RESET_MESSAGE)) {
-                response.setStatus("UP");
-                return response;
-            }
-
-        } catch (IOException | InterruptedException e) {
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        response.setStatus("ERROR");
-        return response;
-    }
-
-    /**
      * Starts Hyperledger Besu if it is not already running.
      * This method executes the `start.sh` script for Besu, waits for startup logs, and checks the health of the Besu.
      *
@@ -362,8 +232,8 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             chmodBuilder.start().waitFor();
             System.out.println("besu start : " + blockChainProperties.getBesu().getChainId());
             ProcessBuilder builder = new ProcessBuilder(
-                    "sh", "-c", "nohup " + besuShellPath + "/start.sh "  +
-                    " > " + logFilePath + " 2>&1 &"
+                "sh", "-c", "nohup " + besuShellPath + "/start.sh "  + getServerIp() +
+                " > " + logFilePath + " 2>&1 &"
             );
 
             builder.directory(new File(besuShellPath));
@@ -443,9 +313,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     }
     /**
      * Resets Hyperledger Besu by executing the `reset.sh` script.
-     * This method attempts to reset Fabric and checks if the reset was successful.
+     * This method attempts to reset Besu and checks if the reset was successful.
      *
-     * @return the status of the Fabric reset (UP or ERROR)
+     * @return the status of the Besu reset (UP or ERROR)
      */
     @Override
     public OrchestratorResponseDto requestResetBesu() {
@@ -510,7 +380,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                     lastReadPosition = reader.getFilePointer();
                 }
 
-                // Health check every 3 minutes
                 long now = System.currentTimeMillis();
                 if (now - lastHealthCheckTime >= HEALTH_CHECK_INTERVAL) {
                     log.debug("Performing blockchain health check...");
@@ -518,9 +387,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                     OrchestratorResponseDto response = new OrchestratorResponseDto();
                     if(logFilePath.contains("besu")){
                         response = requestHealthCheckBesu();
-                    }
-                    if(logFilePath.contains("fabric")){
-                        response = requestHealthCheckFabric();
                     }
                     if (response.getStatus().equals("UP")) {
                         log.debug("Blockchain health check successful. Triggering success callback.");
@@ -560,27 +426,22 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             return response;
         }
         String lssFolder = "LSS";
-        String port = blockChainProperties.getLedgerService().getPort();
+        String port = String.valueOf(blockChainProperties.getLedgerService().getPort());
 
         try {
 
 
             String jarFolder = System.getProperty("user.dir") + blockChainProperties.getLedgerService().getJarPath() + "/" + lssFolder;
             String jarFilePath = jarFolder + "/" + blockChainProperties.getLedgerService().getFile();
-            String configFilePath = jarFolder + "/application.yml";
             File jarFile = new File(jarFilePath);
-            File scriptFile = new File(System.getProperty("user.dir") + blockChainProperties.getLedgerService().getJarPath()  + "/start.sh");
-            if (!new File(configFilePath).exists()) {
-                log.info("requestStartupLedgerService configFilePath : " + configFilePath);
-                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
-            }
+            File scriptFile = new File(System.getProperty("user.dir") + "/shells/LSS/start.sh");
 
             List<String> command = new ArrayList<>();
             command.add("sh");
             command.add(scriptFile.getAbsolutePath());
             command.add(jarFile.getAbsolutePath());
             command.add(port);
-            command.add(configFilePath);
+            command.add(getServerIp());
 
             log.info("Executing command: " + String.join(" ", command));
 
@@ -618,8 +479,8 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         String query = "SELECT 1 FROM pg_database WHERE datname = 'lss'";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
 
             if (rs.next()) {
                 exists = true;
@@ -640,7 +501,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestShutdownLedgerService() {
         log.info("requestShutdownLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-        String port = blockChainProperties.getLedgerService().getPort();
+        String port = String.valueOf(blockChainProperties.getLedgerService().getPort());
         response.setStatus("Unknown error");
         try {
             response.setStatus(stopServer(port));
@@ -660,7 +521,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestHealthCheckLedgerService() {
         log.info("requestHealthCheckLedgerService");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-        String port = blockChainProperties.getLedgerService().getPort();
+        String port = String.valueOf(blockChainProperties.getLedgerService().getPort());
         response.setStatus("DOWN");
         if(isServerRunning(port))
             response.setStatus("UP");
@@ -686,9 +547,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         String checkDbQuery = "SELECT 1 FROM pg_database WHERE datname = 'lss'";
 
         try (
-                Connection adminConn = DriverManager.getConnection(baseUrl + "/postgres", user, password);
-                Statement checkStmt = adminConn.createStatement();
-                ResultSet rs = checkStmt.executeQuery(checkDbQuery)
+            Connection adminConn = DriverManager.getConnection(baseUrl + "/postgres", user, password);
+            Statement checkStmt = adminConn.createStatement();
+            ResultSet rs = checkStmt.executeQuery(checkDbQuery)
         ) {
             if (!rs.next()) {
                 log.warn("Database 'lss' does not exist.");
@@ -700,14 +561,12 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             return response;
         }
 
-        // If lss DB exists, proceed to drop tables
         String getTablesQuery = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'";
 
         try (
-                Connection conn = DriverManager.getConnection(baseUrl + "/lss", user, password);
-                Statement stmt = conn.createStatement()
+            Connection conn = DriverManager.getConnection(baseUrl + "/lss", user, password);
+            Statement stmt = conn.createStatement()
         ) {
-            // Get list of tables
             List<String> tables = new ArrayList<>();
             try (ResultSet rs = stmt.executeQuery(getTablesQuery)) {
                 while (rs.next()) {
@@ -715,8 +574,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                 }
             }
 
-            // Drop all tables with CASCADE
-            stmt.execute("SET session_replication_role = 'replica';"); // Bypass FK constraints
+            stmt.execute("SET session_replication_role = 'replica';");
             for (String table : tables) {
                 log.info("Dropping table: " + table);
                 stmt.executeUpdate("DROP TABLE IF EXISTS \"" + table + "\" CASCADE;");
@@ -741,10 +599,21 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto requestStartupPostgre() {
         log.info("requestStartupPostgre");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        String logFilePath = LOGS_PATH + "/postgre.log";
+
         try {
-            String postgreShellPath = System.getProperty("user.dir") + "/shells/Postgre";
-            ProcessBuilder builder = new ProcessBuilder("sh", postgreShellPath + "/start.sh", databaseProperties.getPort(), databaseProperties.getUser(), databaseProperties.getPassword(), databaseProperties.getDb());
-            builder.directory(new File(postgreShellPath));
+            String postgreShellPath = System.getProperty("user.dir") + "/shells/Postgre/start.sh";
+            File logFile = new File(logFilePath);
+
+            ProcessBuilder builder = new ProcessBuilder("sh", postgreShellPath,
+                String.valueOf(databaseProperties.getPort()),
+                databaseProperties.getUser(),
+                databaseProperties.getPassword(),
+                databaseProperties.getDb());
+
+            builder.directory(new File(System.getProperty("user.dir") + "/shells/Postgre"));
+            builder.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+            builder.redirectError(ProcessBuilder.Redirect.appendTo(logFile));
 
             Process process = builder.start();
             String output = getProcessOutput(process);
@@ -876,35 +745,87 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         Process process = null;
         BufferedWriter writer = null;
         OutputStreamWriter outputStreamWriter = null;
+        BufferedReader reader = null;
+        BufferedReader errorReader = null;
 
         try {
 
             ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_wallet.sh", fileName);
             builder.directory(new File(CLI_TOOL_DIR));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            // Use PIPE instead of INHERIT to capture output
+            builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+            builder.redirectError(ProcessBuilder.Redirect.PIPE);
 
             process = builder.start();
 
+            // Write password to process input
             outputStreamWriter = new OutputStreamWriter(process.getOutputStream());
             writer = new BufferedWriter(outputStreamWriter);
-
             writer.write(password);
             writer.newLine();
             writer.flush();
+            writer.close(); // Close input stream to allow process to continue
 
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                log.debug("Wallet creation successful.");
-            } else {
-                log.error("Wallet creation failed.");
-                response.setStatus("ERROR");
-                return response;
+            // Read output streams
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder errorOutput = new StringBuilder();
+
+            // Read standard output
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+                log.debug("stdout: " + line);
             }
 
-        } catch (IOException | InterruptedException e) {
+            // Read error output
+            while ((line = errorReader.readLine()) != null) {
+                errorOutput.append(line).append("\n");
+                log.debug("stderr: " + line);
+            }
+
+            int exitCode = process.waitFor();
+
+            // Check for WalletException string in output
+            String combinedOutput = output.toString() + errorOutput.toString();
+            boolean hasWalletException = combinedOutput.contains(Constant.CLI_WALLET_EXCEPTION_MESSAGE) || combinedOutput.contains(Constant.CLI_CRYPTO_EXCEPTION_MESSAGE);
+
+            if (exitCode == 0 && !hasWalletException) {
+                log.debug("Wallet creation successful.");
+                response.setStatus("SUCCESS");
+            } else {
+                if (hasWalletException) {
+                    log.error("Wallet creation failed: WalletException detected in output");
+                } else {
+                    log.error("Wallet creation failed with exit code: " + exitCode);
+                }
+                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            }
+
+        } catch (IOException | InterruptedException | OpenDidException e) {
+            log.error("Exception during wallet creation", e);
+            response.setStatus("ERROR");
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         } finally {
+            // Resource cleanup
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stdout.");
+                }
+            }
+
+            if (errorReader != null) {
+                try {
+                    errorReader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stderr.");
+                }
+            }
+
             if (writer != null) {
                 try {
                     writer.close();
@@ -926,7 +847,6 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             }
         }
 
-        response.setStatus("SUCCESS");
         return response;
     }
 
@@ -943,41 +863,94 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     public OrchestratorResponseDto createKeys(String fileName, String password, List<String> keyIds) {
         log.debug("createKeys : " + fileName + " / " + password);
         OrchestratorResponseDto response = new OrchestratorResponseDto();
-//        String[] keyId = {"assert", "auth", "keyagree", "invoke"};
+
         Process process = null;
         BufferedWriter writer = null;
         OutputStreamWriter outputStreamWriter = null;
+        BufferedReader reader = null;
+        BufferedReader errorReader = null;
+
         for(int i = 0; i < keyIds.size(); i++) {
             try {
                 log.debug("createKeys : " + fileName + " / " + password + " / " + keyIds.get(i));
                 ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_keys.sh", fileName + ".wallet", keyIds.get(i));
                 builder.directory(new File(CLI_TOOL_DIR));
-                builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-                builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+                // Use PIPE instead of INHERIT to capture output
+                builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+                builder.redirectError(ProcessBuilder.Redirect.PIPE);
 
                 process = builder.start();
 
+                // Write password to process input
                 outputStreamWriter = new OutputStreamWriter(process.getOutputStream());
                 writer = new BufferedWriter(outputStreamWriter);
-
                 writer.write(password);
                 writer.newLine();
                 writer.flush();
+                writer.close(); // Close input stream to allow process to continue
+
+                // Read output streams
+                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+                StringBuilder output = new StringBuilder();
+                StringBuilder errorOutput = new StringBuilder();
+
+                // Read standard output
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                    log.debug("stdout: " + line);
+                }
+
+                // Read error output
+                while ((line = errorReader.readLine()) != null) {
+                    errorOutput.append(line).append("\n");
+                    log.debug("stderr: " + line);
+                }
 
                 int exitCode = process.waitFor();
-                if (exitCode == 0) {
+
+                // Check for WalletException string in output
+                String combinedOutput = output.toString() + errorOutput.toString();
+                boolean hasWalletException = combinedOutput.contains(Constant.CLI_WALLET_EXCEPTION_MESSAGE) || combinedOutput.contains(Constant.CLI_CRYPTO_EXCEPTION_MESSAGE);
+
+                if (exitCode == 0 && !hasWalletException) {
                     log.debug("Keypair creation successful.");
                 } else {
-                    log.error("Keypair creation failed.");
-                    response.setStatus("ERROR");
-                    return response;
+                    if (hasWalletException) {
+                        log.error("Keypair creation failed: WalletException detected in output");
+                    } else {
+                        log.error("Keypair creation failed with exit code: " + exitCode);
+                    }
+                    throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
                 }
+
                 if (process.isAlive()) {
                     process.destroy();
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException | OpenDidException e) {
+                log.error("Exception during keypair creation", e);
+                response.setStatus("ERROR");
                 throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
             } finally {
+                // Resource cleanup
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        log.error("Error closing BufferedReader for stdout.");
+                    }
+                }
+
+                if (errorReader != null) {
+                    try {
+                        errorReader.close();
+                    } catch (IOException e) {
+                        log.error("Error closing BufferedReader for stderr.");
+                    }
+                }
+
                 if (writer != null) {
                     try {
                         writer.close();
@@ -1022,34 +995,86 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         Process process = null;
         BufferedWriter writer = null;
         OutputStreamWriter outputStreamWriter = null;
+        BufferedReader reader = null;
+        BufferedReader errorReader = null;
 
         try {
             ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_did_doc.sh", fileName + ".wallet", fileName + ".did", did, controller, type);
             builder.directory(new File(CLI_TOOL_DIR));
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            // Use PIPE instead of INHERIT to capture output
+            builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+            builder.redirectError(ProcessBuilder.Redirect.PIPE);
 
             process = builder.start();
 
+            // Write password to process input
             outputStreamWriter = new OutputStreamWriter(process.getOutputStream());
             writer = new BufferedWriter(outputStreamWriter);
-
             writer.write(password);
             writer.newLine();
             writer.flush();
+            writer.close(); // Close input stream to allow process to continue
+
+            // Read output streams
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder errorOutput = new StringBuilder();
+
+            // Read standard output
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+                log.debug("stdout: " + line);
+            }
+
+            // Read error output
+            while ((line = errorReader.readLine()) != null) {
+                errorOutput.append(line).append("\n");
+                log.debug("stderr: " + line);
+            }
 
             int exitCode = process.waitFor();
-            if (exitCode == 0) {
+
+            // Check for WalletException string in output
+            String combinedOutput = output.toString() + errorOutput.toString();
+            boolean hasWalletException = combinedOutput.contains(Constant.CLI_WALLET_EXCEPTION_MESSAGE) || combinedOutput.contains(Constant.CLI_CRYPTO_EXCEPTION_MESSAGE);
+
+            if (exitCode == 0 && !hasWalletException) {
                 log.debug("DID Documents creation successful.");
                 response.setStatus("SUCCESS");
                 return response;
             } else {
-                log.error("DID Documents creation failed.");
+                if (hasWalletException) {
+                    log.error("DID Documents creation failed: WalletException detected in output");
+                } else {
+                    log.error("DID Documents creation failed with exit code: " + exitCode);
+                }
+                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | OpenDidException e) {
+            log.error("Exception during DID document creation", e);
+            response.setStatus("ERROR");
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         } finally {
+            // Resource cleanup
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stdout.");
+                }
+            }
+
+            if (errorReader != null) {
+                try {
+                    errorReader.close();
+                } catch (IOException e) {
+                    log.error("Error closing BufferedReader for stderr.");
+                }
+            }
 
             if (writer != null) {
                 try {
@@ -1070,10 +1095,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
             if (process != null) {
                 process.destroy();
             }
-
         }
-        response.setStatus("ERROR");
-        return response;
     }
 
     /**
@@ -1086,6 +1108,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     @Override
     public String getServerIp() {
         try {
+            // Priority: Check physical network interfaces first
+            List<String> candidateIps = new ArrayList<>();
+
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface iface = interfaces.nextElement();
@@ -1094,15 +1119,38 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                     continue;
                 }
 
+                // Exclude Docker bridge networks
+                String ifaceName = iface.getName().toLowerCase();
+                if (ifaceName.startsWith("docker") || ifaceName.startsWith("br-") ||
+                    ifaceName.equals("veth") || ifaceName.startsWith("veth")) {
+                    continue;
+                }
+
                 Enumeration<InetAddress> addresses = iface.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
 
                     if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
-                        return addr.getHostAddress();
+                        String ip = addr.getHostAddress();
+
+                        // Prioritize actual network ranges (192.168.x.x, 10.x.x.x)
+                        if (ip.startsWith("192.168.") || ip.startsWith("10.")) {
+                            return ip;
+                        }
+                        // Add to candidates if not Docker internal network
+                        else if (!ip.startsWith("172.17.") && !ip.startsWith("172.18.") &&
+                            !ip.startsWith("172.19.") && !ip.startsWith("172.20.")) {
+                            candidateIps.add(ip);
+                        }
                     }
                 }
             }
+
+            // If no priority IP found, return first candidate
+            if (!candidateIps.isEmpty()) {
+                return candidateIps.get(0);
+            }
+
         } catch (SocketException e) {
             throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -1292,6 +1340,3 @@ public class OrchestratorServiceImpl implements OrchestratorService{
     }
 
 }
-
-
-

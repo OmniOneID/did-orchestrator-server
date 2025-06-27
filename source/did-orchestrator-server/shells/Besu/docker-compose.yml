@@ -11,9 +11,11 @@ services:
       - besu_opendid_data:/opt/besu/data
     command: >
       --network=dev
+      --data-path=/opt/besu/data
       --miner-enabled
       --miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73
       --rpc-http-cors-origins=all
+      --rpc-http-max-active-connections=10000
       --host-allowlist=*
       --rpc-ws-enabled
       --rpc-http-enabled

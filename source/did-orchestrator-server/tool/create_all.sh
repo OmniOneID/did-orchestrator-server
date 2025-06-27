@@ -16,7 +16,7 @@ for mode in CA Issuer TA Verifier Wallet; do
     fi
 done
 
-JAR_PATH="did-cli-tool-server-1.0.0.jar"
+JAR_PATH="did-cli-tool-server-2.0.0.jar"
 CAS_PATH="$BASE_DIR/CA"
 ISSUER_PATH="$BASE_DIR/Issuer"
 TAS_PATH="$BASE_DIR/TA"

@@ -5,6 +5,8 @@ DATA_DIR="$(pwd)/data"
 CONTRACT_DIR="$(pwd)/did-besu-contract"
 PROPERTIES_FILE="$(pwd)/blockchain.properties"
 ACCOUNT_INFO_FILE="$(pwd)/besu.dat"
+TA_DIR="$(pwd)/TA"
+ISSUER_DIR="$(pwd)/Issuer"
 
 echo "Resetting Besu environment..."
 
@@ -36,6 +38,20 @@ if [ -f "$ACCOUNT_INFO_FILE" ]; then
     rm -f "$ACCOUNT_INFO_FILE"
 else
     echo "account data not found. Skipping."
+fi
+
+if [ -d "$TA_DIR" ]; then
+    echo "Deleting TA directory: $TA_DIR"
+    rm -rf "$TA_DIR"
+else
+    echo "TA directory not found. Skipping."
+fi
+
+if [ -d "$ISSUER_DIR" ]; then
+    echo "Deleting Issuer directory: $ISSUER_DIR"
+    rm -rf "$ISSUER_DIR"
+else
+    echo "Issuer directory not found. Skipping."
 fi
 
 echo "Removing generated chaincode docker images"

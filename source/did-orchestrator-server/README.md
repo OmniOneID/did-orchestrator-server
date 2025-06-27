@@ -21,7 +21,7 @@ did-orchestrator-server
 │   └── tailwind.config.js
 │   └── tsconfig.json
 └── shells
-    └── Fabric
+    └── Besu
     └── Postgre
 ├── src
 └── build.gradle
@@ -86,7 +86,7 @@ The built static files will be created in the `build` directory, and these files
 ## Non-source Modules (Blockchain and RDBMS Components)
 These components are located under the shells folder, with the main items as follows:
 
-- `Fabric` : Area for Running the Hyperledger Fabric Test Network, Using **Hyperledger Fabric v2.5.10.**
+- `Besu` : Area for Running the Hyperledger Besu Test Node, Using **Hyperledger Besu v25.5.0**
 - `Postgre` : Area for Running PostgreSQL, Using **PostgreSQL v16.4.**
 
 ## Documenttation

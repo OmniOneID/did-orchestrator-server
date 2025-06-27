@@ -28,9 +28,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 @Controller
@@ -121,54 +128,6 @@ public class OrchestratorController {
         OrchestratorResponseDto response = new OrchestratorResponseDto();
         try {
             response = orchestratorService.requestRefresh(port);
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/startup/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricStartup() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestStartupFabric();
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/shutdown/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricShutdown() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestShutdownFabric();
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/healthcheck/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricHealthCheck() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestHealthCheckFabric();
-        } catch (OpenDidException e) {
-            response.setStatus("ERROR");
-            return ResponseEntity.status(500).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/reset/fabric")
-    public ResponseEntity<OrchestratorResponseDto> fabricReset() {
-        OrchestratorResponseDto response = new OrchestratorResponseDto();
-        try {
-            response = orchestratorService.requestResetFabric();
         } catch (OpenDidException e) {
             response.setStatus("ERROR");
             return ResponseEntity.status(500).body(response);
@@ -397,23 +356,62 @@ public class OrchestratorController {
         return response;
     }
 
-    //test
-    @GetMapping("/test")
-    public String test(Model model) {
+    @GetMapping("/select")
+    public ResponseEntity<Map<String, String>> getTrustRepository() {
+        Path CONFIG_PATH = Paths.get("repository.properties");
+        if (!Files.exists(CONFIG_PATH)) {
+            return ResponseEntity.ok(Map.of("selected", ""));
+        }
 
-        List<String> serviceNames = servicesProperties.getServer().values().stream()
-                .map(ServicesProperties.ServiceDetail::getName)
-                .collect(Collectors.toList());
+        Properties props = new Properties();
+        try (InputStream in = Files.newInputStream(CONFIG_PATH)) {
+            props.load(in);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
 
-        List<Integer> servicePorts = servicesProperties.getServer().values().stream()
-                .map(ServicesProperties.ServiceDetail::getPort)
-                .collect(Collectors.toList());
+        String selected = props.getProperty("selectedRepositories", "");
+        return ResponseEntity.ok(Map.of("selected", selected));
+    }
 
-        model.addAttribute("serviceNames", serviceNames);
-        model.addAttribute("servicePorts", servicePorts);
-        // 서버 ip
-        model.addAttribute("serverIp", orchestratorService.getServerIp());
+    @PostMapping("/select")
+    public ResponseEntity<Void> setTrustRepository(@RequestBody Map<String, String> payload) {
+        Path CONFIG_PATH = Paths.get("repository.properties");
+        String selected = payload.get("selected");
 
-        return "test";
+        if (selected != null && !selected.equals("besu") && !selected.equals("lss") && !selected.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Properties props = new Properties();
+
+        try {
+            if (!Files.exists(CONFIG_PATH)) {
+                Files.createFile(CONFIG_PATH);
+            }
+
+            if (selected == null || selected.isEmpty()) {
+                props.remove("selectedRepositories");
+            } else {
+                props.setProperty("selectedRepositories", selected);
+            }
+
+            try (OutputStream out = Files.newOutputStream(CONFIG_PATH)) {
+                props.store(out, "Ledger repository selection");
+            }
+
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok().build();
+
+    }
+
+    @GetMapping("/getIp")
+    public ResponseEntity<Map<String, String>> test() {
+        Map<String, String> response = new HashMap<>();
+        response.put("serverIp", orchestratorService.getServerIp());
+        return ResponseEntity.ok(response);
     }
 }

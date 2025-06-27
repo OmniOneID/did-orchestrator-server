@@ -21,9 +21,9 @@ CONTROLLER=$4
 TYPE=$5
 
 if [ "$TYPE" == "TAS" ]; then
-  java -jar did-cli-tool-server-1.0.0.jar did createDid -m "$WALLET_FILENAME" -f "$DID_FILENAME" -id "$DID" -ci "$CONTROLLER" -mi assert -ai auth -ki keyagree -ii invoke -p
+  java -jar did-cli-tool-server-2.0.0.jar did createDid -m "$WALLET_FILENAME" -f "$DID_FILENAME" -id "$DID" -ci "$CONTROLLER" -mi assert -ai auth -ki keyagree -ii invoke -p
 elif [ "$TYPE" == "ENTITY" ]; then
-  java -jar did-cli-tool-server-1.0.0.jar did createDid -m "$WALLET_FILENAME" -f "$DID_FILENAME" -id "$DID" -ci "$CONTROLLER" -mi assert -ai auth -ki keyagree -p
+  java -jar did-cli-tool-server-2.0.0.jar did createDid -m "$WALLET_FILENAME" -f "$DID_FILENAME" -id "$DID" -ci "$CONTROLLER" -mi assert -ai auth -ki keyagree -p
 else
     echo "Invalid type. Please use 'TAS' or 'ENTITY'."
     exit 1

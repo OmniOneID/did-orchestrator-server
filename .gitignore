@@ -235,3 +235,20 @@ sketch
 # Ignore all local history of files
 .history
 .ionide
+source/did-orchestrator-server/jars/API/application.yml
+source/did-orchestrator-server/jars/API/did-api-server-2.0.0.jar
+source/did-orchestrator-server/jars/CA/application.yml
+source/did-orchestrator-server/jars/CA/cas.wallet
+source/did-orchestrator-server/jars/CA/did-ca-server-2.0.0.jar
+source/did-orchestrator-server/jars/Demo/application.yml
+source/did-orchestrator-server/jars/Demo/did-demo-server-2.0.0.jar
+source/did-orchestrator-server/jars/Issuer/application.yml
+source/did-orchestrator-server/jars/Issuer/did-issuer-server-2.0.0.jar
+source/did-orchestrator-server/jars/LSS/application.yml
+source/did-orchestrator-server/jars/LSS/did-ledger-service-server-2.0.0.jar
+source/did-orchestrator-server/jars/TA/application.yml
+source/did-orchestrator-server/jars/TA/did-ta-server-2.0.0.jar
+source/did-orchestrator-server/jars/Verifier/application.yml
+source/did-orchestrator-server/jars/Verifier/did-verifier-server-2.0.0.jar
+source/did-orchestrator-server/jars/Wallet/application.yml
+source/did-orchestrator-server/jars/Wallet/did-wallet-server-2.0.0.jar

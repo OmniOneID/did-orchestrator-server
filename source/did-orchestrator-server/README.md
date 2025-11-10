@@ -87,9 +87,9 @@ The built static files will be created in the `build` directory, and these files
 These components are located under the shells folder, with the main items as follows:
 
 - `Besu` : Area for Running the Hyperledger Besu Test Node, Using **Hyperledger Besu v25.5.0**
-- `Postgre` : Area for Running PostgreSQL, Using **PostgreSQL v16.4.**
+- `Postgre` : Area for Running PostgreSQL, Using **PostgreSQL v16.4**
 
-## Documenttation
+## Documentation
 
 Refer to the following documents for more detailed information:
 

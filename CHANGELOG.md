@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.1 (2025-12-18)
+
+### 🚀 New Features
+- Fixed Besu backward compatibility issues after the Ethereum Fusaka hardfork.
+
+
 ## v2.0.0 (2025-05-27)
 
 ### 🚀 New Features
@@ -14,4 +20,3 @@
 - Wallet creation supported for each entity via password input.
 
 - DID document generation enabled based on created wallets, also via password input.
-

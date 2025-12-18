@@ -1,6 +1,6 @@
 services:
   besu:
-    image: docker.io/hyperledger/besu:latest
+    image: docker.io/hyperledger/besu:25.5.0
     container_name: opendid-besu-node
     ports:
       - "8545:8545"

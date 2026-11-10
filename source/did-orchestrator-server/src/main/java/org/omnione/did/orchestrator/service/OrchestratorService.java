@@ -42,7 +42,7 @@ public interface OrchestratorService {
     OrchestratorResponseDto requestShutdownPostgre();
     OrchestratorResponseDto requestHealthCheckPostgre();
 
-    //entities
+    // services
     void requestStartupAll();
     void requestShutdownAll();
     OrchestratorResponseDto requestStartup(String port) throws OpenDidException;

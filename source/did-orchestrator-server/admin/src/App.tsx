@@ -630,7 +630,7 @@ const App: React.FC = () => {
                     <button
                         onClick={(e) =>
                             showToolTip(
-                                "This supports starting and stopping all entities sequentially.<br/> - Status All: If any entity's status becomes abnormal due to a browser refresh or similar event,<br> clicking this button will check and normalize the status of all entities.",
+                                "This supports starting and stopping all services sequentially.<br/> - Status All: If a service status becomes abnormal due to a browser refresh or similar event,<br> clicking this button will check and normalize the status of all services.",
                                 e
                             )
                         }
@@ -676,7 +676,7 @@ const App: React.FC = () => {
                   <td className="p-2 pl-6 all">
                     {StatusIcon(status)}
                   </td>
-                  <td className="p-2 font-bold">All Entities</td>
+                  <td className="p-2 font-bold">All Services</td>
                   <td className="p-2">
                     <div className="flex space-x-1">
                       <button

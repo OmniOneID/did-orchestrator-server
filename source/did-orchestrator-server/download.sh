@@ -33,6 +33,13 @@ GITHUB_REPOS=(
     "OmniOneID/did-ledger-service-server"
 )
 
+MAJOR_VERSION="${API_VERSION%%.*}"
+if [[ "$MAJOR_VERSION" =~ ^[0-9]+$ ]] && (( MAJOR_VERSION >= 3 )); then
+    JAR_NAMES+=("did-proxy-server-${API_VERSION}.jar")
+    JAR_PATHS+=("jars/Proxy")
+    GITHUB_REPOS+=("OmniOneID/did-proxy-server")
+fi
+
 fail_flag=0
 
 already_exists_list=()

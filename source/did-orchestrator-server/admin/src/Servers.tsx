@@ -109,6 +109,19 @@ const Servers = forwardRef((props: ServerProps, ref) => {
       const configData = await fetchConfigs();
       if (configData) {
         setConfig(configData);
+        const configuredServers = Object.entries(configData.services?.server ?? {})
+          .filter(([key]) => key !== "demo")
+          .map(([key, value]: [string, any]) => ({
+            id: key,
+            name: value.name,
+            port: value.port,
+            status: "GRAY"
+          }))
+          .sort((a, b) => (a.id === "api" ? 1 : b.id === "api" ? -1 : 0));
+        setServers((previous) => configuredServers.map((server) => ({
+          ...server,
+          status: previous.find((entry) => entry.id === server.id)?.status ?? "GRAY"
+        })));
         if (configData.generator && configData.generator.easySettingModeEnabled !== undefined) {
           setIsEasySettingEnabled(configData.generator.easySettingModeEnabled);
         }
@@ -397,7 +410,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
                 </td>
                 <td className="p-2">
                   <div className="flex space-x-1">
-                    {server.id !== "api" && (
+                    {server.id !== "api" && server.id !== "proxy" && (
                         <button
                             className="bg-gray-600 text-white px-2 py-1 rounded"
                             onClick={() => openWithDifferentPort(`${server.port}`, ``)}
@@ -413,7 +426,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
                     </button>
                   </div>
                 </td>
-                {server.id !== "api" && (
+                {server.id !== "api" && server.id !== "proxy" && (
                     <td className="p-2">
                       <CSSTransition
                           in={!isEasySettingEnabled}
@@ -438,7 +451,7 @@ const Servers = forwardRef((props: ServerProps, ref) => {
                       </CSSTransition>
                     </td>
                 )}
-                {server.id === "api" && <td></td>}
+                {(server.id === "api" || server.id === "proxy") && <td></td>}
               </tr>
           ))}
         </tbody>

@@ -28,7 +28,7 @@ blockchain:
   ledgerService:
     port: 8098
     jarPath: /jars
-    file: did-ledger-service-server-2.0.0.jar
+    file: did-ledger-service-server-3.0.0.jar
 database:
   port: 5430
   user: omn
@@ -44,31 +44,35 @@ services:
     tas:
       name: TA
       port: 8090
-      file: did-ta-server-2.0.0.jar
+      file: did-ta-server-3.0.0.jar
     issuer:
       name: Issuer
       port: 8091
-      file: did-issuer-server-2.0.0.jar
+      file: did-issuer-server-3.0.0.jar
     verifier:
       name: Verifier
       port: 8092
-      file: did-verifier-server-2.0.0.jar
+      file: did-verifier-server-3.0.0.jar
     api:
       name: API
       port: 8093
-      file: did-api-server-2.0.0.jar
+      file: did-api-server-3.0.0.jar
     cas:
       name: CA
       port: 8094
-      file: did-ca-server-2.0.0.jar
+      file: did-ca-server-3.0.0.jar
     wallet:
       name: Wallet
       port: 8095
-      file: did-wallet-server-2.0.0.jar
+      file: did-wallet-server-3.0.0.jar
+    proxy:
+      name: Proxy
+      port: 8097
+      file: did-proxy-server-3.0.0.jar
     demo:
       name: Demo
       port: 8099
-      file: did-demo-server-2.0.0.jar
+      file: did-demo-server-3.0.0.jar
 generator:
   easySettingModeEnabled: true
 logging:

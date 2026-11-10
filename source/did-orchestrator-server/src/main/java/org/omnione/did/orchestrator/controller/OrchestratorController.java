@@ -343,14 +343,17 @@ public class OrchestratorController {
     }
 
     @GetMapping("/entities")
+    @ResponseBody
     public Map<String, Object> getEntities() {
         Map<String, Object> response = new HashMap<>();
-        response.put("serviceNames", servicesProperties.getServer().values().stream()
-                .map(ServicesProperties.ServiceDetail::getName)
+        response.put("serviceNames", servicesProperties.getServer().entrySet().stream()
+                .filter(entry -> !"proxy".equals(entry.getKey()))
+                .map(entry -> entry.getValue().getName())
                 .collect(Collectors.toList()));
 
-        response.put("servicePorts", servicesProperties.getServer().values().stream()
-                .map(ServicesProperties.ServiceDetail::getPort)
+        response.put("servicePorts", servicesProperties.getServer().entrySet().stream()
+                .filter(entry -> !"proxy".equals(entry.getKey()))
+                .map(entry -> entry.getValue().getPort())
                 .collect(Collectors.toList()));
 
         return response;

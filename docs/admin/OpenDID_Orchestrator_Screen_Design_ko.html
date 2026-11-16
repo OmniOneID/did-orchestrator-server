@@ -1,0 +1,56 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>OpenDID Orchestrator 화면계획서 · 3.0.0</title><style>
+:root{font-family:Arial,'Apple SD Gothic Neo',sans-serif;color:#27313d}
+*{box-sizing:border-box}body{margin:0;background:#f4f6f8}
+header{height:58px;background:white;border-bottom:1px solid #e2e6eb;display:flex;align-items:center;justify-content:space-between;padding:0 22px}
+header strong{font-size:15px}header b{color:#ff8400;margin-right:12px}header span{font-size:12px;color:#657182}
+.header-right{display:flex;align-items:center;gap:12px}.version-select{background:#fff;border:1px solid #e2e6eb;border-radius:5px;color:#27313d;font:12px Arial,sans-serif;padding:7px 25px 7px 10px;min-width:96px}
+.layout{display:grid;grid-template-columns:225px minmax(0,1fr);min-height:calc(100vh - 58px)}
+.screen:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px}
+.screen[hidden]{display:none!important}
+.docnav{background:white;border-right:1px solid #e2e6eb;padding:15px 8px}.docnav h3{font-size:12px;color:#6f7a87;padding:0 11px}
+.docnav a{display:block;padding:10px 12px;color:#344052;text-decoration:none;font-size:12px;border-radius:4px}
+.docnav a.active{background:#fff3e8;color:#bf6900;font-weight:700;border-left:3px solid #ff8400}
+.workspace{min-width:0;padding:22px;overflow:auto}.mock{background:#fff;border:1px solid #e5e8ed;border-radius:7px;box-shadow:0 2px 5px #0001;display:flex;min-height:620px}
+.adminnav{width:195px;flex:0 0 195px;background:#202b45;color:#fff;padding:10px 7px;font-size:11px}
+.brand{font-weight:700;padding:12px 8px;border-bottom:1px solid #4e546b;margin-bottom:7px}.brand em{font-style:normal;background:#ff8400;padding:7px;border-radius:4px;margin-right:7px}
+.menu{padding:7px 8px;border-radius:4px;color:#e2e7ee;overflow-wrap:anywhere}.menu.indent1{padding-left:19px}.menu.indent2{padding-left:28px}
+.menu.active{background:#4e546b;color:#fff;font-weight:700}.page{flex:1;min-width:0;background:#f5f6f8;padding:19px}
+.path{font-size:11px;color:#788390;margin-bottom:14px}.card{background:#fff;border:1px solid #e4e8ed;border-radius:5px;padding:20px;margin-bottom:13px}
+h1{font-size:21px;margin:0 0 16px}.section{border:2px solid #287be0;border-radius:6px;padding:14px;margin:14px 0}.section h2{font-size:15px;margin:0 0 13px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{min-width:0}.field label{display:block;font-size:11px;font-weight:700;color:#586474;margin-bottom:5px}
+.value{border:1px solid #cbd2db;border-radius:4px;padding:9px 10px;min-height:36px;overflow-wrap:anywhere;font-size:12px}
+table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:11px}th,td{padding:9px 7px;border-bottom:1px solid #e6eaf0;text-align:left;overflow-wrap:anywhere}th{background:#f4f6f8;color:#526171}
+.buttons{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;margin-top:15px}.button{padding:8px 12px;border:1px solid #cbd2db;border-radius:4px;font-size:11px;font-weight:700}
+.button:first-child{background:#ff8400;color:#fff;border-color:#ff8400}.note{background:#fff7ea;border-left:3px solid #ff8400;padding:10px;font-size:11px;margin-top:10px}
+.help{background:#fff;border-left:1px solid #e2e6eb;padding:20px 16px;font-size:12px}.help h2{font-size:17px;margin:0 0 18px}.help h3{color:#e68117;font-size:12px;margin:19px 0 7px}
+.help p{line-height:1.55;margin:5px 0;color:#485361}.help code{overflow-wrap:anywhere}
+@media(max-width:1350px){.layout{grid-template-columns:205px minmax(0,1fr)}.screen:not([hidden]){grid-template-columns:1fr}.help{border-top:1px solid #e2e6eb;border-left:0}}
+@media(max-width:780px){.layout{display:block}.docnav{border-bottom:1px solid #e2e6eb}.docnav a{display:inline-block}.workspace{padding:10px}.adminnav{width:140px;flex-basis:140px}.fields{grid-template-columns:1fr}.page{padding:10px}.card{padding:12px}.help{padding:14px}}
+</style></head><body>
+      <header><strong><b>OMN</b>Orchestrator 화면계획서</strong>
+      <div class="header-right"><span>2026-11-11</span><label for="versionSelect">버전</label>
+      <select class="version-select" id="versionSelect" aria-label="화면계획서 버전"><option value="v3.0.0" selected>v3.0.0</option></select></div></header>
+      <div class="layout"><nav class="docnav" aria-label="화면 목록"><h3>3.0 변경 화면</h3><a href="#servers" data-screen="servers">Servers · Proxy</a><a href="#proxy-config" data-screen="proxy-config">Proxy 서버 구성</a></nav>
+      <main class="workspace"><div class="screen" id="screen-servers" hidden>
+          <div class="mock"><nav class="adminnav" aria-label="Orchestrator 메뉴">
+      <div class="brand"><em>OR</em>Orchestrator</div><div class="menu indent0 active">Servers</div><div class="menu indent0 ">Repositories</div><div class="menu indent0 ">Configuration</div></nav>
+      <div class="page"><div class="path">Orchestrator › Servers</div>
+      <div class="card"><h1>Servers · Proxy</h1><div class="section"><h2>Servers</h2><table><thead><tr><th>Status</th><th>Name</th><th>Actions</th><th>Info</th><th>Generators</th></tr></thead><tbody><tr><td>●</td><td>Proxy Server</td><td>Start | Stop | Status</td><td>Swagger</td><td>—</td></tr><tr><td>●</td><td>Issuer Server</td><td>Start | Stop | Status</td><td>Settings | Swagger</td><td>Wallet | DID Document</td></tr></tbody></table></div></div></div></div>
+          <aside class="help"><h2>Servers · Proxy</h2><h3>이번 변경점</h3><p>- Proxy 서버 행에서 Start·Stop·Status·Swagger를 제공한다.</p><p>- Proxy는 Entity가 아니므로 Settings·Wallet·DID Document 버튼을 표시하지 않는다.</p>
+          <h3>화면 경로</h3><p><code>/</code></p>
+          <h3>확인한 소스</h3><p><code>source/did-orchestrator-server/admin/src/Servers.tsx</code></p></aside></div><div class="screen" id="screen-proxy-config" hidden>
+          <div class="mock"><nav class="adminnav" aria-label="Orchestrator 메뉴">
+      <div class="brand"><em>OR</em>Orchestrator</div><div class="menu indent0 ">Servers</div><div class="menu indent0 ">Repositories</div><div class="menu indent0 active">Configuration</div></nav>
+      <div class="page"><div class="path">Orchestrator › Configuration</div>
+      <div class="card"><h1>Proxy 서버 구성</h1><div class="section"><h2>Server Configuration</h2><table><thead><tr><th>Service</th><th>Name</th><th>Port</th><th>File</th></tr></thead><tbody><tr><td>proxy</td><td>Proxy Server</td><td>설정값</td><td>did-proxy-server-*.jar</td></tr></tbody></table><div class="buttons"><span class="button">Save</span></div></div></div></div></div>
+          <aside class="help"><h2>Proxy 서버 구성</h2><h3>이번 변경점</h3><p>- Servers 설정 표에 Proxy의 Service·Name·Port·JAR File 항목을 표시한다.</p>
+          <h3>화면 경로</h3><p><code>/</code></p>
+          <h3>확인한 소스</h3><p><code>source/did-orchestrator-server/admin/src/Conf.tsx</code></p></aside></div></main></div>
+      <script>
+      const ids=["servers", "proxy-config"];
+      function show(){const id=ids.includes(location.hash.slice(1))?location.hash.slice(1):ids[0];
+        document.querySelectorAll('.screen').forEach(e=>e.hidden=e.id!=='screen-'+id);
+        document.querySelectorAll('.docnav a').forEach(e=>e.classList.toggle('active',e.dataset.screen===id));}
+      window.addEventListener('hashchange',show);show();
+      </script></body></html>

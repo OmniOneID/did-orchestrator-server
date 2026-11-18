@@ -18,10 +18,12 @@ package org.omnione.did.base.aop;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -33,6 +35,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.TimeZone;
+import java.util.Iterator;
 
 @Slf4j
 @Aspect
@@ -63,7 +66,26 @@ public class ControllerLogAspects {
             .setTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC")));
 
     public String convertToJsonString(final Object msg) throws JsonProcessingException {
-        return OBJECT_MAPPER.writeValueAsString(msg).trim();
+        JsonNode data = OBJECT_MAPPER.valueToTree(msg);
+        redactPasswords(data);
+        return OBJECT_MAPPER.writeValueAsString(data).trim();
+    }
+
+    private void redactPasswords(JsonNode data) {
+        if (data.isArray()) {
+            data.forEach(this::redactPasswords);
+        } else if (data.isObject()) {
+            ObjectNode object = (ObjectNode) data;
+            Iterator<String> fields = object.fieldNames();
+            while (fields.hasNext()) {
+                String name = fields.next();
+                if (name.toLowerCase().contains("password")) {
+                    object.put(name, "[REDACTED]");
+                } else {
+                    redactPasswords(object.get(name));
+                }
+            }
+        }
     }
 
     public static void debugControllerLog(String pattern, Object[] args) {

@@ -34,17 +34,22 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @Slf4j
 @Service
 public class OrchestratorServiceImpl implements OrchestratorService{
+    private static final Pattern CLI_ERROR_CODE = Pattern.compile("ErrorCode: ([A-Z0-9]+)");
     private final RestTemplate restTemplate = new RestTemplate();
     private final ServicesProperties servicesProperties;
     private final BlockchainProperties blockChainProperties;
@@ -75,6 +80,35 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         Constant.DID_DOC_DIR = System.getProperty("user.dir") + servicesProperties.getDidDocPath();
         Constant.CLI_TOOL_DIR = System.getProperty("user.dir") + servicesProperties.getCliToolPath();
         Constant.LOGS_PATH = System.getProperty("user.dir") + servicesProperties.getLogPath();
+    }
+
+    private String walletFolder(String fileName) {
+        return switch (fileName) {
+            case "tas" -> "TA";
+            case "issuer" -> "Issuer";
+            case "verifier" -> "Verifier";
+            case "cas" -> "CA";
+            case "wallet" -> "Wallet";
+            default -> throw new OpenDidException(ErrorCode.INVALID_WALLET_NAME);
+        };
+    }
+
+    private Path walletBasePath(String fileName) {
+        return Path.of(JARS_DIR, walletFolder(fileName), fileName);
+    }
+
+    private Path requireWalletBasePath(String fileName) {
+        Path walletBase = walletBasePath(fileName);
+        if (Files.isRegularFile(Path.of(walletBase + ".wallet"))) {
+            return walletBase;
+        }
+        String expected = "jars/" + walletFolder(fileName) + "/" + fileName + ".wallet";
+        if (Files.isRegularFile(Path.of(CLI_TOOL_DIR, fileName + ".wallet"))) {
+            throw new OpenDidException(ErrorCode.WALLET_NOT_FOUND,
+                "Wallet is at tool/" + fileName + ".wallet. Back it up and move it to " + expected + " before continuing.");
+        }
+        throw new OpenDidException(ErrorCode.WALLET_NOT_FOUND,
+            "Wallet file not found at " + expected + ". Generate the wallet first.");
     }
 
     private Map<String, String> initializeServerJars() {
@@ -695,7 +729,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
      */
     @Override
     public OrchestratorResponseDto createAll(String password) {
-        log.info("createAll : " + password);
+        log.info("createAll requested");
         OrchestratorResponseDto response = new OrchestratorResponseDto();
 
         Process process = null;
@@ -739,7 +773,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
      */
     @Override
     public OrchestratorResponseDto createWallet(String fileName, String password) {
-        log.debug("createWallet : " + fileName + " / " + password);
+        log.debug("createWallet : {}", fileName);
         OrchestratorResponseDto response = new OrchestratorResponseDto();
 
         Process process = null;
@@ -749,8 +783,19 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         BufferedReader errorReader = null;
 
         try {
+            Path walletBase = walletBasePath(fileName);
+            String walletLocation = "jars/" + walletFolder(fileName) + "/" + fileName + ".wallet";
+            if (Files.exists(Path.of(walletBase + ".wallet"))) {
+                throw new OpenDidException(ErrorCode.WALLET_ALREADY_EXISTS,
+                    "Wallet '" + fileName + "' already exists at " + walletLocation + ". Reuse or back up the file before generating it again.");
+            }
+            if (Files.exists(Path.of(CLI_TOOL_DIR, fileName + ".wallet"))) {
+                throw new OpenDidException(ErrorCode.WALLET_ALREADY_EXISTS,
+                    "An earlier wallet exists at tool/" + fileName + ".wallet. Back it up and move it to " + walletLocation + " before continuing.");
+            }
+            Files.createDirectories(walletBase.getParent());
 
-            ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_wallet.sh", fileName);
+            ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_wallet.sh", walletBase.toString());
             builder.directory(new File(CLI_TOOL_DIR));
             // Use PIPE instead of INHERIT to capture output
             builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -796,18 +841,29 @@ public class OrchestratorServiceImpl implements OrchestratorService{
                 log.debug("Wallet creation successful.");
                 response.setStatus("SUCCESS");
             } else {
-                if (hasWalletException) {
-                    log.error("Wallet creation failed: WalletException detected in output");
-                } else {
-                    log.error("Wallet creation failed with exit code: " + exitCode);
+                log.error("Wallet creation failed with exit code {}: {}", exitCode, combinedOutput);
+                if (combinedOutput.contains("SSDKWLT02030")) {
+                    throw new OpenDidException(ErrorCode.WALLET_ALREADY_EXISTS,
+                        "Wallet '" + fileName + "' already exists at " + walletLocation + ". Reuse or back up the file before generating it again.");
                 }
-                throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+                Matcher errorCode = CLI_ERROR_CODE.matcher(combinedOutput);
+                String detail = errorCode.find() ? " (" + errorCode.group(1) + ")" : "";
+                if (combinedOutput.contains("Unable to access jarfile")) {
+                    throw new OpenDidException(ErrorCode.WALLET_CREATION_FAILED,
+                        "Wallet CLI JAR is missing. Check tool/did-cli-tool-server-2.0.0.jar.");
+                }
+                throw new OpenDidException(ErrorCode.WALLET_CREATION_FAILED,
+                    "Wallet creation failed" + detail + ". Check the Orchestrator logs.");
             }
 
-        } catch (IOException | InterruptedException | OpenDidException e) {
+        } catch (OpenDidException e) {
+            throw e;
+        } catch (IOException | InterruptedException e) {
             log.error("Exception during wallet creation", e);
-            response.setStatus("ERROR");
-            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new OpenDidException(ErrorCode.WALLET_CREATION_FAILED);
         } finally {
             // Resource cleanup
             if (reader != null) {
@@ -861,8 +917,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
      */
     @Override
     public OrchestratorResponseDto createKeys(String fileName, String password, List<String> keyIds) {
-        log.debug("createKeys : " + fileName + " / " + password);
+        log.debug("createKeys : {}", fileName);
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        Path walletBase = requireWalletBasePath(fileName);
 
         Process process = null;
         BufferedWriter writer = null;
@@ -872,8 +929,8 @@ public class OrchestratorServiceImpl implements OrchestratorService{
 
         for(int i = 0; i < keyIds.size(); i++) {
             try {
-                log.debug("createKeys : " + fileName + " / " + password + " / " + keyIds.get(i));
-                ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_keys.sh", fileName + ".wallet", keyIds.get(i));
+                log.debug("createKeys : {} / {}", fileName, keyIds.get(i));
+                ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_keys.sh", walletBase + ".wallet", keyIds.get(i));
                 builder.directory(new File(CLI_TOOL_DIR));
                 // Use PIPE instead of INHERIT to capture output
                 builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -989,8 +1046,9 @@ public class OrchestratorServiceImpl implements OrchestratorService{
      */
     @Override
     public OrchestratorResponseDto createDidDocument(String fileName, String password, String did, String controller, String type) {
-        log.debug("createDidDocument : " + fileName + " / " + password + " / " + did + " / " + controller);
+        log.debug("createDidDocument : {} / {} / {}", fileName, did, controller);
         OrchestratorResponseDto response = new OrchestratorResponseDto();
+        Path walletBase = requireWalletBasePath(fileName);
 
         Process process = null;
         BufferedWriter writer = null;
@@ -999,7 +1057,7 @@ public class OrchestratorServiceImpl implements OrchestratorService{
         BufferedReader errorReader = null;
 
         try {
-            ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_did_doc.sh", fileName + ".wallet", fileName + ".did", did, controller, type);
+            ProcessBuilder builder = new ProcessBuilder("sh", CLI_TOOL_DIR + "/create_did_doc.sh", walletBase + ".wallet", walletBase + ".did", did, controller, type);
             builder.directory(new File(CLI_TOOL_DIR));
             // Use PIPE instead of INHERIT to capture output
             builder.redirectOutput(ProcessBuilder.Redirect.PIPE);

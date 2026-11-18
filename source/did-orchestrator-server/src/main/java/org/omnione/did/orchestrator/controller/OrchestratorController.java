@@ -286,7 +286,9 @@ public class OrchestratorController {
         } catch (OpenDidException e) {
             OrchestratorResponseDto errorResponse = new OrchestratorResponseDto();
             errorResponse.setStatus("ERROR");
-            return ResponseEntity.status(500).body(errorResponse);
+            errorResponse.setMessage(e.getMessage());
+            int httpStatus = e.getErrorCode() == null ? 500 : e.getErrorCode().getHttpStatus();
+            return ResponseEntity.status(httpStatus).body(errorResponse);
         }
     }
 
@@ -303,7 +305,9 @@ public class OrchestratorController {
         } catch (OpenDidException e) {
             OrchestratorResponseDto errorResponse = new OrchestratorResponseDto();
             errorResponse.setStatus("ERROR");
-            return ResponseEntity.status(500).body(errorResponse);
+            errorResponse.setMessage(e.getMessage());
+            int httpStatus = e.getErrorCode() == null ? 500 : e.getErrorCode().getHttpStatus();
+            return ResponseEntity.status(httpStatus).body(errorResponse);
         }
     }
 
@@ -315,7 +319,9 @@ public class OrchestratorController {
         } catch (OpenDidException e) {
             OrchestratorResponseDto errorResponse = new OrchestratorResponseDto();
             errorResponse.setStatus("ERROR");
-            return ResponseEntity.status(500).body(errorResponse);
+            errorResponse.setMessage(e.getMessage());
+            int httpStatus = e.getErrorCode() == null ? 500 : e.getErrorCode().getHttpStatus();
+            return ResponseEntity.status(httpStatus).body(errorResponse);
         }
     }
 

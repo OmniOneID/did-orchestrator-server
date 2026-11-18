@@ -29,6 +29,11 @@ public class OpenDidException extends RuntimeException{
         this.errorCode = errorCode;
     }
 
+    public OpenDidException(ErrorCode errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
     public OpenDidException(ErrorResponse errorResponse) {
         super(errorResponse.getDescription());
         this.errorResponse = errorResponse;

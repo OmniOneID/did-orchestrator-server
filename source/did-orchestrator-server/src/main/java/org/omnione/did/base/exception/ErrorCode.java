@@ -28,7 +28,11 @@ public enum ErrorCode {
     POSTGRE_HEALTH_CHECK_FAILED("3003", "PostgreSQL health check failed.", 500),
     BESU_HEALTH_CHECK_FAILED("2003", "Hyperledger Besu health check failed.", 500),
     INVALID_PASSWORD("4001", "The provided password is incorrect.", 401),
-    CONFIG_UPDATE_FAILED("5001", "Failed to update the configuration.", 500);
+    CONFIG_UPDATE_FAILED("5001", "Failed to update the configuration.", 500),
+    WALLET_ALREADY_EXISTS("4002", "The wallet file already exists.", 409),
+    WALLET_CREATION_FAILED("4003", "Wallet creation failed. Check the Orchestrator logs.", 500),
+    INVALID_WALLET_NAME("4004", "Select a supported server wallet name.", 400),
+    WALLET_NOT_FOUND("4005", "The wallet file was not found.", 404);
 
 
     private final String code;
